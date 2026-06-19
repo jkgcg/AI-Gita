@@ -1,0 +1,86 @@
+name: Fetchability Guard
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate fetchability constraints
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ROOT_HTML="AI_Gita.html"
+          if [[ ! -f "$ROOT_HTML" ]]; then
+            echo "ERROR: $ROOT_HTML not found"
+            exit 1
+          fi
+
+          # 1) Prevent top-of-file image blobs from consuming fetch budgets.
+          # Keep this conservative and focused on early payload risk.
+          if head -c 120000 "$ROOT_HTML" | grep -q 'data:image/png;base64'; then
+            echo "ERROR: Found data:image/png;base64 in first 120KB of AI_Gita.html"
+            echo "This likely breaks LLM fetch by consuming token budget before real content."
+            exit 1
+          fi
+
+          # 2) Prevent oversized inline data:image URIs anywhere in the HTML.
+          MAX_DATA_IMAGE_URI_CHARS=50000
+          mapfile -t DATA_URIS < <(grep -oE 'data:image[^" ]*' "$ROOT_HTML" || true)
+          TOO_LARGE=0
+          for uri in "${DATA_URIS[@]:-}"; do
+            len=${#uri}
+            if (( len > MAX_DATA_IMAGE_URI_CHARS )); then
+              TOO_LARGE=1
+              echo "ERROR: Oversized inline data:image URI detected (length=$len, limit=$MAX_DATA_IMAGE_URI_CHARS)"
+            fi
+          done
+          if (( TOO_LARGE )); then
+            exit 1
+          fi
+
+          # 3) Ensure ai-fetch entry files exist.
+          REQUIRED_FILES=(
+            "llms.txt"
+            "docs/ai-fetch-index.md"
+          )
+          for f in "${REQUIRED_FILES[@]}"; do
+            if [[ ! -f "$f" ]]; then
+              echo "ERROR: Required file missing: $f"
+              exit 1
+            fi
+          done
+
+          # 4) Validate repo-relative file links used by ai-fetch docs.
+          CHECK_FILES=(
+            "llms.txt"
+            "docs/ai-fetch-index.md"
+          )
+
+          BAD_LINKS=0
+          for src in "${CHECK_FILES[@]}"; do
+            # Extract references like /foo/bar.md, /foo/bar.html, optionally with #anchor
+            mapfile -t LINKS < <(grep -Eo '/[A-Za-z0-9._/-]+\.(md|txt|html)(#[A-Za-z0-9._:-]+)?' "$src" | sort -u || true)
+            for link in "${LINKS[@]:-}"; do
+              target="${link#/}"
+              target="${target%%#*}"
+              if [[ ! -f "$target" ]]; then
+                BAD_LINKS=1
+                echo "ERROR: Broken link in $src -> $link (missing file: $target)"
+              fi
+            done
+          done
+
+          if (( BAD_LINKS )); then
+            exit 1
+          fi
+
+          echo "Fetchability guard checks passed."
