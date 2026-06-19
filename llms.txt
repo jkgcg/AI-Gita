@@ -1,0 +1,23 @@
+# AI Gita LLM Access Map
+
+> Primary UI (unchanged): /AI_Gita.html
+> AI-friendly index: /docs/ai-fetch-index.md
+
+## Recommended fetch order
+
+1. /docs/ai-fetch-index.md
+2. One focused file from /docs/tabs/
+3. Open /AI_Gita.html only for anchor-level verification
+
+## Focused topic files
+
+- /docs/tabs/foundations.md
+- /docs/tabs/llm-genai.md
+- /docs/tabs/rag-agents.md
+- /docs/tabs/engineering.md
+- /docs/tabs/practice.md
+
+## Notes
+
+- The repository keeps /AI_Gita.html as the public shared URL.
+- For LLM queries, prefer tab-focused markdown files first to avoid large HTML fetch budgets.
