@@ -972,6 +972,9 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
     <button class="rsel-btn"        data-role="ds"   data-action="select-role"   style="--rc:#059669">&#128202; Data Scientist</button>
     <button class="rsel-btn"        data-role="mlo"  data-action="select-role"  style="--rc:#d97706">&#9881; MLOps Engineer</button>
     <button class="rsel-btn"        data-role="arc"  data-action="select-role"  style="--rc:#dc2626">&#127963; AI Architect</button>
+    <button class="rsel-btn"        data-role="sa"   data-action="select-role"   style="--rc:#0d9488">&#129513; Solution Architect</button>
+    <button class="rsel-btn"        data-role="be"   data-action="select-role"   style="--rc:#4338ca">&#128268; Backend Engineer</button>
+    <button class="rsel-btn"        data-role="beg"  data-action="select-role"  style="--rc:#e11d48">&#127793; Beginner</button>
   </div>
 </div>
 
@@ -1182,7 +1185,7 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
   <div class="wk-body">
     <div class="lp-item" data-role="all aie arc" data-action="switch-tab" data-tab="rag" data-anchor="anchor-rag-pipeline"><span class="lp-ico">&#128269;</span><span class="lp-link">RAG pipeline: 5 chunking strategies, HNSW algorithm, BM25 formula, hybrid RRF, reranking + code</span><div class="lp-meta"><span class="lp-dur">4h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
     <div class="lp-item" data-role="all aie arc" data-action="switch-tab" data-tab="agents" data-anchor="anchor-agents-react"><span class="lp-ico">&#129302;</span><span class="lp-link">ReAct agent code, LangGraph implementation, 4-layer memory, 6 failure modes</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
-    <div class="lp-item" data-role="aie arc" data-action="switch-tab" data-tab="longctx" data-anchor="anchor-longctx-rope"><span class="lp-ico">&#128269;</span><span class="lp-link">Long context: YaRN/RoPE extension, Mamba SSM, structured output</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-i">DEEP</span></div></div>
+    <div class="lp-item" data-role="aie arc be" data-action="switch-tab" data-tab="longctx" data-anchor="anchor-longctx-rope"><span class="lp-ico">&#128269;</span><span class="lp-link">Long context: YaRN/RoPE extension, Mamba SSM, structured output</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-i">DEEP</span></div></div>
     <div class="lp-item" data-role="ds mle" data-action="switch-tab" data-tab="recsys" data-anchor="anchor-recsys-twotower"><span class="lp-ico">&#128202;</span><span class="lp-link">Recommendation: two-tower code, ALS, TFT time series, XGBoost tabular</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-i">DEEP</span></div></div>
   </div>
 </div>
@@ -1200,7 +1203,7 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
     <div class="lp-item" data-role="all mlo arc" data-action="switch-tab" data-tab="infra" data-anchor="anchor-infra-gpu"><span class="lp-ico">&#128200;</span><span class="lp-link">GPU memory math, quantization (NF4/AWQ/GPTQ), distributed training (FSDP/TP/PP) + code</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
     <div class="lp-item" data-role="all mlo arc" data-action="switch-tab" data-tab="infra" data-anchor="anchor-infra-vllm"><span class="lp-ico">&#128200;</span><span class="lp-link">vLLM: PagedAttention algorithm, continuous batching, speculative decoding + code</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
     <div class="lp-item" data-role="all mlo arc" data-action="switch-tab" data-tab="mlops" data-anchor="anchor-mlops-cicd"><span class="lp-ico">&#9881;</span><span class="lp-link">Feature stores, drift detection, CI/CD pipeline YAML, LLMOps (prompt versioning, cost tracking)</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
-    <div class="lp-item" data-role="aie arc" data-action="switch-tab" data-tab="sysdesign" data-anchor="anchor-sysdesign-6layer"><span class="lp-ico">&#127959;</span><span class="lp-link">Production LLM system (6-layer arch), latency optimisation, cost math, design scenarios</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
+    <div class="lp-item" data-role="aie arc sa be" data-action="switch-tab" data-tab="sysdesign" data-anchor="anchor-sysdesign-6layer"><span class="lp-ico">&#127959;</span><span class="lp-link">Production LLM system (6-layer arch), latency optimisation, cost math, design scenarios</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
   </div>
 </div>
 
@@ -1214,11 +1217,11 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
     </div>
   </div>
   <div class="wk-body">
-    <div class="lp-item" data-role="arc aie" data-action="switch-tab" data-tab="akp" data-anchor="anchor-akp-planes"><span class="lp-ico">&#127981;</span><span class="lp-link">AKP 6 planes: Surfaces, Agent Runtime, Tool Plane, Governance, Knowledge, Data Backbone</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-a">EXPERT</span></div></div>
-    <div class="lp-item" data-role="arc aie" data-action="switch-tab" data-tab="gov2" data-anchor="anchor-gov2-prr"><span class="lp-ico">&#128274;</span><span class="lp-link">Governance: PRR checklist, Artifact Registry, DPP, red-teaming (Garak), Saga coordinator</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-a">EXPERT</span></div></div>
-    <div class="lp-item" data-role="arc aie" data-action="switch-tab" data-tab="agentops" data-anchor="anchor-agentops-memory"><span class="lp-ico">&#129302;</span><span class="lp-link">4-layer memory, context budget, prompt drift detection, IIB adapter code</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-a">EXPERT</span></div></div>
+    <div class="lp-item" data-role="arc aie sa" data-action="switch-tab" data-tab="akp" data-anchor="anchor-akp-planes"><span class="lp-ico">&#127981;</span><span class="lp-link">AKP 6 planes: Surfaces, Agent Runtime, Tool Plane, Governance, Knowledge, Data Backbone</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-a">EXPERT</span></div></div>
+    <div class="lp-item" data-role="arc aie sa" data-action="switch-tab" data-tab="gov2" data-anchor="anchor-gov2-prr"><span class="lp-ico">&#128274;</span><span class="lp-link">Governance: PRR checklist, Artifact Registry, DPP, red-teaming (Garak), Saga coordinator</span><div class="lp-meta"><span class="lp-dur">3h</span><span class="lp-lvl lvl-a">EXPERT</span></div></div>
+    <div class="lp-item" data-role="arc aie be" data-action="switch-tab" data-tab="agentops" data-anchor="anchor-agentops-memory"><span class="lp-ico">&#129302;</span><span class="lp-link">4-layer memory, context budget, prompt drift detection, IIB adapter code</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-a">EXPERT</span></div></div>
     <div class="lp-item" data-role="all arc aie mlo" data-action="switch-tab" data-tab="safety" data-anchor="anchor-safety-hallucination"><span class="lp-ico">&#128274;</span><span class="lp-link">Safety: guardrail code, EU AI Act, OWASP LLM Top 10, Constitutional AI</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
-    <div class="lp-item" data-role="arc mlo aie" data-action="switch-tab" data-tab="devexp" data-anchor="anchor-devexp-prompts"><span class="lp-ico">&#128187;</span><span class="lp-link">Dev Experience + People &amp; Adoption: prompt library, SDK, CoE model, change management</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
+    <div class="lp-item" data-role="arc mlo aie sa" data-action="switch-tab" data-tab="devexp" data-anchor="anchor-devexp-prompts"><span class="lp-ico">&#128187;</span><span class="lp-link">Dev Experience + People &amp; Adoption: prompt library, SDK, CoE model, change management</span><div class="lp-meta"><span class="lp-dur">2h</span><span class="lp-lvl lvl-f">CORE</span></div></div>
   </div>
 </div>
 
@@ -2094,6 +2097,7 @@ flowchart TB
 &middot; <em>Tightest regulatory boundary (EU)?</em> Mistral Large 3 &middot; self-hosted Llama 4.</div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A customer-support assistant built on a hosted foundation model. The team picks a mid-size instruction-tuned model, sets the system prompt and temperature, and caps context to the last few turns &mdash; shipping useful answers in days without training anything, then later swaps to a cheaper open-weights model once volume makes the API bill the bigger cost.</div>
 <div class="sh" id="anchor-llm-go-deeper">&#127759; Go Deeper &mdash; LLMs &amp; Foundation Models</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -2295,6 +2299,7 @@ flowchart TB
 
 <div class="sh" id="anchor-landscape-build-vs-prompt-vs-fine-tune-vs-train">Build vs Prompt vs Fine-tune vs Train</div><div class="vs-box"><div class="vs-side vs-good"><div class="vs-title">When to Prompt</div><ul><li>Task is general, LLM has strong priors</li><li>Low-medium volume (&lt;10M tokens/day)</li><li>Speed to market is priority</li></ul></div><div class="vs-side"><div class="vs-title">When to Fine-tune</div><ul><li>Domain-specific tone or format needed</li><li>High volume + cost reduction needed</li><li>100+ quality training examples available</li></ul></div></div>
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> Choosing the model for a new feature. An engineer maps the requirement &mdash; long legal documents, strict data residency, a tight latency budget &mdash; onto the landscape, rules out closed APIs for the residency constraint, shortlists two open-weights long-context models, and benchmarks both on the team's own eval set before committing.</div>
 <div class="sh" id="anchor-landscape-go-deeper">&#127759; Go Deeper &mdash; AI Landscape</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -2684,6 +2689,7 @@ How many components?  Explained variance =  /
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A churn-prediction model for a subscription business. The team frames it as binary classification, guards against data leakage (no post-cancellation features), picks PR-AUC over accuracy because churners are rare, and ships a gradient-boosted model whose feature importances tell the retention team which signals to act on.</div>
 <div class="sh" id="anchor-ml-go-deeper">&#127759; Go Deeper &mdash; ML Fundamentals</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -2993,6 +2999,7 @@ Flash Attention  not an attention variant but an implementation:
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> An image-defect detector on a factory line. A convolutional network trained on a few thousand labelled photos flags scratches in real time; when accuracy stalls, the team adds augmentation and batch-norm rather than more layers, and uses the learned feature maps to show operators where the model is looking.</div>
 <div class="sh" id="anchor-dl-go-deeper">&#127759; Go Deeper &mdash; Deep Learning</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -3627,6 +3634,7 @@ z1, z2 = vae.encode(img1)[<span class="num">0</span>], vae.encode(img2)[<span cl
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A marketing team auto-drafts product descriptions. A generative model turns a few bullet-point specs into on-brand copy; the team controls tone with the system prompt, constrains length and format with structured output, and routes anything mentioning price or claims through a human review step before publishing.</div>
 <div class="sh" id="anchor-genai-go-deeper">&#127759; Go Deeper &mdash; Generative AI</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -4069,6 +4077,7 @@ and optimise the clipped surrogate (PPO-style) plus a KL penalty to the SFT refe
 <div class="ibox"><strong>Tooling stack (2026):</strong> Unsloth (2&ndash;5&times; faster QLoRA), Liger Kernels (drop-in Triton kernels), Axolotl / LLaMA-Factory / OpenRLHF / TRL / verl for trainers; vLLM for fast rollouts inside RL loops. <strong>Model merging</strong> (mergekit: TIES, DARE, SLERP, Sakana evolutionary) is the cheap alternative to multitask fine-tuning when you have several adapters or several full fine-tunes.</div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A support bot that must answer in a company's exact voice and follow its escalation rules. Rather than retrain from scratch, the team LoRA-fine-tunes an open model on a few thousand curated past tickets &mdash; cheaply teaching style and policy the base model never had, while keeping the base weights frozen so they can roll back instantly.</div>
 <div class="sh" id="anchor-finetune-go-deeper">&#127759; Go Deeper &mdash; Fine-tuning</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -4418,6 +4427,7 @@ client = instructor.from_openai(OpenAI())
 <div class="ibox"><strong>Long-context vs RAG decision (architect-grade):</strong> stuff the prompt only when (a) the corpus changes per request and would need re-indexing anyway, (b) <em>order</em> and <em>cross-references</em> across the whole doc matter (legal contracts, single long codebase), or (c) latency requirements tolerate ~5&ndash;30 s TTFT. Otherwise: <em>RAG + rerank + grounded citations</em> is faster, cheaper, more auditable, and degrades more gracefully. The right answer in production is almost always <strong>hybrid: RAG to focus on ~50K&ndash;200K of relevant context, then let the long-context model reason over it.</strong></div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A contract-review assistant. For a 200-page master agreement whose clauses cross-reference each other, the team feeds the whole document to a long-context model so it can reason over the entire contract at once &mdash; then falls back to RAG + reranking for the routine 90% of queries that only touch one section, keeping cost and latency in check.</div>
 <div class="sh" id="anchor-longctx-go-deeper">&#127759; Go Deeper &mdash; Long Context &amp; SSMs</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -4782,6 +4792,55 @@ print(result.to_pandas())</div>
  </div>
 </div>
 <div class="ibox"><strong>Evaluating RAG in 2026:</strong> RAGAS, ARES, DeepEval, TruLens, Phoenix, LangSmith for app-level; BEIR &amp; MTEB for component retrievers; <strong>CRAG benchmark</strong> for end-to-end factual QA. Always measure both <em>context-precision</em> (signal) and <em>context-recall</em> (coverage) &mdash; a retriever can have great precision and still lose because it missed the answer.</div>
+
+
+<div class="sh" id="anchor-rag-handson">&#128296; Hands-on Implementation &mdash; Minimal RAG</div>
+<div class="ibox" style="border-left-color:#0891b2;margin-bottom:8px"><strong>Build the core mechanism.</strong> The from-scratch sections above show how HNSW, BM25, and reranking work internally. This is the opposite view: the smallest end-to-end <em>retrieve-then-generate</em> loop you can actually run &mdash; genuinely correct, but deliberately not production-grade (no chunking, caching, hybrid search, or error handling). It exists so you can see the whole idea in one screen.</div>
+<div class="code-label">Python &mdash; Minimal RAG (retrieve + generate)</div>
+<div class="code"><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+
+client = OpenAI()
+DOCS = [
+    <span class="str">"Refunds are processed within 5 business days."</span>,
+    <span class="str">"Standard shipping takes 3-7 days; express takes 1-2 days."</span>,
+    <span class="str">"You can cancel an order any time before it ships."</span>,
+]
+
+<span class="kw">def</span> <span class="fn">embed</span>(texts):
+    r = client.embeddings.create(model=<span class="str">"text-embedding-3-small"</span>, input=texts)
+    <span class="kw">return</span> np.array([d.embedding <span class="kw">for</span> d <span class="kw">in</span> r.data])
+
+DOC_VECS = embed(DOCS)                  <span class="cmt"># index is built once, offline</span>
+
+<span class="kw">def</span> <span class="fn">retrieve</span>(query, k=<span class="num">2</span>):
+    q = embed([query])[<span class="num">0</span>]
+    sims = DOC_VECS @ q                 <span class="cmt"># similarity = dot product</span>
+    top = sims.argsort()[::-<span class="num">1</span>][:k]    <span class="cmt"># k closest documents</span>
+    <span class="kw">return</span> [DOCS[i] <span class="kw">for</span> i <span class="kw">in</span> top]
+
+<span class="kw">def</span> <span class="fn">answer</span>(query):
+    context = <span class="str">"\n"</span>.join(retrieve(query))
+    prompt = <span class="str">f"Answer using ONLY the context.\n\nContext:\n{context}\n\nQ: {query}"</span>
+    r = client.chat.completions.create(
+        model=<span class="str">"gpt-4o-mini"</span>,
+        messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}],
+    )
+    <span class="kw">return</span> r.choices[<span class="num">0</span>].message.content
+
+<span class="fn">print</span>(answer(<span class="str">"How long do refunds take?"</span>))</div>
+<div class="ibox" style="border-left-color:#7c3aed;margin-top:10px">
+  <strong>Step by step (what the code actually does):</strong>
+  <ol style="margin:8px 0 0;padding-left:20px;line-height:1.7">
+    <li>Each document is turned into a vector once &mdash; a list of numbers that captures its meaning. That set of vectors <em>is</em> your index.</li>
+    <li>At question time, the query is embedded into the same vector space.</li>
+    <li>The dot product of the query vector against every document vector scores how close their meanings are &mdash; a bigger number means more relevant.</li>
+    <li>The top-<em>k</em> highest-scoring documents become the &ldquo;context&rdquo;.</li>
+    <li>That context is pasted into the prompt, and the model is told to answer using only it &mdash; so the answer is grounded in your data, not the model's memory.</li>
+  </ol>
+  <div style="margin-top:8px"><strong>The pattern:</strong> embed &rarr; match by similarity &rarr; stuff into the prompt &rarr; generate. That four-step loop is <em>Retrieval-Augmented Generation</em>.</div>
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px"><strong>&#127757; Real-world use case:</strong> An internal support copilot. Instead of fine-tuning a model on policy documents (expensive, and stale the moment a policy changes), you embed the current policy PDFs into a vector database. When an agent asks &ldquo;how long do refunds take?&rdquo;, the bot retrieves the live policy chunk and answers from it &mdash; edit the document and the answer updates instantly, with a citation you can audit.</div>
 
 
 <div class="sh" id="anchor-rag-go-deeper">&#127759; Go Deeper &mdash; RAG &amp; Vector Search</div>
@@ -5241,6 +5300,107 @@ result = app.invoke({<span class="str">"messages"</span>: [{<span class="str">"r
 </table>
 
 
+<div class="sh" id="anchor-agents-handson">&#128296; Hands-on Implementation &mdash; Minimal Tool-Calling Agent</div>
+<div class="ibox" style="border-left-color:#0891b2;margin-bottom:8px"><strong>Build the core mechanism.</strong> The ReAct section above explains the theory. This is the smallest agent loop that actually runs: a model that can decide to call a tool, see the result, and decide again &mdash; with a step budget so it can never loop forever. No retries, validation, or monitoring yet; just the engine every agent framework wraps.</div>
+<div class="code-label">Python &mdash; Minimal tool-calling loop</div>
+<div class="code"><span class="kw">import</span> json
+<span class="kw">from</span> openai <span class="kw">import</span> OpenAI
+
+client = OpenAI()
+
+<span class="kw">def</span> <span class="fn">get_weather</span>(city):                       <span class="cmt"># a "tool" is just a normal function</span>
+    data = {<span class="str">"Berlin"</span>: <span class="str">"12C rain"</span>, <span class="str">"Cairo"</span>: <span class="str">"33C clear"</span>}
+    <span class="kw">return</span> data.get(city, <span class="str">"unknown"</span>)
+
+TOOLS = [{
+    <span class="str">"type"</span>: <span class="str">"function"</span>,
+    <span class="str">"function"</span>: {
+        <span class="str">"name"</span>: <span class="str">"get_weather"</span>,
+        <span class="str">"description"</span>: <span class="str">"Current weather for a city"</span>,
+        <span class="str">"parameters"</span>: {
+            <span class="str">"type"</span>: <span class="str">"object"</span>,
+            <span class="str">"properties"</span>: {<span class="str">"city"</span>: {<span class="str">"type"</span>: <span class="str">"string"</span>}},
+            <span class="str">"required"</span>: [<span class="str">"city"</span>],
+        },
+    },
+}]
+
+<span class="kw">def</span> <span class="fn">run</span>(user_msg, max_steps=<span class="num">5</span>):
+    messages = [{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: user_msg}]
+    <span class="kw">for</span> _ <span class="kw">in</span> range(max_steps):              <span class="cmt"># budget: never loop forever</span>
+        r = client.chat.completions.create(
+            model=<span class="str">"gpt-4o-mini"</span>, messages=messages, tools=TOOLS)
+        msg = r.choices[<span class="num">0</span>].message
+        <span class="kw">if</span> <span class="kw">not</span> msg.tool_calls:              <span class="cmt"># model is done -&gt; final answer</span>
+            <span class="kw">return</span> msg.content
+        messages.append(msg)
+        <span class="kw">for</span> call <span class="kw">in</span> msg.tool_calls:         <span class="cmt"># model asked to use a tool</span>
+            args = json.loads(call.function.arguments)
+            result = get_weather(**args)        <span class="cmt"># we execute it for real</span>
+            messages.append({<span class="str">"role"</span>: <span class="str">"tool"</span>,
+                             <span class="str">"tool_call_id"</span>: call.id, <span class="str">"content"</span>: result})
+    <span class="kw">return</span> <span class="str">"Stopped: step budget exhausted."</span>
+
+<span class="fn">print</span>(run(<span class="str">"Should I take an umbrella in Berlin?"</span>))</div>
+<div class="ibox" style="border-left-color:#7c3aed;margin-top:10px">
+  <strong>Step by step (what the code actually does):</strong>
+  <ol style="margin:8px 0 0;padding-left:20px;line-height:1.7">
+    <li>You hand the model a question <em>plus</em> a list of tools it is allowed to call.</li>
+    <li>The model replies with one of two things: a final answer, or a request to call a tool (&ldquo;call <code>get_weather</code> with city = Berlin&rdquo;).</li>
+    <li>If it asked for a tool, <em>your</em> code runs the real function and appends the result back into the conversation.</li>
+    <li>The model sees that result and decides again &mdash; answer now, or call another tool.</li>
+    <li>The <code>max_steps</code> budget guarantees the loop always terminates, even if the model keeps asking.</li>
+  </ol>
+  <div style="margin-top:8px"><strong>The pattern:</strong> assemble context &rarr; model picks a tool &rarr; execute &rarr; observe &rarr; repeat until done or out of budget. Naming it formally, that thought&ndash;action&ndash;observation cycle is <em>ReAct</em>.</div>
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px"><strong>&#127757; Real-world use case:</strong> A DevOps assistant. The exact same loop &mdash; with tools like <code>query_logs</code>, <code>restart_service</code>, and <code>page_oncall</code> &mdash; lets an engineer ask &ldquo;why is checkout returning 500s?&rdquo; The agent pulls the logs, spots the failing dependency, and proposes a restart, with a human approving the irreversible step before it runs.</div>
+
+
+<div class="sh" id="anchor-mcp-handson">&#128296; Hands-on Implementation &mdash; Minimal MCP Client/Server</div>
+<div class="ibox" style="border-left-color:#0891b2;margin-bottom:8px"><strong>Build the core mechanism.</strong> In the agent above, the tool was hard-coded into the program. <em>Model Context Protocol</em> (MCP) decouples that: a server <em>describes</em> its tools, and any client <em>discovers and calls</em> them over a shared message format (JSON-RPC). Below is the smallest server + client pair that speaks it.</div>
+<div class="code-label">Python &mdash; MCP server (exposes one tool)</div>
+<div class="code"><span class="cmt"># server.py</span>
+<span class="kw">from</span> mcp.server.fastmcp <span class="kw">import</span> FastMCP
+
+mcp = FastMCP(<span class="str">"weather-server"</span>)
+
+<span class="at">@mcp.tool()</span>
+<span class="kw">def</span> <span class="fn">get_weather</span>(city: str) -&gt; str:
+    <span class="str">"Return current weather for a city."</span>
+    <span class="kw">return</span> {<span class="str">"Berlin"</span>: <span class="str">"12C rain"</span>}.get(city, <span class="str">"unknown"</span>)
+
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    mcp.run()        <span class="cmt"># speaks MCP (JSON-RPC) over stdio</span></div>
+<div class="code-label">Python &mdash; MCP client (discovers + calls the tool)</div>
+<div class="code"><span class="cmt"># client.py</span>
+<span class="kw">import</span> asyncio
+<span class="kw">from</span> mcp <span class="kw">import</span> ClientSession, StdioServerParameters
+<span class="kw">from</span> mcp.client.stdio <span class="kw">import</span> stdio_client
+
+<span class="kw">async def</span> <span class="fn">main</span>():
+    params = StdioServerParameters(command=<span class="str">"python"</span>, args=[<span class="str">"server.py"</span>])
+    <span class="kw">async with</span> stdio_client(params) <span class="kw">as</span> (read, write):
+        <span class="kw">async with</span> ClientSession(read, write) <span class="kw">as</span> session:
+            <span class="kw">await</span> session.initialize()              <span class="cmt"># 1. handshake</span>
+            tools = <span class="kw">await</span> session.list_tools()      <span class="cmt"># 2. discovery</span>
+            <span class="fn">print</span>(<span class="str">"server offers:"</span>, [t.name <span class="kw">for</span> t <span class="kw">in</span> tools.tools])
+            out = <span class="kw">await</span> session.call_tool(<span class="str">"get_weather"</span>, {<span class="str">"city"</span>: <span class="str">"Berlin"</span>})
+            <span class="fn">print</span>(out.content[<span class="num">0</span>].text)      <span class="cmt"># 3. result</span>
+
+asyncio.run(main())</div>
+<div class="ibox" style="border-left-color:#7c3aed;margin-top:10px">
+  <strong>Step by step (what the code actually does):</strong>
+  <ol style="margin:8px 0 0;padding-left:20px;line-height:1.7">
+    <li>The server registers a normal function and wraps it so it can be <em>described</em> and <em>called</em> over a standard protocol (JSON-RPC messages), not just imported.</li>
+    <li>The client launches the server and sends an <code>initialize</code> handshake &mdash; both sides agree on protocol version and capabilities.</li>
+    <li>The client calls <code>list_tools</code>; the server replies with the tools it offers and their schemas. This is <em>discovery</em> &mdash; the client did not hard-code the tool, it asked what was available.</li>
+    <li>The client sends <code>call_tool</code> with arguments; the server runs the function and returns the result as a message.</li>
+  </ol>
+  <div style="margin-top:8px"><strong>The pattern:</strong> one server describes its tools; any client discovers and calls them over a shared message format. That standard is <em>MCP</em> &mdash; so the same server works with Claude Desktop, an IDE, or your own agent with no custom glue.</div>
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px"><strong>&#127757; Real-world use case:</strong> A company wraps each internal system &mdash; Jira, Snowflake, Confluence &mdash; as its own MCP server. Every AI client (the IDE assistant, the support bot, a custom agent) connects and discovers those tools through the same protocol, so each integration is built once instead of being re-wired into every product separately.</div>
+
+
 <div class="sh" id="anchor-agents-go-deeper">&#127759; Go Deeper &mdash; Agents &amp; Prompting</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -5647,6 +5807,7 @@ Why soft targets help more than hard labels:
 <div class="ibox"><strong>MoE serving specifics (DeepSeek V3/V4, Llama 4, Qwen3-235B, Kimi K2):</strong> use <em>Expert Parallelism (EP)</em> with all-to-all (NVSHMEM / DeepEP / DualPipe). On Blackwell, FP4 + FP8 KV is the typical mix. SGLang and Dynamo both ship production MoE EP. Capacity planning rule of thumb: a 1T-param MoE with 32B active fits on 8&times;H200 (FP8) or 4&times;B200 (FP4) for serving, much more for training.</div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> Serving a chat product at scale. The platform team runs the model on vLLM with paged-attention batching, splits prefill and decode across GPU pools to hold time-to-first-token under a second at peak, and quantizes to int8 so the same hardware serves roughly twice the traffic without a noticeable quality drop.</div>
 <div class="sh" id="anchor-infra-go-deeper">&#127759; Go Deeper &mdash; AI Infrastructure</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -5997,6 +6158,7 @@ jobs:
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> Shipping a new prompt version safely. Before rollout, CI runs the candidate prompt against a golden eval set, catches a faithfulness regression on refund questions, and blocks the deploy &mdash; so the bad version never reaches users and the team gets the exact failing cases to fix.</div>
 <div class="sh" id="anchor-mlops-go-deeper">&#127759; Go Deeper &mdash; MLOps / LLMOps</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -6210,6 +6372,7 @@ Prompt caching (Anthropic - up to 90% cost reduction on repeated context):
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> Designing a support copilot for a 10M-user product. A semantic cache absorbs the most common FAQ traffic, a router sends easy queries to a small cheap model and hard ones to a frontier model, and disaggregated serving keeps latency flat under load &mdash; cutting cost per query by more than half versus sending everything to one big model.</div>
 <div class="sh" id="anchor-sysdesign-go-deeper">&#127759; Go Deeper &mdash; System Design</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -6466,6 +6629,7 @@ Impossibility theorem (Chouldechova 2017):
 </table>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A healthcare triage assistant under the EU AI Act. The team classifies it as high-risk, adds a prompt-injection filter (OWASP LLM01), gates answers on a grounded-citation check, and routes low-confidence outputs to a clinician &mdash; documenting each control so the deployment can pass an audit.</div>
 <div class="sh" id="anchor-safety-go-deeper">&#127759; Go Deeper &mdash; Safety &amp; Ethics</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -6900,6 +7064,7 @@ print(<span class="fn">f</span><span class="str">"Merge rules: {list(bpe.merges.
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> An automated document-processing pipeline. A vision transformer classifies each incoming scan (invoice vs. receipt vs. contract), an OCR + NLP stage extracts the key fields, and a cross-encoder ranks which clauses a human should review &mdash; clearing the routine majority automatically and routing only the ambiguous documents to people.</div>
 <div class="sh" id="anchor-cvnlp-go-deeper">&#127759; Go Deeper &mdash; CV &amp; NLP</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -7387,6 +7552,7 @@ agent_core = graph.compile()            <span class="cmt"># wrap with memory + g
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> An enterprise rolling out internal agents across teams. The governance plane enforces data classification (confidential queries route only to the self-hosted model), the tool plane exposes 50+ internal APIs through one MCP layer, and the observability plane streams traces to a dashboard &mdash; so every team builds on shared rails instead of re-implementing auth, tools, and audit each time.</div>
 <div class="sh" id="anchor-akp-go-deeper">&#127759; Go Deeper &mdash; Agentic Platform (AKP)</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -7756,6 +7922,7 @@ Scale at production:
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A homepage recommendation feed. A two-tower model retrieves a few hundred candidate items in milliseconds from millions, a gradient-boosted ranker re-scores them with business rules (freshness, margin, diversity), and a content-based fallback handles brand-new items the model has never seen.</div>
 <div class="sh" id="anchor-recsys-go-deeper">&#127759; Go Deeper &mdash; RecSys, Time Series &amp; Tabular</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -8121,6 +8288,7 @@ Alpha spending (Lan-DeMets):
 </div>
 
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> Measuring whether a new checkout flow actually helps. The team runs an A/B test, but because users self-select into mobile vs. desktop they use causal adjustment to remove the confound, size the experiment for the minimum detectable effect up front, and report a confidence interval &mdash; not just a single lift number &mdash; before rolling the change out.</div>
 <div class="sh" id="anchor-datasci-go-deeper">&#127759; Go Deeper &mdash; Data Science</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -10168,6 +10336,7 @@ release_id = await saga.execute_step(
 <div class="dec-row"><div class="dec-cond">Limited risk</div><div class="dec-ans">Chatbots, deepfakes. Must disclose AI to users. Minimal compliance burden.</div></div>
 <div class="dec-row"><div class="dec-cond">Minimal risk</div><div class="dec-ans">Spam filters, AI in games, most recommendation systems. No mandatory requirements.</div></div></div>
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> Putting an agent platform through a production-readiness review. Each release must pass a PRR checklist, register its model and data lineage in an artifact registry, clear a red-team pass (Garak), and declare a rollback path &mdash; so when an auditor or incident asks &ldquo;what changed and who approved it,&rdquo; the answer is one query away.</div>
 <div style="margin-top:24px;padding:12px 0;border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
  <div style="display:flex;align-items:center;gap:10px"><button data-action="switch-tab" data-tab="qa3" style="background:var(--white);border:1.5px solid var(--border);border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--muted)">&#8592; Q&amp;A Vol 3</button></div>
  <div><button data-action="switch-tab" data-tab="agentops" style="background:var(--ai);border:none;border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff">Next: Agent Ops &#8594;</button></div>
@@ -10451,7 +10620,6 @@ release_id = await saga.execute_step(
   <div class="arch-block ab-2"><div class="ab-label">Tier 1: Async approval (15min SLA)</div><div class="ab-content">Moderate impact, reversible with effort. Examples: draft email ready to send, order amendment, report generation. Agent pauses, sends approval request to Slack/email. Approver clicks approve/reject.</div></div>
   <div class="arch-block ab-3"><div class="ab-label">Tier 2: Sync approval (immediate)</div><div class="ab-content">High impact or irreversible actions. Examples: payment processing, bulk data deletion, external communication to customers. Agent blocks on approval  timeout triggers auto-rejection.</div></div>
   <div class="arch-block ab-4"><div class="ab-label">Tier 3: Multi-approver</div><div class="ab-content">Critical operations, regulatory impact. Examples: financial transactions &gt;$10K, PII data export, system configuration changes. Requires N-of-M approvals (e.g., 2-of-3 senior approvers). SLA: 4 hours.</div></div>
-</div> 
 </div>
 
 <div class="sh">Agent Monitoring  What to Watch</div>
@@ -10471,8 +10639,6 @@ release_id = await saga.execute_step(
   <div class="arch-block ab-3"><div class="ab-label">Tier 2: Sync (immediate)</div><div class="ab-content">High impact, irreversible. Examples: payment, bulk deletion, customer communication. Agent blocks. Timeout auto-rejects.</div></div>
   <div class="arch-block ab-4"><div class="ab-label">Tier 3: Multi-approver</div><div class="ab-content">Critical/regulatory. Examples: &gt;$10K transactions, PII export. Requires 2-of-3 senior approvers. 4-hour SLA.</div></div>
 </div>
- <div><button data-action="switch-tab" data-tab="devexp" style="background:var(--ai);border:none;border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff">Next: Dev Experience &#8594;</button></div>
-</div>
 
 <div class="sh">Agent Monitoring Metrics</div>
 <table class="cmp"><tr><th>Metric</th><th>Alert Threshold</th><th>Root Cause</th></tr>
@@ -10481,6 +10647,7 @@ release_id = await saga.execute_step(
 <tr><td>Tool p99 latency</td><td>&gt;5s</td><td>External API degraded, missing index</td></tr>
 <tr><td>Faithfulness score</td><td>&lt;0.80</td><td>Model update, retrieval quality drop, prompt drift</td></tr>
 <tr><td>Safety flag rate</td><td>Spike &gt;10 baseline</td><td>Adversarial users, new jailbreak vector</td></tr></table>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> Keeping a long-running research agent reliable. A four-layer memory stops it forgetting earlier steps, a context-budget manager trims history before it overflows the window, and a prompt-drift detector alerts the team when a model update quietly changes the agent's behaviour in production &mdash; before users notice.</div>
 <div class="sh">HITL Risk-Tiered Approvals</div>
 <div class="arch-diagram">
 <div class="arch-block ab-1"><div class="ab-label">Tier 0: Auto-approve</div><div class="ab-content">Read-only, reversible, &lt;$100 impact. Examples: search, draft generation. No human in loop.</div></div>
@@ -10488,8 +10655,6 @@ release_id = await saga.execute_step(
 <div class="arch-block ab-3"><div class="ab-label">Tier 2: Sync (immediate block)</div><div class="ab-content">High impact, irreversible. Examples: payment, bulk delete, customer communication. Timeout auto-rejects.</div></div>
 <div class="arch-block ab-4"><div class="ab-label">Tier 3: Multi-approver</div><div class="ab-content">Critical/regulatory. &gt;$10K, PII export. Requires 2-of-3 senior approvers. 4h SLA.</div></div>
 </div>
-
-
 <div class="sh" id="anchor-agentops-go-deeper">&#127759; Go Deeper &mdash; Agent Ops</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -10763,6 +10928,7 @@ token_cost = meter.create_histogram(
   </ul>
 </div>
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> An internal AI platform team improving developer adoption. They ship a prompt playground with versioned prompts and side-by-side diffs, expose model access through one SDK instead of raw APIs, and attribute token cost back to each team &mdash; so product engineers ship features in hours and finance can see exactly where spend goes.</div>
 <div class="sh" id="anchor-devexp-go-deeper">&#127759; Go Deeper &mdash; Dev Experience</div>
 <div style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;margin:12px 0 20px;font-size:12px;line-height:1.75">
   <strong style="display:block;margin-bottom:8px;font-size:12.5px;color:#1e3a8a">Curated external resources &mdash; use these after finishing this tab, not instead of it.</strong>
@@ -11411,6 +11577,7 @@ token_cost = meter.create_histogram(
   <div class="arch-block ab-4"><div class="ab-label">Solution 3: Constrained Decoding (Outlines)</div><div class="ab-content">Grammar-constrained generation: token sampling is restricted to only tokens that could extend a valid JSON document matching your schema. Mathematically guarantees valid output with zero retries. Works with local models via vLLM or llama.cpp. Zero overhead at inference.</div></div>
 </div>
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A product team adopting a reasoning model. They turn on extended thinking only for the hard analytical queries &mdash; where the accuracy gain justifies the extra latency and tokens &mdash; keep a fast non-thinking model for everything else, and wrap both in Instructor + Pydantic so the structured JSON their app expects validates 99% of the time.</div>
 <div style="margin-top:24px;padding:12px 0;border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
  <div style="display:flex;align-items:center;gap:10px"><button data-action="switch-tab" data-tab="career" style="background:var(--white);border:1.5px solid var(--border);border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--muted)">&#8592; AI Career Path</button></div>
  <div><button data-action="switch-tab" data-tab="cloud" style="background:var(--ai);border:none;border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff">Next: Cloud Platforms &#8594;</button></div>
@@ -11630,6 +11797,7 @@ pipeline.start()</div>
  
 </div>
 
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:14px"><strong>&#127757; Real-world use case:</strong> A scale-up deciding build vs. buy for its first GenAI feature. It starts on a managed platform (Bedrock / Azure OpenAI / Vertex) to ship in weeks, builds an ROI model before committing headcount, and sets data contracts and model cards from day one &mdash; so the system doesn't accumulate the hidden technical debt that compounds in ML.</div>
 <div style="margin-top:24px;padding:12px 0;border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
  <div style="display:flex;align-items:center;gap:10px"><button data-action="switch-tab" data-tab="emerging" style="background:var(--white);border:1.5px solid var(--border);border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--muted)">&#8592; Emerging Trends</button></div>
  <div><button data-action="switch-tab" data-tab="glossary" style="background:var(--ai);border:none;border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff">Next: Glossary &#8594;</button></div>
@@ -11985,6 +12153,24 @@ var ROLE_DATA={
     core:["plan","landscape","ml","math","datasci","coding","recsys","interview","career","qa"],
     deep:["dl","llm","genai","rag","finetune","safety","agents","qa2","qa3"],
     skip:["infra","mlops","sysdesign","akp","agentops","devexp","people","gov2","longctx","cvnlp","cloud","emerging"]
+  },
+  sa:{
+    label:"Solution Architect",
+    core:["plan","landscape","llm","genai","rag","agents","sysdesign","akp","gov2","safety","devexp","people","cloud","interview","career","qa"],
+    deep:["infra","mlops","agentops","longctx","emerging","qa2","qa3"],
+    skip:["math","ml","dl","finetune","cvnlp","datasci","recsys","coding"]
+  },
+  be:{
+    label:"Backend Engineer",
+    core:["plan","landscape","llm","rag","agents","infra","mlops","sysdesign","agentops","coding","safety","cloud","interview","career","qa"],
+    deep:["genai","finetune","longctx","akp","devexp","gov2","emerging","qa2","qa3"],
+    skip:["math","ml","dl","cvnlp","datasci","recsys","people"]
+  },
+  beg:{
+    label:"Beginner",
+    core:["plan","landscape","ml","llm","genai","rag","agents","safety","interview","career","qa"],
+    deep:["math","dl","finetune","longctx","infra","mlops","sysdesign","datasci","recsys","cvnlp","emerging","cloud","qa2"],
+    skip:["akp","agentops","devexp","people","gov2","coding","qa3"]
   }
 };
 
@@ -12019,7 +12205,10 @@ function selectRole(role){
     aie:"AI Engineer path: emphasises implementation \u2014 fine-tuning, RAG, agents, infrastructure, MLOps, and cloud deployment.",
     mle:"ML Engineer path: emphasises theory and implementation \u2014 backprop, optimisers, fine-tuning, evaluation, and production serving.",
     mlo:"MLOps Engineer path: emphasises infrastructure, CI/CD for ML, monitoring, and cloud platform operations.",
-    ds:"Data Scientist path: emphasises statistical foundations, feature engineering, model selection, and experiment design."
+    ds:"Data Scientist path: emphasises statistical foundations, feature engineering, model selection, and experiment design.",
+    sa:"Solution Architect path: emphasises enterprise integration, build-vs-buy trade-offs, cross-system architecture, governance and risk, and communicating AI decisions to stakeholders. De-emphasises low-level training and infra operations.",
+    be:"Backend Engineer path: emphasises API integration with LLM services, building reliable systems around unreliable model outputs, RAG/vector integration, and agent/tool-calling from a service-design view. De-emphasises deep ML theory.",
+    beg:"Beginner path: the gentlest on-ramp \u2014 core conceptual tabs in dependency order, building intuition before terminology. Deeper and expert material is marked optional so you can return to it later."
   };
   var lbl=document.getElementById('role-intro-label');
   if(lbl){ lbl.textContent=data.label; lbl.style.color=activeRoleColor; }
