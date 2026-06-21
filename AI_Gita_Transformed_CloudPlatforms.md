@@ -8,6 +8,20 @@
 
 ## 1. What Is It (Plain English)
 
+> **Before you read this section — six plain-English concepts you need**
+>
+> **LLM (Large Language Model):** Software that reads text and generates text in response. Think of it as a very sophisticated autocomplete engine trained on a vast library of human-written text. ChatGPT, Claude, and Gemini are LLMs. You interact with them via an API.
+>
+> **GPU (Graphics Processing Unit):** Originally designed for video-game graphics, GPUs turned out to be ideal for running LLM mathematics because they can perform millions of calculations simultaneously. Running an LLM at scale requires many GPUs — a GPU cluster. Buying and managing these is expensive, specialist work.
+>
+> **Inference:** In AI, *inference* means running the model to get an answer — as opposed to *training*, which is teaching the model in the first place. When a user sends a message to your chatbot, your system is doing inference. Cloud platforms sell inference as a managed service so you do not buy GPUs.
+>
+> **Embedding:** A way of converting text into a list of numbers that captures its meaning — so that texts with similar meanings produce similar number lists. Used to power semantic search and RAG systems. You send text to an embedding API; it returns a list of numbers; you store those numbers in a vector database.
+>
+> **Vector store / Vector database:** A database designed to store embeddings (lists of numbers) and answer the question "which stored items are most similar in meaning to this query?" Standard SQL databases cannot do this efficiently. Purpose-built vector databases (pgvector, Pinecone, Weaviate) can. All major cloud platforms now offer managed vector store services.
+>
+> **Chunking:** Breaking a long document into smaller pieces before embedding it. Because LLMs and embedding models have a maximum input length, and because smaller chunks produce more precise similarity matches, you split documents into paragraphs or sections before processing. Chunk size is a tunable parameter that affects retrieval quality.
+
 Cloud platforms for AI are the managed infrastructure services that make AI capabilities available at enterprise scale — without requiring you to build GPU clusters, manage model serving infrastructure, or procure frontier model access directly.
 
 The three major cloud providers each offer an AI platform:

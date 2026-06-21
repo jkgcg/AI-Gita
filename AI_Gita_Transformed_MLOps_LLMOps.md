@@ -293,6 +293,16 @@ Drift alert triggered
 
 ### 4.5 LLM Evaluation — The New Discipline
 
+> **Explain Like I'm an Architect — Why LLM evaluation is different from traditional software testing**
+>
+> In traditional software, you test a function by checking: given input X, does the output exactly equal expected value Y? This works because software is deterministic. LLMs are not deterministic — the same input produces a different, valid answer each time. You cannot check for exact equality. You need a scoring system that can say *this answer is roughly as good as the reference* rather than *this answer is identical to the reference*.
+>
+> **BLEU / ROUGE:** Measure text similarity by counting word overlaps between the model's output and a reference answer. Imagine marking a student essay by counting how many of the same phrases appear in the answer key. A paraphrase of the right answer scores lower than it deserves; a formulaic repetition of the answer key scores higher than it deserves. These metrics are fast and cheap but imperfect proxies for quality. Use them as a first-pass filter, not as a final verdict.
+>
+> **Perplexity:** How "surprised" the model is by a piece of text — lower perplexity means the text looks more like what the model learned during training. Useful as a health indicator (a sudden perplexity spike on production logs may indicate input distribution drift) but not useful as a quality metric for generated answers.
+>
+> **Why this matters architecturally:** Your CI/CD pipeline for LLM applications needs a numeric threshold to decide whether a new model version or prompt change is safe to deploy. BLEU/ROUGE give you that number cheaply. Supplement them with a golden test set (a curated set of representative questions with known-good answers) evaluated by a judge model — this is the production-grade gate that BLEU/ROUGE alone cannot provide.
+
 This is where LLMOps diverges most sharply from classic MLOps. You cannot evaluate LLM quality with a single number on a labelled test set. Quality is multidimensional, context-dependent, and partially subjective.
 
 **The three evaluation layers:**

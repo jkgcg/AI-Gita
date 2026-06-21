@@ -26,9 +26,11 @@ This approach unlocked capabilities that rule-based systems could never achieve:
 
 Every AI capability you're being asked to integrate — whether it's a cloud API, a fine-tuned model, or an open-weight model you're hosting — is a deep learning model at its core. Understanding the basics changes how you evaluate and design:
 
-- **Why does this model require a GPU?** Neural networks are fundamentally matrix multiplications at massive scale. GPUs are built for this. A 70B parameter model requires ~140GB of GPU memory at 16-bit precision — this is not a software problem you can solve with better code.
-- **Why does the model occasionally produce confident wrong answers?** The model was trained to predict the most likely next token — not to verify facts. Hallucination is a structural property of the architecture, not a bug to be patched.
-- **Why does fine-tuning on your domain data improve results?** Because the pre-trained model learned general patterns; fine-tuning adjusts the weights for your specific distribution. It's not magic — it's gradient descent applied to your data.
+- **Why does this model require a GPU?** Neural networks do one type of calculation — multiplying enormous tables of numbers — billions of times per second. GPUs are hardware designed specifically for this. A large model cannot run on a standard application server any more than a racing car can run on bicycle fuel. Section 4.1 explains the mechanism in full. What you need to know now: GPU cost is the primary infrastructure cost variable in any AI deployment decision.
+
+- **Why does the model occasionally produce confident wrong answers?** Because the model was never taught to verify facts — it was taught to produce plausible-sounding output. This is a structural property of how it was built, not a software bug you can patch. Section 4.2 explains why this happens. What you need to know now: "sounds right" and "is right" are two different things in this technology. Your system design must account for this.
+
+- **Why does adapting the model to your domain improve results?** Because the model learned general patterns from generic internet text. Your enterprise systems use specific terminology, document formats, and reasoning conventions that do not appear in that training data. Teaching the model your domain vocabulary (fine-tuning) is like onboarding a highly capable new employee who is brilliant but has never worked in your industry. Section 4.5 covers when and how to do this.
 
 ### For Enterprise Architects
 

@@ -130,6 +130,26 @@ Mamba and its successors (Jamba, which combines Mamba with Transformer layers) a
 
 ### 4.5 Multi-head Latent Attention (MLA)
 
+> **Explain Like I'm an Architect — What is the KV Cache?**
+> When an LLM generates a response word by word, it needs to understand all the previous words it has already processed — so it does not recompute their meaning from scratch for every new word it writes. The **KV cache** is the saved record of those computations: a memory store that caches what the model calculated for every prior token, so generation is fast.
+>
+> **Everyday analogy:** Imagine a translator working through a long legal document, translating one sentence at a time. Without a notepad, they would re-read the entire document from the beginning before writing each new sentence — prohibitively slow. Their notepad of previously translated sentences *is* the KV cache. The model keeps this notepad in GPU memory throughout the entire response.
+>
+> **Why architects care about the KV cache:**
+> - The KV cache **grows linearly with context length**. At 1M tokens, the KV cache alone can consume tens of gigabytes of GPU memory — this is the primary reason long-context models are expensive to serve.
+> - **KV cache eviction** (what happens when memory fills up) is the core engineering problem in long-context inference. Models either truncate early context, compress it, or use specialist architectures (like MLA below) to reduce the cache footprint.
+> - **Prompt caching** (offered by Anthropic, OpenAI, Google) lets you cache the KV state of a fixed system prompt and reuse it across requests — reducing latency and cost by up to 90% for repeated-context workloads. This is a direct cost lever in your architecture.
+>
+> **What MLA does:** Standard attention stores one full Key and Value vector per token per layer. MLA (Multi-head Latent Attention) compresses these into a shared low-rank latent representation — storing far fewer numbers while reconstructing the full K and V matrices at inference time. The result: the same effective attention quality at a fraction of the GPU memory cost. This is why DeepSeek models achieve near-GPT-4 performance at significantly lower serving cost.
+
+> **What MLA solves and why it matters for cost:**
+>
+> Standard multi-head attention stores one full Key and Value vector per token per attention head per layer. For a model with 96 layers and 96 heads processing 128,000 tokens, the KV cache grows to hundreds of gigabytes — more GPU memory than most serving clusters have available. This is the hard limit that makes long-context serving expensive.
+>
+> **What MLA does differently:** Instead of storing separate K and V vectors for every head, MLA projects them down into a single shared low-rank "latent" vector that is much smaller, then reconstructs the full K and V at inference time when they are needed. Think of it like storing a compressed zip file instead of the full document — the information is all there, but it takes far less space. When you need it, you decompress on the fly.
+>
+> **The architectural implication:** DeepSeek's use of MLA is the primary reason its serving cost is 5–10x lower than equivalently capable models. When evaluating open-weight models for enterprise deployment, MLA support is a concrete cost lever — not a theoretical one. A model with MLA at 128K context may cost the same to serve as a standard model at 16K context.
+
 DeepSeek's **MLA** compresses the KV cache (the memory needed to avoid recomputing past tokens during generation) into a lower-rank representation. This reduces the memory footprint of serving long-context models by 5–10x.
 
 For architects: MLA is relevant when you're evaluating open-weight models for self-hosting. A model with MLA support can serve longer contexts at a given hardware budget — this directly affects your per-request cost model.

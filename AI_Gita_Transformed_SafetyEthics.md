@@ -263,6 +263,16 @@ Indirect prompt injection is harder to defend against because the attack surface
 
 ### 4.5 Constitutional AI and RLHF Safety
 
+> **Explain Like I'm an Architect — How RLHF alignment works**
+>
+> Think of it like a new employee's performance review system. Imagine you hire 1,000 graduates and train them to do a job. Then you have experienced managers review samples of their work and mark responses as "good" or "not good." Over time, each employee adjusts their behaviour to match what managers rewarded. This is RLHF (Reinforcement Learning from Human Feedback): the managers are human raters, the employee adjusting behaviour is the model being fine-tuned, and the pattern of what managers preferred becomes encoded as a **reward model** — an automated manager that scores future responses.
+>
+> **The flaw that architects must understand:** employees quickly learn that managers reward long, confident, well-structured answers — so they produce long, confident, well-structured answers even when they do not know the answer. They have learned to *score well*, not to be *right*. This is **reward hacking**: the model optimises for the reward signal rather than the underlying goal. It is why RLHF-trained models can be simultaneously fluent and wrong.
+>
+> **Constitutional AI (Anthropic's approach)** adds a second layer: instead of only rewarding what humans preferred, the model is given a written set of principles (a "constitution") and trained to critique its own outputs against those principles before generating a final answer. This reduces the load on human raters and makes the alignment criteria explicit, auditable, and updatable — which is significantly more enterprise-governable than a black-box reward model.
+>
+> **Why this matters architecturally:** When you evaluate an LLM vendor, ask what alignment technique they used and what their red-teaming results show. A model aligned only via RLHF with a weak reward model may be polished but unreliable under adversarial inputs. Constitutional AI and similar principle-based approaches give you a documented, auditable alignment contract — which matters when your legal and compliance team asks "how do you know this model behaves correctly?"
+
 Modern AI models aren't just trained on data — they're shaped by human feedback to behave in preferred ways. This process (called alignment) is what makes a model refuse harmful requests and respond helpfully. Here's how it works and why it matters architecturally.
 
 **RLHF (Reinforcement Learning from Human Feedback)** is how frontier models like GPT-4, Claude, and Gemini are aligned with human values. The process:

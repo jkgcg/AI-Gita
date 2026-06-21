@@ -17,6 +17,15 @@ The name explains the pattern:
 - **Augmented** — add those passages to the context before asking the model
 - **Generation** — the model generates its answer grounded in what was retrieved
 
+> **Explain Like I'm an Architect — What is a vector (embedding)?**
+> Imagine describing every document in your company's knowledge base by its position on a map. Not a 2D map with latitude and longitude — a 1,536-dimensional map where documents that *mean similar things* end up close to each other, and documents that mean different things end up far apart.
+>
+> "How do I get a refund?" and "What is the returns policy?" land near each other on this map. "Tell me about our office football league" lands far away. The 1,536 numbers are the coordinates — you never read them directly. The database uses them to calculate distances and find the nearest neighbours to your query.
+>
+> This is why vector (semantic) search can find relevant documents even when the query uses completely different words from the document — it is searching by *meaning*, not by keyword match.
+>
+> **Why this matters architecturally:** Every RAG pipeline depends on this mechanism. The quality of your embedding model determines whether semantically similar content is correctly clustered on this map — which directly determines whether the right documents are retrieved and whether the LLM's answer is grounded in your actual data.
+
 **Vector search** is the retrieval mechanism that makes this work at scale. Rather than matching keywords, it converts text into numerical vectors (embeddings) that capture semantic meaning — so "What is your returns policy?" and "How do I send something back?" find the same documents, even though they share no words.
 
 RAG is the single most widely deployed AI pattern in enterprise in 2026. If you're integrating AI into a system that needs to answer questions about your organisation's information — products, policies, contracts, knowledge base, support history — RAG is almost certainly the right starting point.

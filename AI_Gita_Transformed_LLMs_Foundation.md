@@ -493,6 +493,11 @@ A colleague proposes using the floating alias `gpt-4o` (which always points to t
 
 ### 8.1 Attention Math: A Concrete 3-Token Walkthrough
 
+> **Explain Like I'm an Architect — Q/K/V Attention**
+> Think of Q/K/V like a corporate directory search. Every word (token) in a sentence has three things: a **search query** (Q — what this word is looking for right now to understand itself), a **business card headline** (K — the short summary of what this word offers to others), and a **full CV** (V — the complete information this word can contribute). When the word "bank" wants to know whether it means "river bank" or "financial bank", it broadcasts its search query and checks every other word's business card headline. Whoever scores highest on the match gets their full CV pulled in. That weighted blend of CVs becomes the word's updated meaning, carrying context forward into the next layer. Run this process for every word simultaneously — in parallel — across 80-plus layers, and you get a model that deeply understands context across an entire document.
+>
+> **Why this matters architecturally:** You do not need to memorise the formula. What you need to know is that attention is the mechanism that lets the model connect "it" to "the animal" three sentences earlier, or connect "bank" to "river" from context. The quality of this mechanism is why transformer-based models outperform everything that came before — and why the size of the context window (how much text the model can hold in working memory) is a primary cost and capability variable in your architecture decisions. The math below is just this mechanism expressed as matrix multiplication — you can read it or skip it.
+
 For those who want to understand what happens inside each Transformer layer:
 
 Given input tokens ["The", "cat", "sat"], the attention mechanism computes:

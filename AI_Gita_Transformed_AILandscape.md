@@ -238,6 +238,18 @@ Most commonly encountered in enterprise: **OpenAI/Anthropic/Google APIs** (found
 
 **The architect's role:** you don't need to master every tool in this stack. You need to: (a) know the category each tool fits, (b) have evaluated at least one tool per critical category for your organisation's requirements, and (c) have defined the interfaces between layers as clean contracts rather than implementation details.
 
+> **How a real request flows through this stack — worked example**
+>
+> A customer types: *"What is my current account balance limit?"* into a bank's web app.
+>
+> 1. **(User Interface layer)** The web app sends the message to the orchestration layer via API call.
+> 2. **(Orchestration layer — LangChain/LangGraph)** The orchestrator decides: to answer this accurately, I need to retrieve the customer's account policy documents. It does not guess from training data.
+> 3. **(Knowledge & Data layer — Vector Store)** The orchestrator converts the question into an embedding (a list of numbers representing its meaning) and queries the vector database for the most relevant policy paragraphs. Returns: the three most semantically similar policy sections.
+> 4. **(LLM layer — Claude/GPT-4o via Cloud Platform)** Those three paragraphs plus the customer's original question are assembled into a prompt and sent to the LLM. The LLM reads the policy excerpts and generates a precise answer grounded in that retrieved text.
+> 5. **(Back to UI)** The answer is streamed back to the customer in the web app.
+>
+> **What the architect designs:** the orchestration logic (step 2), the chunking and indexing strategy (step 3), the prompt template (step 4), the guardrails at each transition, and the observability layer that logs every step for audit and debugging. The LLM itself is a commodity API call — your design work is everything around it.
+
 ### 4.5 The Build vs Prompt vs Fine-tune vs Train Decision
 
 Every AI feature starts with this decision:

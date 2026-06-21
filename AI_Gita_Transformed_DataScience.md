@@ -109,6 +109,18 @@ Because assignment is random, any differences between the groups in terms of use
 
 **Unit of randomisation**: what entity is randomly assigned — the user, the session, the order, the store? The unit must be the same as the unit at which the intervention is applied. If your AI personalises at the user level, randomise at the user level. If it affects an entire store's operations, randomise at the store level (a "cluster randomised trial").
 
+> **Explain Like I'm an Architect — Why sample size matters (no statistics required)**
+>
+> Imagine you want to know whether a new office layout improves productivity. You try it with two people for one day and one person reports feeling more productive. Is the new layout better? Almost certainly you cannot tell — two people for one day is too noisy. Try it with 500 people for a month and you get a reliable answer.
+>
+> **Statistical power** is the name for: *how likely is my test to detect a real improvement if one exists?* Low power (too few users, too short a test) means: even if the AI genuinely improves the conversion rate, your test may not see it — and you may incorrectly conclude the AI made no difference, cancelling a change that would have delivered real value.
+>
+> **80% power** means: if the AI truly improves the metric by your minimum detectable effect, your test will reliably catch it 80 times out of 100. The 20% miss rate is an accepted engineering trade-off between test cost (more users, longer time) and reliability.
+>
+> **Practical rule for architects:** before approving an A/B test design, ask the data scientist: "what is the minimum detectable effect and how long does the test need to run to reach 80% power at that effect size?" If they cannot answer this, the test is not designed — it is a guess.
+>
+> **Why this matters for AI specifically:** AI system improvements tend to be smaller in magnitude than traditional product changes (a 1–2% conversion lift, not a 10% lift). This means AI A/B tests require larger sample sizes and longer run times than you are used to. Under-powered tests are the primary reason AI initiatives appear to "not work" in production when they actually do.
+
 **Sample size and statistical power**: before running the test, calculate how many users you need in each group to detect a meaningful effect. This requires estimating the baseline conversion rate, the minimum effect size you care about, and the desired statistical power (typically 80–90%). Running a test with too few users and declaring victory based on a positive result is a form of false confidence — small samples produce noisy results that can be positive by chance.
 
 **Duration**: run the test for long enough to cover a full business cycle. A test run only on weekdays misses weekend effects. A test run over one week misses weekly patterns. For seasonally affected businesses, tests may need to run for weeks to months to avoid capturing a temporary seasonal effect as a permanent AI improvement.

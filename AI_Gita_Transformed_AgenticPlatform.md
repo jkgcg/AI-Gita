@@ -8,6 +8,10 @@
 
 ## 1. What Is It (Plain English)
 
+**What is an LLM?** An LLM (Large Language Model) is a software service — accessible via an API — that takes text as input and produces text as output. It has no database connection, no memory between calls, and no ability to take actions in external systems by default. You call it like any other API: send a request (your prompt), receive a response (the generated text). GPT-4o, Claude, and Gemini are examples. That is the entirety of what an LLM is on its own.
+
+**What this module is about:** An Agentic Knowledge Platform is the enterprise infrastructure layer that transforms an LLM — which on its own can only read text and write text — into a system that can take actions, access your data, coordinate with other AI agents, remember past interactions, and do all of this safely under your governance and compliance framework. This module teaches you how to design that infrastructure.
+
 A single LLM is like a very smart consultant who can only answer questions by talking — no phone, no laptop, no access to your systems, no memory of the last meeting.
 
 An **AI agent** gives that consultant a phone, a laptop, access to your systems, and a notebook. It can now look things up, run calculations, call APIs, read emails, write files, and remember what happened last week.

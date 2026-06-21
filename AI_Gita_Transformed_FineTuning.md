@@ -291,6 +291,20 @@ A fine-tuned model learns to replicate the patterns in your training data. If yo
 
 ### 4.5 Evaluation: How You Know the Model is Better
 
+> **Explain Like I'm an Architect — What these metrics actually mean**
+>
+> In traditional software you test a function by checking: given input X, does the output exactly equal expected value Y? This works because code is deterministic. LLMs are not deterministic — ask the same question twice and you get two different valid answers. You cannot check for exact equality. You need a scoring system that says *this answer is roughly as good as the reference* rather than *this answer is identical to the reference*.
+>
+> **Precision:** Of all the times the model said "yes" (or flagged something), how often was it correct? A model that rarely says "yes" can have 100% precision — but may miss many real cases.
+>
+> **Recall:** Of all the real "yes" cases that exist, how many did the model find? A model that always says "yes" has 100% recall — but is also always wrong.
+>
+> **F1:** The balanced score between precision and recall. An F1 of 0.90 means the model is both accurate when it says yes *and* catches most of the real cases. For a production classifier (fraud detection, support ticket routing), target F1 above 0.85 before deploying.
+>
+> **ROUGE / BLEU:** Measure how similar the model's generated text is to a reference answer, by counting word overlaps. A ROUGE score of 0.85 means 85% of the key phrases in the reference appear in the model's output. Used to evaluate summarisation and translation quality. A ROUGE score below 0.70 typically means the model is generating plausible-but-wrong summaries.
+>
+> **Why this matters architecturally:** These are the metrics your ML engineer will report. If you cannot interpret them, you cannot hold the team accountable for quality thresholds, set acceptance criteria for go-live, or understand when a model regression has occurred in production.
+
 Never deploy a fine-tuned model without an evaluation gate. The gate must include:
 
 **Automated metrics (fast, cheap, run on every training run):**
