@@ -840,6 +840,23 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
 .rhythm-card{margin:10px 0 0;padding:12px;border:1px solid #c7d2fe;border-radius:10px;background:linear-gradient(135deg,#eef2ff,#ffffff)}
 .rhythm-card h4{margin:0 0 8px;font-size:12px;color:#312e81}
 .rhythm-list{margin:0;padding-left:18px;font-size:11px;line-height:1.6;color:#334155}
+
+/*  Go Deeper section  */
+.go-deeper{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #7dd3fc;border-left:5px solid #0284c7;border-radius:10px;padding:16px 20px;margin:18px 0}
+.go-deeper-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0369a1;margin-bottom:4px}
+.go-deeper-sub{font-size:11.5px;color:#0c4a6e;margin-bottom:12px;line-height:1.5}
+.go-deeper-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.gd-card{background:#fff;border:1px solid #bae6fd;border-radius:7px;padding:10px 12px;text-decoration:none;display:block;transition:all .15s}
+.gd-card:hover{border-color:#0284c7;box-shadow:0 2px 8px rgba(2,132,199,.15);transform:translateY(-1px)}
+.gd-type{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.gd-name{font-size:12px;font-weight:700;color:#0c4a6e;line-height:1.4;margin-bottom:2px}
+.gd-meta{font-size:10.5px;color:#64748b}
+.gd-yt .gd-type{color:#dc2626}
+.gd-course .gd-type{color:#7c3aed}
+.gd-paper .gd-type{color:#065f46}
+.gd-docs .gd-type{color:#0369a1}
+.gd-blog .gd-type{color:#b45309}
+@media(max-width:720px){.go-deeper-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -2122,6 +2139,18 @@ Time-sensitive vendor facts in one place: frontier model names, pricing, and ben
   </div>
 </div>
 
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">3Blue1Brown — Essence of Linear Algebra</div><div class="gd-meta">Playlist · ~3 h · best visual intro to vectors & matrices</div></a>
+<a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">3Blue1Brown — Neural Networks series</div><div class="gd-meta">Playlist · ~3.5 h · backprop from first principles</div></a>
+<a href="https://www.youtube.com/@statquest" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">StatQuest — Statistics & ML playlist</div><div class="gd-meta">Josh Starmer · intuition-first explanations</div></a>
+<a href="https://seeing-theory.brown.edu" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Seeing Theory — Visual Probability & Stats</div><div class="gd-meta">Brown University · interactive probability concepts</div></a>
+<a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">Attention Is All You Need (Vaswani et al.)</div><div class="gd-meta">2017 · the Transformer paper — read §3 on attention</div></a>
+</div>
+</div>
 <div class="sh">9. Key Takeaways</div>
 
 <ul class="dl">
@@ -2756,6 +2785,18 @@ For "sat" attending to all tokens:
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.youtube.com/watch?v=zjkBMFhNj_g" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">Andrej Karpathy — Intro to Large Language Models</div><div class="gd-meta">1 h lecture · best conceptual overview available</div></a>
+<a href="https://www.youtube.com/watch?v=kCc8FmEb1nY" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">Andrej Karpathy — Let's build GPT from scratch</div><div class="gd-meta">2 h · builds a full GPT in Python, step by step</div></a>
+<a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">The Illustrated Transformer (Jay Alammar)</div><div class="gd-meta">Best visual walkthrough of the Transformer architecture</div></a>
+<a href="https://course.fast.ai" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">fast.ai — Practical Deep Learning for Coders</div><div class="gd-meta">Free · Part 1 covers LLM foundations practically</div></a>
+<a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">OpenAI Tokenizer</div><div class="gd-meta">Interactive tool — see how text becomes tokens</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
@@ -3210,6 +3251,18 @@ Data Layer
 
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://docs.anthropic.com/en/docs/about-claude/models/overview" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Anthropic — Model Overview & Pricing</div><div class="gd-meta">Claude model tiers, context lengths, pricing</div></a>
+<a href="https://platform.openai.com/docs/models" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">OpenAI — Models Overview</div><div class="gd-meta">GPT-4o, o1, o3 capabilities and API pricing</div></a>
+<a href="https://artificialanalysis.ai" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Artificial Analysis — AI Benchmarks</div><div class="gd-meta">Live model comparison — quality, speed, price</div></a>
+<a href="https://lmarena.ai" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">LMSYS Chatbot Arena Leaderboard</div><div class="gd-meta">ELO-ranked model quality via blind human voting</div></a>
+<a href="https://www.youtube.com/@aiexplained-official" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">AI Explained — State of AI updates</div><div class="gd-meta">Concise landscape updates — YouTube channel</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
@@ -3470,6 +3523,18 @@ Data Layer
   </div>
 </div>
 
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://developers.google.com/machine-learning/crash-course" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">Google ML Crash Course</div><div class="gd-meta">Free · structured ML fundamentals with exercises</div></a>
+<a href="https://www.youtube.com/playlist?list=PLblh5JKOoLUICTaGLRoHQDuF_7q2GfuJF" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">StatQuest — Machine Learning playlist</div><div class="gd-meta">Best intuition-first ML explanations on YouTube</div></a>
+<a href="https://course.fast.ai" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">fast.ai — Practical Deep Learning</div><div class="gd-meta">Free · starts from tabular ML and builds up</div></a>
+<a href="https://scikit-learn.org/stable/user_guide.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">scikit-learn User Guide</div><div class="gd-meta">Canonical reference for classical ML in Python</div></a>
+<a href="https://arxiv.org/abs/1603.02754" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">XGBoost: A Scalable Tree Boosting System</div><div class="gd-meta">Chen & Guestrin 2016 · the dominant tabular ML model</div></a>
+</div>
+</div>
 <div class="sh">9. Key Takeaways</div>
 
 <ul class="dl">
@@ -3813,6 +3878,18 @@ IF >3 orders in 24 hours from same IP → flag</div>
   <strong>For architects:</strong> "Transformer++" refers to the modern combination of improvements now essentially universal. For deployment decisions what matters is parameter count, context length, and benchmark performance — not which activation function was used.
 </div>
 
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.coursera.org/specializations/deep-learning" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">Deep Learning Specialisation — Coursera (Andrew Ng)</div><div class="gd-meta">5 courses · the most comprehensive DL curriculum</div></a>
+<a href="https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">Andrej Karpathy — Neural Networks: Zero to Hero</div><div class="gd-meta">Playlist · builds everything from scratch in Python</div></a>
+<a href="https://distill.pub" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Distill.pub</div><div class="gd-meta">Research journal with exceptional interactive ML visuals</div></a>
+<a href="https://jalammar.github.io/illustrated-bert/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">The Illustrated BERT (Jay Alammar)</div><div class="gd-meta">Visual guide to BERT and contextual embeddings</div></a>
+<a href="https://pytorch.org/tutorials/beginner/basics/intro.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">PyTorch — Learn the Basics (official tutorial)</div><div class="gd-meta">Best starting point for deep learning in PyTorch</div></a>
+</div>
+</div>
 <div class="sh">9. Key Takeaways</div>
 
 <ul class="dl">
@@ -4481,6 +4558,18 @@ Flow:       learn to transport data along straight paths
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.youtube.com/watch?v=zjkBMFhNj_g" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">Andrej Karpathy — Intro to Large Language Models</div><div class="gd-meta">1 h · best conceptual overview of generative AI</div></a>
+<a href="https://writings.stephenwolfram.com/2023/02/what-is-chatgpt-doing-and-why-does-it-work/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">What Is ChatGPT Doing? (Stephen Wolfram)</div><div class="gd-meta">Long-form intuition piece — no equations required</div></a>
+<a href="https://www.deeplearning.ai/courses/generative-ai-for-everyone/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — Generative AI for Everyone</div><div class="gd-meta">Free · non-technical intro, ideal for architects</div></a>
+<a href="https://jalammar.github.io/illustrated-stable-diffusion/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">The Illustrated Stable Diffusion (Jay Alammar)</div><div class="gd-meta">Visual walkthrough of how diffusion models work</div></a>
+<a href="https://huggingface.co/docs/diffusers/index" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Hugging Face Diffusers — Documentation</div><div class="gd-meta">Official library for diffusion model pipelines</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
@@ -4989,6 +5078,18 @@ Where:
 </div>
 
 <!-- S9 -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://huggingface.co/blog/rlhf" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">The Illustrated RLHF (Hugging Face)</div><div class="gd-meta">Visual guide to RLHF and alignment fine-tuning</div></a>
+<a href="https://www.deeplearning.ai/short-courses/finetuning-large-language-models/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — Finetuning Large Language Models</div><div class="gd-meta">Short course · practical fine-tuning walkthrough</div></a>
+<a href="https://huggingface.co/docs/peft/index" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Hugging Face PEFT — Documentation</div><div class="gd-meta">Official docs for LoRA, QLoRA, and related PEFT methods</div></a>
+<a href="https://lightning.ai/pages/community/lora-insights/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">LoRA Insights (Sebastian Raschka)</div><div class="gd-meta">Best practical breakdown of LoRA fine-tuning</div></a>
+<a href="https://arxiv.org/abs/2106.09685" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">LoRA: Low-Rank Adaptation of LLMs (Hu et al.)</div><div class="gd-meta">2021 · the original LoRA paper</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>Fine-tuning solves behaviour problems, not knowledge problems — use RAG for the latter.</strong> If the model gives wrong answers because it lacks facts, fine-tuning won't reliably fix it. Fine-tuning is the right tool when the model has the underlying capability but doesn't apply it consistently in the right format, style, or scope for your domain.</li>
@@ -5299,6 +5400,18 @@ Where:
   </div>
 </div>
 
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">Lost in the Middle (Liu et al. 2023)</div><div class="gd-meta">The key paper on mid-context recall degradation</div></a>
+<a href="https://arxiv.org/abs/2205.14135" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">FlashAttention: Fast, Memory-Efficient Exact Attention</div><div class="gd-meta">Dao et al. 2022 · the memory-efficient attention algorithm</div></a>
+<a href="https://arxiv.org/abs/2312.00752" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">Mamba: Linear-Time Sequence Modelling</div><div class="gd-meta">Gu & Dao 2023 · the SSM architecture paper</div></a>
+<a href="https://arxiv.org/abs/2404.06654" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">RULER: What's the Real Context Window of LLMs?</div><div class="gd-meta">Benchmark that tests true usable context length</div></a>
+<a href="https://docs.anthropic.com/en/docs/build-with-claude/long-context-tips" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Anthropic — Long Context Tips & Best Practices</div><div class="gd-meta">Official practical guidance for using Claude with long context</div></a>
+</div>
+</div>
 <div class="sh">9. Key Takeaways</div>
 
 <ul class="dl">
@@ -5976,6 +6089,18 @@ where:
 </div>
 
 <!-- S9 -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — Building and Evaluating Advanced RAG</div><div class="gd-meta">Short course · production RAG patterns and evaluation</div></a>
+<a href="https://www.pinecone.io/learn/vector-database/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Pinecone — What is a Vector Database?</div><div class="gd-meta">Best practical intro to vector search and RAG architecture</div></a>
+<a href="https://python.langchain.com/docs/tutorials/rag/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">LangChain — RAG Tutorial (official)</div><div class="gd-meta">End-to-end RAG pipeline in Python</div></a>
+<a href="https://docs.ragas.io/en/stable/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">RAGAS — RAG Evaluation Framework</div><div class="gd-meta">Open-source evaluation for RAG pipeline quality</div></a>
+<a href="https://arxiv.org/abs/2002.08909" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">REALM: Retrieval-Augmented LM Pre-Training</div><div class="gd-meta">Google 2020 · the paper that introduced the RAG concept</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>RAG is the solution to the LLM knowledge cutoff problem — and the most widely deployed AI pattern in enterprise.</strong> It doesn't require retraining. Knowledge is updated by updating the index. The model answers from what was retrieved, not from what it memorised. This makes AI systems maintainable in a way that pure parametric models are not.</li>
@@ -6684,6 +6809,18 @@ graph = workflow.compile(checkpointer=memory_checkpointer)</div>
                 audit_log.record(task_id, tool_call, result)</div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Anthropic — Building Effective Agents</div><div class="gd-meta">Canonical guide to agentic system design patterns</div></a>
+<a href="https://www.deeplearning.ai/short-courses/ai-agents-in-langgraph/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — AI Agents in LangGraph</div><div class="gd-meta">Short course · multi-step agentic workflows in practice</div></a>
+<a href="https://modelcontextprotocol.io/introduction" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Model Context Protocol (MCP) — Specification</div><div class="gd-meta">Anthropic · official MCP docs and quickstart</div></a>
+<a href="https://platform.openai.com/docs/guides/prompt-engineering" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">OpenAI — Prompt Engineering Guide</div><div class="gd-meta">Official prompting strategies with worked examples</div></a>
+<a href="https://arxiv.org/abs/2210.03629" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">ReAct: Synergising Reasoning and Acting</div><div class="gd-meta">Yao et al. 2022 · the paper that introduced the ReAct agent pattern</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>Prompting is a design decision, not a developer task.</strong> The system prompt defines the model's role, boundaries, escalation behaviour, and output contract. A poorly designed system prompt produces inconsistent behaviour at scale. Write it with the same rigour you'd apply to an API specification.</li>
@@ -7363,6 +7500,18 @@ Adjusted total: £4,320 × 0.90 = £3,888/month</div>
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://docs.vllm.ai/en/latest/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">vLLM — Documentation</div><div class="gd-meta">Most widely used open-source LLM inference server</div></a>
+<a href="https://huggingface.co/blog/optimize-llm" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Hugging Face — LLM Inference Optimisation</div><div class="gd-meta">Practical guide to GPU serving, batching, quantisation</div></a>
+<a href="https://timdettmers.com/2022/08/17/llm-int8-and-emergent-features/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Tim Dettmers — LLM.int8() and Quantisation</div><div class="gd-meta">Best intuition piece for INT8/INT4/GPTQ quantisation</div></a>
+<a href="https://arxiv.org/abs/2307.08691" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">FlashAttention-2: Faster Attention</div><div class="gd-meta">Dao 2023 · v2 improvements relevant for production inference</div></a>
+<a href="https://nvidia.github.io/TensorRT-LLM/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">NVIDIA TensorRT-LLM — Documentation</div><div class="gd-meta">NVIDIA's optimised LLM inference library</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>GPU VRAM is the primary constraint for LLM deployment — everything else follows from it.</strong> Model weights must fit in VRAM before any inference happens. A 70B model at FP16 needs 140 GB; quantised to INT4 it needs 35 GB. Know the memory requirement before choosing hardware or deciding between self-hosted and API.</li>
@@ -7889,6 +8038,18 @@ jobs:
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.deeplearning.ai/short-courses/llmops/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — LLMOps</div><div class="gd-meta">Short course · CI/CD, evals, and monitoring for LLMs</div></a>
+<a href="https://huyenchip.com/2022/01/02/real-time-machine-learning-challenges-and-solutions.html" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Chip Huyen — Real-time ML Challenges</div><div class="gd-meta">Production ML system design — practitioner perspective</div></a>
+<a href="https://mlflow.org/docs/latest/index.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">MLflow — Documentation</div><div class="gd-meta">Open-source ML lifecycle management platform</div></a>
+<a href="https://www.evidentlyai.com/ml-in-production/monitoring-ml-models-in-production" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Evidently AI — ML Monitoring in Production</div><div class="gd-meta">Drift detection, data quality, production metrics guide</div></a>
+<a href="https://docs.wandb.ai/guides" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Weights & Biases — Guides</div><div class="gd-meta">Experiment tracking, model registry, monitoring</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>MLOps is the discipline that bridges AI experiments and production reliability.</strong> Without it, you have no reproducibility, no automated quality gates, no rollback capability, and no early warning when models degrade. The gap between Level 1 (manual) and Level 2 (automated pipeline) is where most production AI incidents originate.</li>
@@ -8368,6 +8529,18 @@ Example: customer service assistant
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://blog.bytebytego.com" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">ByteByteGo — System Design Newsletter</div><div class="gd-meta">LLM and AI system design patterns — highly visual</div></a>
+<a href="https://eugeneyan.com/writing/system-design-for-discovery/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Eugene Yan — System Design for Discovery</div><div class="gd-meta">Production ML system design from a practitioner</div></a>
+<a href="https://www.deeplearning.ai/short-courses/building-systems-with-chatgpt/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — Building Systems with the ChatGPT API</div><div class="gd-meta">Short course · chaining LLM calls in production</div></a>
+<a href="https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/machine-learning-lens.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">AWS Well-Architected — Machine Learning Lens</div><div class="gd-meta">Official enterprise ML system design guidance</div></a>
+<a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Lilian Weng — Autonomous Agents Survey</div><div class="gd-meta">Comprehensive system-design-level agent architecture review</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>AI system design is about making the hard decisions before code is written.</strong> Model choice, routing strategy, caching approach, fallback architecture, multi-tenancy model — these decisions are expensive to reverse. Design time is when they cost nothing to change.</li>
@@ -8761,6 +8934,18 @@ Tool: apply_discount
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">OWASP LLM Top 10 (2025)</div><div class="gd-meta">Canonical LLM application security threat taxonomy</div></a>
+<a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">Constitutional AI: Harmlessness from AI Feedback</div><div class="gd-meta">Anthropic 2022 · the alignment technique behind Claude</div></a>
+<a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">EU AI Act — Official Full Text</div><div class="gd-meta">EUR-Lex · the regulation architects must understand</div></a>
+<a href="https://www.deeplearning.ai/short-courses/red-teaming-llm-applications/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — Red Teaming LLM Applications</div><div class="gd-meta">Short course · adversarial testing and safety evaluation</div></a>
+<a href="https://www.nist.gov/artificial-intelligence" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">NIST AI Risk Management Framework</div><div class="gd-meta">US Government AI governance and risk management standard</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>Safety is a system property, not a model property.</strong> A well-trained model in a poorly designed system is not safe. Defence-in-depth — input guardrails, system prompt hardening, output guardrails, action guardrails — is how you make the system safe regardless of whether the model is perfectly aligned.</li>
@@ -9133,6 +9318,18 @@ Tool: apply_discount
 </div>
 
 <!-- ── S9: Key Takeaways ── -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://jalammar.github.io/illustrated-bert/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">The Illustrated BERT (Jay Alammar)</div><div class="gd-meta">Visual guide to transformer-based NLP and embeddings</div></a>
+<a href="https://course.fast.ai/Lessons/lesson1.html" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">fast.ai — Practical Deep Learning Part 1 (Vision)</div><div class="gd-meta">Free · CNNs, transfer learning, vision fine-tuning</div></a>
+<a href="https://huggingface.co/docs/transformers/index" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Hugging Face Transformers — Vision Models</div><div class="gd-meta">ViTs, CLIP, multimodal models in practice</div></a>
+<a href="https://jalammar.github.io/illustrated-word2vec/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">The Illustrated Word2Vec (Jay Alammar)</div><div class="gd-meta">How word embeddings and semantic similarity work</div></a>
+<a href="https://arxiv.org/abs/2010.11929" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">An Image is Worth 16×16 Words (ViT paper)</div><div class="gd-meta">Dosovitskiy et al. 2020 · Vision Transformer original paper</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
@@ -9301,6 +9498,18 @@ Legacy System (SAP, mainframe)</div>
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://docs.anthropic.com/en/docs/build-with-claude/tool-use/multi-agent-orchestration" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Anthropic — Multi-agent Orchestration</div><div class="gd-meta">Official patterns for building multi-agent systems</div></a>
+<a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Anthropic — Building Effective Agents</div><div class="gd-meta">Canonical agentic design patterns guide</div></a>
+<a href="https://langchain-ai.github.io/langgraph/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">LangGraph — Documentation</div><div class="gd-meta">Graph-based agent orchestration framework</div></a>
+<a href="https://microsoft.github.io/autogen/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">AutoGen — Microsoft Multi-Agent Framework</div><div class="gd-meta">Conversation-based multi-agent orchestration</div></a>
+<a href="https://arxiv.org/abs/2309.07864" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">A Survey on LLM-based Autonomous Agents</div><div class="gd-meta">Xi et al. 2023 · comprehensive agent architecture survey</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>An agent is just an LLM with tools and a loop.</strong> The Agent Core is: think (LLM call) → act (tool call) → observe (add result to context) → repeat until done. Everything else is infrastructure to make this loop safe, governed, and observable at enterprise scale.</li>
@@ -9669,6 +9878,18 @@ Response to User</div>
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://course.fast.ai/Lessons/lesson6.html" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">fast.ai — Practical Deep Learning (Tabular & RecSys)</div><div class="gd-meta">Free · gradient boosting and collaborative filtering</div></a>
+<a href="https://eugeneyan.com/writing/system-design-for-discovery/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Eugene Yan — System Design for Discovery</div><div class="gd-meta">Netflix/Spotify-style recommendation system design</div></a>
+<a href="https://faiss.ai/index.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">FAISS — Getting Started (Facebook ANN Search)</div><div class="gd-meta">ANN search library used in production rec systems</div></a>
+<a href="https://arxiv.org/abs/1708.05031" target="_blank" rel="noopener" class="gd-card gd-paper"><div class="gd-type">📄 Paper</div><div class="gd-name">Neural Collaborative Filtering (He et al.)</div><div class="gd-meta">2017 · foundational recommendation systems paper</div></a>
+<a href="https://nixtlaverse.nixtla.io/nixtla/docs/getting-started/introduction.html" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Nixtla — TimeGPT and Modern Forecasting</div><div class="gd-meta">State-of-the-art time series forecasting overview</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
@@ -10047,6 +10268,18 @@ Response to User</div>
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.coursera.org/learn/ab-testing" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">Coursera — A/B Testing by Google</div><div class="gd-meta">Free audit · experiment design and causal inference</div></a>
+<a href="https://matheusfacure.github.io/python-causality-handbook/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Causal Inference for The Brave and True</div><div class="gd-meta">Free online textbook — causal ML for practitioners</div></a>
+<a href="https://www.exp-platform.com/Documents/guidecontrolledexperiments.pdf" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Trustworthy Online Controlled Experiments</div><div class="gd-meta">Kohavi — first chapter free · definitive A/B testing book</div></a>
+<a href="https://econml.azurewebsites.net" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Microsoft EconML — Causal ML Library</div><div class="gd-meta">Uplift modelling, heterogeneous treatment effects in Python</div></a>
+<a href="https://www.youtube.com/@scotcunningham" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">Mixtape Sessions — Causal Inference lectures</div><div class="gd-meta">Free · econometrics and causal inference for data scientists</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
@@ -12169,6 +12402,18 @@ Minimal risk — no mandatory requirements
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">EU AI Act — Official Full Text (EUR-Lex)</div><div class="gd-meta">The regulation architects must understand</div></a>
+<a href="https://www.nist.gov/artificial-intelligence" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">NIST AI Risk Management Framework</div><div class="gd-meta">US government AI governance standard</div></a>
+<a href="https://ainowinstitute.org/research" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">AI Now Institute — Annual Report</div><div class="gd-meta">Critical review of the AI governance landscape</div></a>
+<a href="https://www.iso.org/standard/81230.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">ISO/IEC 42001 — AI Management System</div><div class="gd-meta">International AI governance standard overview</div></a>
+<a href="https://pair.withgoogle.com/guidebook/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Google PAIR — People + AI Research Guidebook</div><div class="gd-meta">Practical UX and ethics guidance for AI product teams</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>Governance must be designed in, not retrofitted.</strong> Audit logs, blast radius controls, artifact versioning, HITL gates, and explainability hooks are architectural decisions. A system designed without them cannot be made governable by adding a policy layer on top.</li>
@@ -12492,6 +12737,18 @@ Agent: "Tool unavailable — escalating to human"</div>
 </div>
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://docs.smith.langchain.com" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">LangSmith — LLM Observability Platform</div><div class="gd-meta">Tracing, evaluation, and monitoring for LLM applications</div></a>
+<a href="https://hamel.dev/blog/posts/evals/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Hamel Husain — Your AI Product Needs Evals</div><div class="gd-meta">Practitioner's guide to eval design and automated scoring</div></a>
+<a href="https://www.traceloop.com/docs/openllmetry/introduction" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">OpenLLMetry — OpenTelemetry for LLMs</div><div class="gd-meta">Open-source LLM observability via standard OTel</div></a>
+<a href="https://docs.wandb.ai/guides/prompts" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Weights & Biases — Prompt Tracking</div><div class="gd-meta">Prompt versioning and LLM experiment tracking</div></a>
+<a href="https://www.anthropic.com/research/building-effective-agents" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Anthropic — Building Effective Agents</div><div class="gd-meta">Canonical agentic system design and ops patterns</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>Agent failures are often silent.</strong> The agent confidently does the wrong thing, logs a success, and moves on — no errors thrown. Your monitoring strategy must watch for behavioral anomalies (unexpected tool sequences, cost spikes, quality score drops), not just error rates.</li>
@@ -13149,6 +13406,18 @@ result = response.choices[0].message.parsed  # typed ExceptionClassification obj
 </div>
 
 <!-- S9 — Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://platform.openai.com/docs/guides/prompt-engineering" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">OpenAI — Prompt Engineering Best Practices</div><div class="gd-meta">Official prompt engineering guide with worked examples</div></a>
+<a href="https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">DeepLearning.AI — Prompt Engineering for Developers</div><div class="gd-meta">Short course · structured prompting techniques</div></a>
+<a href="https://hamel.dev/blog/posts/evals/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Hamel Husain — Evals: Your AI Product's Foundation</div><div class="gd-meta">Practical evaluation design from a practitioner</div></a>
+<a href="https://www.braintrust.dev/docs" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Braintrust — LLM Evaluation Platform</div><div class="gd-meta">CI/CD and testing infrastructure for LLM applications</div></a>
+<a href="https://docs.cursor.com" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Cursor AI — Documentation</div><div class="gd-meta">AI-native IDE — developer experience benchmark for the space</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>Treat prompts as code: version them, review them, test them, and deploy them with the same discipline as application code.</strong> Prompts stored in notebooks or hardcoded in source files become undebuggable liabilities as systems grow. A prompt file in version control, reviewed in PRs, tested against an eval harness, and logged with every production call is an engineered artifact — not a magic string.</li>
@@ -13722,6 +13991,18 @@ Measurement plan: [exactly how you will verify the ROI post-launch]</div>
 </div>
 
 <!-- S9 — Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">McKinsey — The State of AI (Annual Report)</div><div class="gd-meta">Enterprise AI adoption data and case studies</div></a>
+<a href="https://www.coursera.org/learn/ai-for-everyone" target="_blank" rel="noopener" class="gd-card gd-course"><div class="gd-type">🎓 Course</div><div class="gd-name">Coursera — AI For Everyone (Andrew Ng)</div><div class="gd-meta">Free · non-technical AI literacy for all employees</div></a>
+<a href="https://www.prosci.com/methodology/adkar" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Prosci — ADKAR Model Overview</div><div class="gd-meta">The change management framework referenced in this tab</div></a>
+<a href="https://www.kotterinc.com/methodology/8-steps/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Kotter — 8-Step Change Model</div><div class="gd-meta">The organisational change framework referenced in this tab</div></a>
+<a href="https://hbr.org/2018/07/collaborative-intelligence-humans-and-ai-are-joining-forces" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">HBR — Collaborative Intelligence: Humans and AI</div><div class="gd-meta">Enterprise AI adoption strategy with practitioner cases</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 <ul class="dl">
   <li><strong>AI adoption is 60–70% people and process, 30–40% technology — design accordingly.</strong> The most common cause of AI project failure is not technical. It's systems that work as designed but don't get used, don't get trusted, or don't have governance in place when something goes wrong. Architects must take ownership of the adoption dimension, not just the technical architecture.</li>
@@ -14485,6 +14766,18 @@ invoice = response.choices[0].message.parsed  # typed InvoiceExtraction object</
 </div>
 
 <!-- ── S9: Key Takeaways ── -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://www.youtube.com/watch?v=7xTGNNLPyMI" target="_blank" rel="noopener" class="gd-card gd-yt"><div class="gd-type">▶ YouTube</div><div class="gd-name">Andrej Karpathy — Deep Dive into LLM Reasoning</div><div class="gd-meta">1 h · reasoning model mechanics (o1 / o3) explained</div></a>
+<a href="https://artificialanalysis.ai" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Artificial Analysis — Frontier Model Tracker</div><div class="gd-meta">Live comparisons of reasoning and frontier models</div></a>
+<a href="https://huggingface.co/blog/moe" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Hugging Face — Mixture of Experts Explained</div><div class="gd-meta">Visual guide to MoE architectures (Mixtral, Grok)</div></a>
+<a href="https://www.anthropic.com/news/3-5-models-and-computer-use" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Anthropic — Computer Use Technical Overview</div><div class="gd-meta">Official overview of computer use capability</div></a>
+<a href="https://lilianweng.github.io/posts/2023-06-23-agent/" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Lilian Weng — LLM-Powered Autonomous Agents</div><div class="gd-meta">Comprehensive deep-dive into emerging agent architectures</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
@@ -14952,6 +15245,18 @@ Measurement plan: [exactly what metrics, what baseline, who measures, what caden
 
 
 <!-- S9: Key Takeaways -->
+
+<div class="go-deeper">
+<div class="go-deeper-title">📚 Go Deeper</div>
+<div class="go-deeper-sub">Finished this tab? These are the best next resources — use them <em>after</em> reading the content above, not instead of it.</div>
+<div class="go-deeper-grid">
+<a href="https://docs.aws.amazon.com/bedrock/latest/userguide/getting-started.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">AWS Bedrock — Getting Started Guide</div><div class="gd-meta">Managed LLM service · official quickstart</div></a>
+<a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Azure OpenAI Service — Documentation</div><div class="gd-meta">Enterprise LLM deployment on Azure</div></a>
+<a href="https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">Google Vertex AI — Generative AI Quickstart</div><div class="gd-meta">GCP's managed AI platform — Gemini and open models</div></a>
+<a href="https://artificialanalysis.ai/providers" target="_blank" rel="noopener" class="gd-card gd-blog"><div class="gd-type">✍ Article</div><div class="gd-name">Artificial Analysis — Cloud Provider Comparison</div><div class="gd-meta">Live benchmark: latency, cost, throughput across providers</div></a>
+<a href="https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/machine-learning-lens.html" target="_blank" rel="noopener" class="gd-card gd-docs"><div class="gd-type">📖 Official Docs</div><div class="gd-name">AWS Well-Architected — Machine Learning Lens</div><div class="gd-meta">Official enterprise ML system design on AWS</div></a>
+</div>
+</div>
 <div class="sh">Key Takeaways</div>
 
 <ul class="dl">
