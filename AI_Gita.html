@@ -891,7 +891,7 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
 </div>
 <div class="platform-strip">
  <span><a href="https://github.com/jkgcg/AI-Gita/issues" target="_blank" rel="noopener">Contribute / report issue</a></span>
- <details class="platform-more"><summary>More transparency</summary><div>Sources: vendor docs + curated references &middot; <a href="https://github.com/jkgcg/AI-Gita/commits/main" target="_blank" rel="noopener">View change history</a></div></details>
+ <span>Sources: vendor docs + curated references &middot; <a href="https://github.com/jkgcg/AI-Gita/commits/main" target="_blank" rel="noopener">View change history</a></span>
 </div>
 
 <!--  GROUPED TAB NAV  -->
@@ -6514,6 +6514,85 @@ MCP Client (agent framework):
   Source of truth — order data, customer records, inventory
 </div>
 
+<div class="sh2">MCP Starter — Minimal Working Example</div>
+<p>The fastest way to build intuition for MCP is to see both sides of the conversation. This is a minimal Python MCP server that exposes one tool, and the agent-side call that invokes it.</p>
+<div class="g2">
+  <div>
+    <div class="code-label">MCP Server (tool provider) — server.py</div>
+    <div class="code"># pip install mcp
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("order-service")
+
+@mcp.tool()
+def get_order_status(order_id: str) -> dict:
+    """Return current status for an order."""
+    # In production: query your OMS here
+    return {"order_id": order_id, "status": "shipped",
+            "eta": "2026-06-25"}
+
+@mcp.tool()
+def create_refund(order_id: str, amount: float) -> dict:
+    """Create a refund for an order. Requires amount &lt;= 500."""
+    if amount &gt; 500:
+        return {"error": "Amounts over £500 require supervisor approval"}
+    # In production: call your payments API here
+    return {"refund_id": "REF-9821", "status": "approved",
+            "amount": amount}
+
+if __name__ == "__main__":
+    mcp.run()   # exposes tools over stdio or SSE</div>
+  </div>
+  <div>
+    <div class="code-label">Agent (tool consumer) — agent.py</div>
+    <div class="code"># pip install anthropic mcp
+import anthropic
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+async def run_agent(user_query: str):
+    server = StdioServerParameters(
+        command="python", args=["server.py"])
+
+    async with stdio_client(server) as (r, w):
+        async with ClientSession(r, w) as session:
+            await session.initialize()
+
+            # Discover tools from MCP server
+            tools = await session.list_tools()
+            tool_schemas = [t.model_dump() for t in tools.tools]
+
+            client = anthropic.Anthropic()
+            messages = [{"role": "user", "content": user_query}]
+
+            # ReAct loop
+            while True:
+                response = client.messages.create(
+                    model="claude-opus-4-8",
+                    max_tokens=1024,
+                    tools=tool_schemas,
+                    messages=messages)
+
+                if response.stop_reason == "end_turn":
+                    return response.content[0].text
+
+                # Execute tool calls via MCP
+                for block in response.content:
+                    if block.type == "tool_use":
+                        result = await session.call_tool(
+                            block.name, block.input)
+                        messages.append({
+                            "role": "assistant",
+                            "content": response.content})
+                        messages.append({
+                            "role": "user",
+                            "content": [{"type": "tool_result",
+                                         "tool_use_id": block.id,
+                                         "content": str(result)}]})</div>
+  </div>
+</div>
+<p style="font-size:12px;color:#64748b;margin-top:6px"><strong>What this shows architecturally:</strong> the server owns the tool logic and auth; the agent owns the reasoning loop; MCP is the contract between them. Swap the server for a different OMS or a different LLM on the agent side — neither side needs to know about the other's internals.</p>
+
 <!-- S5: Enterprise Example -->
 <div class="sh">Enterprise Example</div>
 <div class="card a">
@@ -9384,11 +9463,13 @@ Tool: apply_discount
 </div>
 
 <!-- S4: Core Concepts — AKP Six-Plane Architecture -->
-<div class="sh">Step-by-Step — The AKP Six-Plane Architecture</div>
+<div class="sh">The Agent Core Loop</div>
 
 <div class="ibox" style="border-left-color:#2563eb;margin-bottom:12px">
   <strong>Start here:</strong> an Agent Core is a loop — Think (LLM call) → Decide (tool needed?) → Act (tool call) → Observe (add result to context) → Repeat. This is the <strong>ReAct pattern</strong> (Reasoning + Acting). Everything else is infrastructure to make this loop safe, governed, and observable at scale.
 </div>
+
+<div class="sh">Step-by-Step — The AKP Six-Plane Architecture</div>
 
 <div class="alayer al1"><div class="ln">Plane 1 — Surfaces</div>User-facing entry points: chat interfaces, API endpoints, embedded widgets, voice channels, CLI tools. Each surface authenticates the caller and translates the request into a standard agent invocation.</div>
 <div class="alayer al2"><div class="ln">Plane 2 — Agent Runtime</div>Execution environment for the Agent Core loop. Manages the lifecycle of agent tasks: spawning, scheduling, timeout handling, retries, and parallelism. Coordinates multiple concurrent agents (manager delegating to specialists).</div>
@@ -18281,7 +18362,7 @@ function filterRole(show){
       var ageLabel = ageDays === 0 ? 'today' : (ageDays === 1 ? '1 day ago' : ageDays+' days ago');
       var stamp = document.createElement('div');
       stamp.className = 'review-stamp '+cls;
-      stamp.innerHTML = 'Last reviewed: '+dateStr+' <span class="rs-age">\u00b7 '+ageLabel+'</span>';
+      stamp.innerHTML = 'Last updated: '+dateStr+' <span class="rs-age">\u00b7 '+ageLabel+'</span>';
       stamp.title = 'Content currency. Update PANEL_REVIEWED in source when you re-audit a panel.';
       // Insert after the first heading-like element (or analogy/onramp/firstprin) if present
       var anchor = panel.querySelector(':scope > .firstprin')
