@@ -22,6 +22,8 @@ Here's what MLOps actually covers in practice:
 - **Drift detection** — continuous monitoring to catch when a model's real-world performance has degraded since deployment
 - **Feedback loops** — capturing production outcomes to feed back into future training data
 
+> **What is a token?** A token is the basic unit of text that LLMs process — and the unit that APIs charge for. Roughly 3–4 characters or 0.75 words in English. "Hello world" = 2 tokens. 1,000 tokens ≈ 750 words ≈ 1.5 pages. APIs charge separately for **input tokens** (your prompt) and **output tokens** (the model's response). When you see pricing like "$2 per million tokens", that is the cost per million of these text chunks.
+
 LLMOps adds on top of this:
 - **Prompt management** — versioning, testing, and deploying prompts as first-class artifacts (not hardcoded strings)
 - **LLM evaluation** — assessing quality, safety, and relevance using LLM judges and benchmark suites
@@ -143,6 +145,8 @@ The business cost of ad hoc: when something goes wrong in production (and it wil
 ### 4.2 What LLMOps Changes
 
 Classic MLOps was designed for models with structured inputs and outputs (tabular data, classification, regression). LLMs break several foundational assumptions:
+
+> **What is RAG?** RAG (Retrieval-Augmented Generation) means: instead of relying on the model's built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from *your data*, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
 
 | Assumption | Classic ML | LLMs |
 |---|---|---|
@@ -529,9 +533,9 @@ MLOps doesn't replace your existing platforms — it extends them with AI-specif
 
 Six months after deploying a product recommendation model, the data science team reports that accuracy has dropped from 87% to 71% on the production test set, but no code changes were made. What are the two most likely causes and how would you investigate each?
 
-> **Detailed Answer:** (1) Data drift — the distribution of products, customers, or purchase behaviour has shifted from the training data. Investigate by comparing the statistical distribution of current incoming features (product categories, price bands, customer segments) against the training distribution using PSI or KS test. If drift is detected, retrain on recent data. (2) Concept drift — the relationship between inputs and correct recommendations has changed (e.g., a new product category launched, seasonal patterns shifted). Investigate by checking whether accuracy degradation is uniform across all product categories or concentrated in specific new/changed ones. If concentrated, collect labelled data for the drifted segment and retrain.
->
 > **Simple Explanation:** Either the world looks different from what the model was trained on (data drift — "the inputs changed"), or the right answer has changed even for the same inputs (concept drift — "what counts as a good recommendation changed"). These require different fixes: data drift is resolved by retraining on recent data; concept drift requires new labelled examples for the changed patterns.
+>
+> **Detailed Answer:** (1) Data drift — the distribution of products, customers, or purchase behaviour has shifted from the training data. Investigate by comparing the statistical distribution of current incoming features (product categories, price bands, customer segments) against the training distribution using PSI or KS test. If drift is detected, retrain on recent data. (2) Concept drift — the relationship between inputs and correct recommendations has changed (e.g., a new product category launched, seasonal patterns shifted). Investigate by checking whether accuracy degradation is uniform across all product categories or concentrated in specific new/changed ones. If concentrated, collect labelled data for the drifted segment and retrain.
 >
 > **Architecture Takeaway:** Specify drift detection monitoring before deployment — not after accuracy drops. PSI checks on incoming features and rolling accuracy checks on a refreshed labelled holdout are the two minimum monitoring requirements for any production ML model.
 
@@ -539,9 +543,9 @@ Six months after deploying a product recommendation model, the data science team
 
 Your team wants to update the system prompt for a customer service LLM from "be helpful" to a 500-word persona specification. A developer says "it's just a config change, I'll push it directly to production." What's the correct MLOps response?
 
-> **Detailed Answer:** Prompt changes are production artifacts, not config strings. A 500-word persona specification can dramatically change model behavior — tone, refusal patterns, tool call decisions, response length, escalation behavior. The correct process: version the new prompt in the prompt registry, run it through the full pre-deployment evaluation gate (golden test set + LLM judge scoring against the current prompt), deploy to staging in shadow mode to compare outputs against the live prompt, then promote to canary (5% traffic) while monitoring LLM judge scores. Only after canary metrics are stable does it go to full rollout. Pushing directly to production skips every quality gate and makes rollback difficult.
->
 > **Simple Explanation:** "It's just a config change" is the most dangerous phrase in LLMOps. A 500-word persona specification is a 500-word specification of how the system behaves in production. It deserves exactly the same discipline as a 500-word code change: review, test, stage, canary, monitor, rollback capability.
+>
+> **Detailed Answer:** Prompt changes are production artifacts, not config strings. A 500-word persona specification can dramatically change model behavior — tone, refusal patterns, tool call decisions, response length, escalation behavior. The correct process: version the new prompt in the prompt registry, run it through the full pre-deployment evaluation gate (golden test set + LLM judge scoring against the current prompt), deploy to staging in shadow mode to compare outputs against the live prompt, then promote to canary (5% traffic) while monitoring LLM judge scores. Only after canary metrics are stable does it go to full rollout. Pushing directly to production skips every quality gate and makes rollback difficult.
 >
 > **Architecture Takeaway:** Every prompt change must pass through version control → golden test set evaluation → shadow/canary deployment → monitoring. The rollback unit for an LLM system is the (model version, prompt version) pair — both must be versioned together. "Just a config change" is how production incidents begin.
 
@@ -549,9 +553,9 @@ Your team wants to update the system prompt for a customer service LLM from "be 
 
 What is an LLM judge and why is it preferable to BLEU/ROUGE for evaluating a customer service LLM?
 
-> **Detailed Answer:** An LLM judge is a capable LLM (e.g., GPT-4o) used to evaluate the outputs of a production model, scoring them against a rubric (accuracy, completeness, tone, safety). BLEU/ROUGE measure textual overlap between the model's output and a reference answer — they reward using the same words. For customer service, two answers can be equally correct but phrased differently, and BLEU/ROUGE would score the paraphrase low even though it is semantically correct. Conversely, a wrong answer that happens to share words with the reference gets a high BLEU score. LLM judges evaluate semantic correctness, tone appropriateness, and task completion — much more aligned with what actually matters for a customer-facing system.
->
 > **Simple Explanation:** BLEU/ROUGE are like marking a student essay by counting how many of the same words appear as in the answer key — a paraphrase of the right answer gets a low mark, and a wrong answer that uses the right keywords gets a high one. An LLM judge reads for meaning, not word overlap.
+>
+> **Detailed Answer:** An LLM judge is a capable LLM (e.g., GPT-4o) used to evaluate the outputs of a production model, scoring them against a rubric (accuracy, completeness, tone, safety). BLEU/ROUGE measure textual overlap between the model's output and a reference answer — they reward using the same words. For customer service, two answers can be equally correct but phrased differently, and BLEU/ROUGE would score the paraphrase low even though it is semantically correct. Conversely, a wrong answer that happens to share words with the reference gets a high BLEU score. LLM judges evaluate semantic correctness, tone appropriateness, and task completion — much more aligned with what actually matters for a customer-facing system.
 >
 > **Architecture Takeaway:** Use LLM judges as the primary quality signal for any generative AI system. BLEU/ROUGE are appropriate only for tasks with a single correct wording (structured data extraction, code generation). For any natural language output where meaning matters more than phrasing, LLM judge scoring is the appropriate evaluation approach.
 
@@ -559,9 +563,9 @@ What is an LLM judge and why is it preferable to BLEU/ROUGE for evaluating a cus
 
 Describe the "production traffic feeds the eval set; the eval set gates every release" loop and why it matters for long-running AI systems.
 
-> **Detailed Answer:** In a mature LLMOps system, a sample of production queries and their evaluated outputs (scored by LLM judge + periodic human review) are continuously added to the golden test set. This keeps the test set current — it evolves to include the query types that users actually ask, including edge cases that were not anticipated at design time. When a new model or prompt version is released, it must pass evaluation against this ever-growing, production-grounded test set. This matters because models trained and evaluated only on pre-deployment test sets can pass gates while silently failing on the long tail of real user queries. The feedback loop closes this gap: what fails in production eventually becomes a test case that gates future releases.
->
 > **Simple Explanation:** Your pre-launch test set was written before you knew what users would actually ask. The most important failures come from the long tail of real queries that you did not anticipate. Continuously adding production failures to the test set means the gates get smarter over time — they catch the things that have actually gone wrong, not just the things you predicted might go wrong.
+>
+> **Detailed Answer:** In a mature LLMOps system, a sample of production queries and their evaluated outputs (scored by LLM judge + periodic human review) are continuously added to the golden test set. This keeps the test set current — it evolves to include the query types that users actually ask, including edge cases that were not anticipated at design time. When a new model or prompt version is released, it must pass evaluation against this ever-growing, production-grounded test set. This matters because models trained and evaluated only on pre-deployment test sets can pass gates while silently failing on the long tail of real user queries. The feedback loop closes this gap: what fails in production eventually becomes a test case that gates future releases.
 >
 > **Architecture Takeaway:** The eval feedback loop is what separates improving AI systems from static ones. Specify: (1) what percentage of production traffic gets sampled for evaluation, (2) how evaluated failures get added to the golden test set, (3) how the test set gates each new deployment. These three design decisions determine whether your system gets better over time or drifts silently.
 
@@ -569,9 +573,9 @@ Describe the "production traffic feeds the eval set; the eval set gates every re
 
 Your finance director asks why the AI knowledge assistant cost 40% more than budgeted last quarter. What monitoring would have caught this earlier, and what's the likely root cause?
 
-> **Detailed Answer:** Cost monitoring should track token usage per request (P50, P95) against a baseline established at deployment. A 40% cost overrun typically indicates one of: (1) context bloat — retrieval is returning larger document chunks than expected, inflating input token counts; investigate average input tokens per query vs. baseline; (2) unexpected query volume — more users or more queries than planned; check query volume trends; (3) model routing change — the model gateway switched to a more expensive model version; check model version distribution in LLM call logs; (4) loop or retry overhead — errors in a tool or retrieval system are causing extra LLM calls; check for elevated tool error rates. Per-team, per-model cost dashboards with weekly budget alerts (e.g., alert when weekly spend exceeds 120% of the weekly average) would surface this within days rather than at quarter-end.
->
 > **Simple Explanation:** LLM cost overruns are almost never random — they have a specific cause: too many tokens per query, more queries than planned, a more expensive model being called, or retry loops inflating call counts. Each cause leaves a signature in the usage logs if you are monitoring the right metrics. "Cost" is not a single metric — it is the product of (calls × tokens per call × cost per token), and each factor can spike independently.
+>
+> **Detailed Answer:** Cost monitoring should track token usage per request (P50, P95) against a baseline established at deployment. A 40% cost overrun typically indicates one of: (1) context bloat — retrieval is returning larger document chunks than expected, inflating input token counts; investigate average input tokens per query vs. baseline; (2) unexpected query volume — more users or more queries than planned; check query volume trends; (3) model routing change — the model gateway switched to a more expensive model version; check model version distribution in LLM call logs; (4) loop or retry overhead — errors in a tool or retrieval system are causing extra LLM calls; check for elevated tool error rates. Per-team, per-model cost dashboards with weekly budget alerts (e.g., alert when weekly spend exceeds 120% of the weekly average) would surface this within days rather than at quarter-end.
 >
 > **Architecture Takeaway:** Cost is a first-class operational signal that requires dedicated monitoring infrastructure: per-team, per-model token usage dashboards with weekly budget alerts set at 120% of baseline spend. A cost anomaly that takes a quarter to surface would surface in days with this monitoring. Design this before launch — it costs almost nothing and saves expensive post-hoc investigations.
 

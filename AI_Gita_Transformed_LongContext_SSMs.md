@@ -10,6 +10,8 @@
 
 Every LLM has a **context window** — the maximum amount of text it can read and reason about in a single interaction. Think of it as the model's working memory.
 
+> **What is a token?** A token is the basic unit of text that LLMs process — and the unit that APIs charge for. Roughly 3–4 characters or 0.75 words in English. "Hello world" = 2 tokens. 1,000 tokens ≈ 750 words ≈ 1.5 pages. APIs charge separately for **input tokens** (your prompt) and **output tokens** (the model's response). When you see pricing like "$2 per million tokens", that is the cost per million of these text chunks.
+
 Early models (GPT-2, 2019) had a context of 1,024 tokens — roughly two pages of text. Today, models like Gemini 1.5 Pro and Claude 3.5 Sonnet handle 1 million tokens or more — roughly an entire novel, or a year of Slack messages.
 
 **Long Context** refers to the collection of techniques that make this possible: smarter positional encoding (how the model keeps track of where each word sits), efficient attention algorithms (so it doesn't run out of memory), and new architectures (State Space Models, or SSMs) that process long sequences without the quadratic cost of standard attention.
@@ -209,9 +211,9 @@ These questions are answerable from the material above. No trick questions.
 
 Your team proposes putting a 300-page customer service knowledge base (≈240K tokens) into a long-context model for every support ticket query. What's the main cost concern, and how would you address it?
 
-> **Detailed Answer:** Each query costs proportional to the full 240K-token input. At GPT-4o pricing, a 240K-token input costs roughly $0.60–$1.20 per query. At 10,000 tickets/day, that is $6,000–$12,000/day for input tokens alone — $2–$4M/year. The fix is RAG: retrieve only the 3–5 most relevant knowledge base articles per query, reducing input to ~2K tokens — roughly 120x cheaper. Reserve the full-context approach for complex escalations where cross-article reasoning matters.
->
 > **Simple Explanation:** Imagine printing the entire company manual for every customer service call just in case it comes in handy. RAG is like having a smart index: you look up the right page and hand only that to the agent.
+>
+> **Detailed Answer:** Each query costs proportional to the full 240K-token input. At GPT-4o pricing, a 240K-token input costs roughly $0.60–$1.20 per query. At 10,000 tickets/day, that is $6,000–$12,000/day for input tokens alone — $2–$4M/year. The fix is RAG: retrieve only the 3–5 most relevant knowledge base articles per query, reducing input to ~2K tokens — roughly 120x cheaper. Reserve the full-context approach for complex escalations where cross-article reasoning matters.
 >
 > **Architecture Takeaway:** Default to RAG for high-volume knowledge base queries. Reserve long context for low-volume, high-complexity tasks where cross-document reasoning justifies the cost.
 
@@ -219,9 +221,9 @@ Your team proposes putting a 300-page customer service knowledge base (≈240K t
 
 A vendor tells you their model "supports 1M token context." What two questions should you ask before trusting that claim in a production use case?
 
-> **Detailed Answer:** (1) Is the 1M context natively trained or post-training extended via RoPE scaling? Natively trained is more reliable — post-training extension often degrades quality at the extreme end. (2) What are the RULER benchmark scores at your intended context length, specifically NIAH (Needle in a Haystack) and multi-key retrieval tasks? Most models perform well at 32K and degrade significantly beyond 128K — a vendor claiming "1M context" may have a NIAH score that drops from 95% at 128K to 40% at 512K.
->
 > **Simple Explanation:** "Supports 1M tokens" is like a car that can technically reach 200km/h — it may manage it briefly on a test track but be unreliable in actual conditions. Ask for the benchmark results at the speed you actually need.
+>
+> **Detailed Answer:** (1) Is the 1M context natively trained or post-training extended via RoPE scaling? Natively trained is more reliable — post-training extension often degrades quality at the extreme end. (2) What are the RULER benchmark scores at your intended context length, specifically NIAH (Needle in a Haystack) and multi-key retrieval tasks? Most models perform well at 32K and degrade significantly beyond 128K — a vendor claiming "1M context" may have a NIAH score that drops from 95% at 128K to 40% at 512K.
 >
 > **Architecture Takeaway:** Never accept maximum context length as a proxy for reliable context length. Request RULER scores at your target context length before architectural commitment.
 
@@ -229,9 +231,9 @@ A vendor tells you their model "supports 1M token context." What two questions s
 
 What is the "Lost in the Middle" problem and why does it matter for system design?
 
-> **Detailed Answer:** LLMs are empirically better at using information from the beginning and end of their context window than from the middle. In a 1M-token context, facts placed at token position 500,000 may be less reliably recalled than the same facts at position 1,000 or 999,000. Benchmarks like RULER specifically test for this — performance degrades significantly in mid-context positions. This means prompt structure is a design variable: reference material should be placed at the beginning or end of the context, not buried in the middle.
->
 > **Simple Explanation:** It's like a long briefing document — executives reliably read the executive summary and the conclusion, and skim the middle. LLMs have the same attention bias, just more measurable.
+>
+> **Detailed Answer:** LLMs are empirically better at using information from the beginning and end of their context window than from the middle. In a 1M-token context, facts placed at token position 500,000 may be less reliably recalled than the same facts at position 1,000 or 999,000. Benchmarks like RULER specifically test for this — performance degrades significantly in mid-context positions. This means prompt structure is a design variable: reference material should be placed at the beginning or end of the context, not buried in the middle.
 >
 > **Architecture Takeaway:** When using long context, structure prompts deliberately: place the most important reference material at the top or bottom. This is especially important for contract analysis and document comparison tasks.
 
@@ -239,9 +241,9 @@ What is the "Lost in the Middle" problem and why does it matter for system desig
 
 What is the main practical difference between Mamba (SSM) and a Transformer for long-sequence tasks? In which enterprise scenario would you prefer Mamba?
 
-> **Detailed Answer:** Mamba maintains a fixed-size recurrent state that is updated as new tokens arrive — processing cost scales linearly with sequence length. A Transformer attends to all past tokens at every step — cost scales quadratically. Mamba is faster and cheaper for long sequences, but less reliable at exact recall of specific facts from deep in the past (the state compresses history rather than preserving it fully). The right enterprise scenarios for Mamba: real-time log analysis, continuous IoT sensor monitoring, or edge inference where you need to process a continuous stream of tokens with low latency and limited memory.
->
 > **Simple Explanation:** Mamba is like a river that carries a current of recent information but loses precise memory of what was upstream 50km ago. A Transformer is like a lake that holds every drop but takes up enormous space. Pick the river for streaming; pick the lake when exact recall matters.
+>
+> **Detailed Answer:** Mamba maintains a fixed-size recurrent state that is updated as new tokens arrive — processing cost scales linearly with sequence length. A Transformer attends to all past tokens at every step — cost scales quadratically. Mamba is faster and cheaper for long sequences, but less reliable at exact recall of specific facts from deep in the past (the state compresses history rather than preserving it fully). The right enterprise scenarios for Mamba: real-time log analysis, continuous IoT sensor monitoring, or edge inference where you need to process a continuous stream of tokens with low latency and limited memory.
 >
 > **Architecture Takeaway:** Choose Mamba (or Mamba-hybrid) for streaming/edge/real-time scenarios. Stick with Transformer-based models when the task requires precise recall of specific facts from across a long document.
 
@@ -249,9 +251,9 @@ What is the main practical difference between Mamba (SSM) and a Transformer for 
 
 What is KV cache reuse and when should you ask your inference provider if they support it?
 
-> **Detailed Answer:** When multiple queries are made against the same long document, the key-value (KV) pairs computed for that document's tokens can be cached and reused across queries — you pay the processing cost once, not once per query. This can reduce per-query cost by 80–90% for document-heavy workflows. Ask your inference provider about KV cache support whenever your use case involves repeated queries against the same large document: contract review portals, codebase Q&A systems, policy document assistants, or any scenario where a base document is loaded once and queried many times.
->
 > **Simple Explanation:** It's like computing a complex spreadsheet formula once and saving the result, rather than recalculating it every time someone opens the file.
+>
+> **Detailed Answer:** When multiple queries are made against the same long document, the key-value (KV) pairs computed for that document's tokens can be cached and reused across queries — you pay the processing cost once, not once per query. This can reduce per-query cost by 80–90% for document-heavy workflows. Ask your inference provider about KV cache support whenever your use case involves repeated queries against the same large document: contract review portals, codebase Q&A systems, policy document assistants, or any scenario where a base document is loaded once and queried many times.
 >
 > **Architecture Takeaway:** For document-intensive AI products with repeated queries against the same context, KV cache support is a cost-critical capability — factor it into your inference provider selection and per-request cost model.
 

@@ -187,9 +187,9 @@ The rule of thumb for architects evaluating model outputs:
 
 You are comparing two product descriptions using cosine similarity and get a score of 0.31. A colleague says "that's basically zero — they're unrelated." Is your colleague correct? What does a score of 0.31 actually mean?
 
-> **Detailed Answer:** Not necessarily. Cosine similarity ranges from -1 to 1. In practice, for text embeddings comparing different topics, 0.31 is on the lower end but not zero. Two truly unrelated documents often score 0.1–0.3 because their embeddings share some general-language components. The correct interpretation requires knowing the distribution of scores in your specific embedding space. A score that is low *relative to known-similar pairs in your domain* is more informative than any absolute threshold. The colleague is applying a naive interpretation — context and calibration always matter.
->
 > **Simple Explanation:** A score of 0.31 is like saying two cities are "not that close" without knowing whether you're measuring in metres or light-years. Without the distribution of scores for your domain, a raw cosine similarity number tells you little.
+>
+> **Detailed Answer:** Not necessarily. Cosine similarity ranges from -1 to 1. In practice, for text embeddings comparing different topics, 0.31 is on the lower end but not zero. Two truly unrelated documents often score 0.1–0.3 because their embeddings share some general-language components. The correct interpretation requires knowing the distribution of scores in your specific embedding space. A score that is low *relative to known-similar pairs in your domain* is more informative than any absolute threshold. The colleague is applying a naive interpretation — context and calibration always matter.
 >
 > **Architecture Takeaway:** Never set similarity thresholds based on absolute values alone. Calibrate them against a labelled set of known-similar and known-dissimilar pairs in your specific domain before deploying.
 
@@ -197,9 +197,9 @@ You are comparing two product descriptions using cosine similarity and get a sco
 
 Your fine-tuned model has a training loss that decreases smoothly from 2.1 to 0.3 over 10 epochs. The validation loss decreases from 2.1 to 0.8, then stops improving and begins rising from epoch 7 onward. What is happening and what should you do?
 
-> **Detailed Answer:** The model is overfitting — it is memorising the training data rather than learning generalisable patterns. The optimal stopping point is the epoch where validation loss was lowest (epoch 6–7). Remedies: use early stopping (halt training when validation loss stops improving), apply regularisation (dropout, weight decay), reduce model complexity, or increase training data volume. In production, save the checkpoint from epoch 6, not epoch 10.
->
 > **Simple Explanation:** The model got so good at the practice exam that it memorised the answers instead of learning the subject. It then fails on any new exam. Early stopping is like saying "you've peaked — stop studying and take the test now."
+>
+> **Detailed Answer:** The model is overfitting — it is memorising the training data rather than learning generalisable patterns. The optimal stopping point is the epoch where validation loss was lowest (epoch 6–7). Remedies: use early stopping (halt training when validation loss stops improving), apply regularisation (dropout, weight decay), reduce model complexity, or increase training data volume. In production, save the checkpoint from epoch 6, not epoch 10.
 >
 > **Architecture Takeaway:** Always monitor validation loss during fine-tuning, not just training loss. Use early stopping and checkpoint the best-validation-loss epoch. A fine-tuning job that only reports training loss is a red flag.
 
@@ -207,9 +207,9 @@ Your fine-tuned model has a training loss that decreases smoothly from 2.1 to 0.
 
 A vendor shows you a fraud detection model with 99.2% accuracy. Your fraud rate is 0.5% (5 in 1,000 transactions). Should you be impressed by this accuracy figure?
 
-> **Detailed Answer:** No. A model that classifies every transaction as legitimate would achieve 99.5% accuracy with zero fraud detection. The 99.2% figure is essentially meaningless here — it tells you nothing about fraud detection quality. The relevant metrics are: precision (of all flagged fraud, what fraction is actually fraud), recall (of all actual fraud, what fraction is caught), and F1 or F-beta score. Ask for the model's performance at specific operating points — for example, at a threshold that catches 90% of fraud, how many false positives does it generate per day?
->
 > **Simple Explanation:** In a room of 1,000 people where only 5 are guilty, a guard who arrests nobody achieves 99.5% accuracy. That's not a good guard. The same logic applies to fraud detection.
+>
+> **Detailed Answer:** No. A model that classifies every transaction as legitimate would achieve 99.5% accuracy with zero fraud detection. The 99.2% figure is essentially meaningless here — it tells you nothing about fraud detection quality. The relevant metrics are: precision (of all flagged fraud, what fraction is actually fraud), recall (of all actual fraud, what fraction is caught), and F1 or F-beta score. Ask for the model's performance at specific operating points — for example, at a threshold that catches 90% of fraud, how many false positives does it generate per day?
 >
 > **Architecture Takeaway:** For any AI system operating in an imbalanced domain (fraud, safety events, rare defects), require precision and recall at your operating threshold — not accuracy. Accuracy alone is a vendor red flag in these domains.
 
@@ -217,9 +217,9 @@ A vendor shows you a fraud detection model with 99.2% accuracy. Your fraud rate 
 
 An engineer proposes using Euclidean distance instead of cosine similarity for your product matching system. In what scenario would Euclidean distance give worse results, and why?
 
-> **Detailed Answer:** Euclidean distance is affected by the magnitude (length) of vectors, not just their direction. If your embedding model produces longer vectors for longer product descriptions, Euclidean distance would penalise a detailed description even if it is semantically identical to a shorter one. Cosine similarity measures only the angle between vectors, ignoring their length — making it more robust to description length variation. The practical workaround: normalising all vectors to unit length before indexing makes Euclidean distance equivalent to a monotonic transformation of cosine similarity, so both give the same ranking. Without normalisation, cosine similarity is almost always the better choice for semantic matching.
->
 > **Simple Explanation:** Euclidean distance measures how far apart two points are in space. Cosine similarity measures the angle between them. For comparing meaning (not just position), angle is what matters — a detailed description and a short one about the same product should be "close" regardless of how long each is.
+>
+> **Detailed Answer:** Euclidean distance is affected by the magnitude (length) of vectors, not just their direction. If your embedding model produces longer vectors for longer product descriptions, Euclidean distance would penalise a detailed description even if it is semantically identical to a shorter one. Cosine similarity measures only the angle between vectors, ignoring their length — making it more robust to description length variation. The practical workaround: normalising all vectors to unit length before indexing makes Euclidean distance equivalent to a monotonic transformation of cosine similarity, so both give the same ranking. Without normalisation, cosine similarity is almost always the better choice for semantic matching.
 >
 > **Architecture Takeaway:** Default to cosine similarity for semantic matching tasks. If using Euclidean distance, always normalise embeddings to unit length first — this is a standard production pattern and most vector databases support it natively.
 
@@ -227,9 +227,9 @@ An engineer proposes using Euclidean distance instead of cosine similarity for y
 
 You are asked to review a model that uses softmax output for a product categorisation task. The product can belong to multiple categories simultaneously (a "running shoe" can also be "trail", "waterproof", and "sale"). Is softmax the right choice?
 
-> **Detailed Answer:** No. Softmax is designed for mutually exclusive categories — it forces all outputs to sum to 1, meaning selecting one category reduces the probability mass available for all others. For multi-label classification (where multiple labels can be simultaneously true), you need independent sigmoid outputs for each label. Each output neuron independently predicts the probability of that label being present, and the probabilities do not need to sum to 1. The loss function also changes: from categorical cross-entropy (softmax case) to binary cross-entropy applied to each label independently (sigmoid multi-label case).
->
 > **Simple Explanation:** Softmax is like a competition where only one winner is allowed. Sigmoid is like a checklist where any number of boxes can be ticked. A running shoe that is also trail-ready, waterproof, and on sale needs a checklist, not a competition.
+>
+> **Detailed Answer:** No. Softmax is designed for mutually exclusive categories — it forces all outputs to sum to 1, meaning selecting one category reduces the probability mass available for all others. For multi-label classification (where multiple labels can be simultaneously true), you need independent sigmoid outputs for each label. Each output neuron independently predicts the probability of that label being present, and the probabilities do not need to sum to 1. The loss function also changes: from categorical cross-entropy (softmax case) to binary cross-entropy applied to each label independently (sigmoid multi-label case).
 >
 > **Architecture Takeaway:** When reviewing ML model designs for classification tasks, always ask: are the categories mutually exclusive? If not, softmax is incorrect — use sigmoid with binary cross-entropy per label. Getting this wrong silently degrades model quality.
 

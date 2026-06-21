@@ -236,9 +236,9 @@ At serving time, each customer's embedding is pre-computed nightly. For each com
 
 A product manager asks for "an AI system that forecasts demand and personalises promotions." Before agreeing to build it, what architectural decomposition do you perform, and why does it matter?
 
-> **Detailed Answer:** The request contains at least two distinct AI problem types. Demand forecasting is a time series problem — it exploits temporal patterns in sales history to predict future demand at the SKU/store level. Promotion personalisation is a recommendation system problem (collaborative filtering) combined with tabular prediction for response propensity. These problems have different data requirements, different model families, different retraining cadences, and different serving architectures. Treating them as one system forces compromises that make neither work well. The decomposition also matters for ownership: demand forecasting typically belongs to supply chain; promotion personalisation belongs to marketing.
->
 > **Simple Explanation:** Asking one system to both predict "how many units do we need in the warehouse?" and "which customer should see which promotion?" is like asking one employee to be both your warehouse logistics manager and your marketing director. Both roles need different skills, different data, and different reporting lines.
+>
+> **Detailed Answer:** The request contains at least two distinct AI problem types. Demand forecasting is a time series problem — it exploits temporal patterns in sales history to predict future demand at the SKU/store level. Promotion personalisation is a recommendation system problem (collaborative filtering) combined with tabular prediction for response propensity. These problems have different data requirements, different model families, different retraining cadences, and different serving architectures. Treating them as one system forces compromises that make neither work well. The decomposition also matters for ownership: demand forecasting typically belongs to supply chain; promotion personalisation belongs to marketing.
 >
 > **Architecture Takeaway:** When a business asks for "an AI system that does X and Y", decompose X and Y into their constituent problem types before agreeing to any design. Misclassifying the problem type (treating a time series problem as tabular) is one of the most common causes of AI project failure.
 
@@ -246,9 +246,9 @@ A product manager asks for "an AI system that forecasts demand and personalises 
 
 Your recommendation system is retrieving candidates very quickly (8ms for 2,000 candidates) but the end-to-end latency is 450ms — far above the 150ms SLA. Where in the cascade pipeline is the likely bottleneck, and what do you investigate first?
 
-> **Detailed Answer:** The cascade pipeline has three stages: retrieval, ranking, and filtering. With retrieval at 8ms, the bottleneck is almost certainly the ranking stage, which must score 2,000 candidates with rich features. Investigate: is the ranking model running on CPU vs GPU? Is feature computation for the 2,000 candidates done in real time or pre-computed? Can the retrieval stage be configured to return fewer candidates (200 instead of 2,000 reduces ranking load by 10x with manageable quality impact)? Can the ranking model be quantised or distilled? Also check whether the 450ms includes network round trips that could be parallelised or cached.
->
 > **Simple Explanation:** You've confirmed that finding the 2,000 candidates is fast. The bottleneck is the detailed evaluation of those 2,000 candidates — the expensive "interview" stage is taking too long. Either make the interviews shorter (smaller ranking model) or send fewer candidates to interview (retrieval returns 200, not 2,000).
+>
+> **Detailed Answer:** The cascade pipeline has three stages: retrieval, ranking, and filtering. With retrieval at 8ms, the bottleneck is almost certainly the ranking stage, which must score 2,000 candidates with rich features. Investigate: is the ranking model running on CPU vs GPU? Is feature computation for the 2,000 candidates done in real time or pre-computed? Can the retrieval stage be configured to return fewer candidates (200 instead of 2,000 reduces ranking load by 10x with manageable quality impact)? Can the ranking model be quantised or distilled? Also check whether the 450ms includes network round trips that could be parallelised or cached.
 >
 > **Architecture Takeaway:** The ranking stage is the primary latency lever in a recommendation cascade. Design it with explicit CPU/GPU options, configurable candidate set size, and a model complexity dial — you will need to tune all three in production.
 
@@ -256,9 +256,9 @@ Your recommendation system is retrieving candidates very quickly (8ms for 2,000 
 
 Your collaborative filtering model works well for your top 20% of customers (those with rich purchase history) but gives poor recommendations for the other 80% (infrequent purchasers). What is the problem called, and what strategies address it?
 
-> **Detailed Answer:** This is the cold start problem for sparse users — users with few interactions have thin signals for the collaborative filtering model; their user embedding is weak because there is little interaction history to learn from. Strategies: (1) Supplement the user tower with content features available for all users regardless of purchase history — demographics, region, loyalty signup answers, browsing behaviour. (2) Below an interaction threshold, fall back to popularity-based or content-based recommendations. (3) Design onboarding flows that capture preference signals explicitly (preference surveys, quick category ratings). (4) Train a separate model specifically for sparse users with different feature sets than the full-history model.
->
 > **Simple Explanation:** Collaborative filtering is like asking a librarian to recommend books based on what "people like you" read — but if the librarian has only ever seen you borrow one book, they have almost nothing to go on. The fix is to give the librarian other signals about you (your job, your location, what you said you enjoy) so they're not starting blind.
+>
+> **Detailed Answer:** This is the cold start problem for sparse users — users with few interactions have thin signals for the collaborative filtering model; their user embedding is weak because there is little interaction history to learn from. Strategies: (1) Supplement the user tower with content features available for all users regardless of purchase history — demographics, region, loyalty signup answers, browsing behaviour. (2) Below an interaction threshold, fall back to popularity-based or content-based recommendations. (3) Design onboarding flows that capture preference signals explicitly (preference surveys, quick category ratings). (4) Train a separate model specifically for sparse users with different feature sets than the full-history model.
 >
 > **Architecture Takeaway:** Cold start is a structural limitation that must be designed around explicitly — not handled as an edge case. Architect explicit fallback paths (content-based, popularity-based, onboarding) and define the interaction threshold at which the system switches between them.
 
@@ -266,9 +266,9 @@ Your collaborative filtering model works well for your top 20% of customers (tho
 
 A data scientist proposes using random cross-validation to evaluate the time series demand forecasting model. Why is this incorrect, and what is the right approach?
 
-> **Detailed Answer:** Random cross-validation violates temporal causality. If data is split randomly, month-12 data can appear in the training set while month-6 data appears in the test set — the model learns from data that would be "in the future" relative to what it's predicting. This produces optimistic evaluation metrics that collapse in production, because in deployment the model always predicts forward from the present. The correct approach is temporal cross-validation (walk-forward validation): train on months 1–12, test on months 13–14; then train on months 1–14, test on months 15–16; and so on. This exactly simulates the production scenario.
->
 > **Simple Explanation:** It's like practising for a history exam by answering questions about events that haven't happened yet. The model would appear to do well in evaluation, then fail completely in the real world where it can only know the past.
+>
+> **Detailed Answer:** Random cross-validation violates temporal causality. If data is split randomly, month-12 data can appear in the training set while month-6 data appears in the test set — the model learns from data that would be "in the future" relative to what it's predicting. This produces optimistic evaluation metrics that collapse in production, because in deployment the model always predicts forward from the present. The correct approach is temporal cross-validation (walk-forward validation): train on months 1–12, test on months 13–14; then train on months 1–14, test on months 15–16; and so on. This exactly simulates the production scenario.
 >
 > **Architecture Takeaway:** For any time series model, temporal train/test splits are a correctness requirement, not a best practice. Include this as a mandatory review criterion in your ML project governance checklist.
 
@@ -276,9 +276,9 @@ A data scientist proposes using random cross-validation to evaluate the time ser
 
 Your Two-Tower recommendation model retrieves item embeddings from an ANN index. A new collection of 8,000 items goes live on the website. How long until these items appear in recommendations, and what determines that timeline?
 
-> **Detailed Answer:** New items will not appear in recommendations until they have embeddings in the ANN index. The timeline depends on the item embedding computation pipeline. If embeddings are computed from static item features (title, description, category, image), new items can be embedded as soon as they are ingested — potentially within minutes to an hour on a short batch cadence. Then the ANN index must be rebuilt or incrementally updated. FAISS supports online insertion but batch rebuilds are often faster and produce better index quality. The practical timeline is: item ingestion time + embedding computation time + index rebuild time + serving tier cache refresh time. For a daily batch pipeline: 12–24 hours. For a near-real-time pipeline: potentially under an hour.
->
 > **Simple Explanation:** New items are invisible to the recommendation system until they've been "catalogued" — given a GPS coordinate in the embedding space and added to the searchable map. The speed at which that happens depends entirely on how often you run the cataloguing pipeline.
+>
+> **Detailed Answer:** New items will not appear in recommendations until they have embeddings in the ANN index. The timeline depends on the item embedding computation pipeline. If embeddings are computed from static item features (title, description, category, image), new items can be embedded as soon as they are ingested — potentially within minutes to an hour on a short batch cadence. Then the ANN index must be rebuilt or incrementally updated. FAISS supports online insertion but batch rebuilds are often faster and produce better index quality. The practical timeline is: item ingestion time + embedding computation time + index rebuild time + serving tier cache refresh time. For a daily batch pipeline: 12–24 hours. For a near-real-time pipeline: potentially under an hour.
 >
 > **Architecture Takeaway:** Agree the maximum acceptable cold start window for new items with the business before designing the embedding pipeline cadence. For seasonal or fast-fashion retail (where new items go from launch to peak demand within days), near-real-time embedding is a business requirement, not an optimisation.
 
