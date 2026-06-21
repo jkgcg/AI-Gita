@@ -1,0 +1,38 @@
+name: Freshness report
+description: Flag stale model names, pricing, benchmarks, or timeline claims.
+title: "[Freshness] "
+labels:
+  - stale-content
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Impacted tab/section
+      placeholder: "Snapshot tab -> Current Snapshot Buckets"
+    validations:
+      required: true
+  - type: textarea
+    id: stale_claim
+    attributes:
+      label: Stale claim
+      description: What appears stale today?
+    validations:
+      required: true
+  - type: textarea
+    id: latest_fact
+    attributes:
+      label: Latest known fact
+      description: Provide the up-to-date statement and source links.
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - High (could mislead production decisions)
+        - Medium (important but non-blocking)
+        - Low (minor drift)
+      default: 1
+    validations:
+      required: true

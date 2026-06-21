@@ -654,6 +654,27 @@ body.linear-mode .panel{display:block !important;border-bottom:3px solid var(--a
 body.linear-mode .panel::before{content:attr(data-linear-title);display:block;position:absolute;top:0;left:0;right:0;background:#1a0533;color:#ddd6fe;padding:10px 16px;font-weight:800;font-size:12px;letter-spacing:.4px;text-transform:uppercase;border-radius:0}
 .linear-back{position:fixed;bottom:80px;right:20px;z-index:1000;background:var(--ai);color:#fff;border:none;border-radius:50%;width:48px;height:48px;font-size:20px;cursor:pointer;box-shadow:0 4px 12px rgba(124,58,237,.4);font-weight:800}
 .linear-back:hover{background:var(--ai2)}
+@media (max-width:820px){
+  html,body{overflow-x:hidden}
+  .chrome{flex-wrap:wrap;align-items:flex-start;gap:10px;padding:12px 14px 10px}
+  .chrome > div{min-width:0}
+  .searchbox{order:10;flex:1 1 100%;min-width:0;max-width:none}
+  .meta{margin-left:0;flex:1 1 100%;min-width:0;align-items:flex-start}
+  #linear-toggle-btn{margin-left:0}
+  .tab-nav-wrap{max-width:100vw;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab-nav{min-width:max-content}
+  .platform-strip{padding:8px 12px}
+}
+
+@media (max-width:1024px){
+  html,body{overflow-x:hidden}
+  body{min-width:0}
+  .panel{min-width:0}
+  .searchbox{min-width:220px;max-width:none;flex:1 1 320px}
+  .tab-nav-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab-nav{min-width:max-content}
+}
+
 @media (max-width:720px){
   html,body{overflow-x:hidden}
   body{min-width:0}
@@ -704,6 +725,11 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
 .qaf-fc-stats .fc-solid{background:#dbeafe;color:#1d4ed8}
 .qaf-fc-stats .fc-senior{background:#ede9fe;color:#5b21b6}
 .qaf-fc-stats .fc-new{background:#e0e7ff;color:#3730a3}
+.qaf-coach{margin-top:8px;padding:10px 12px;border:1px solid #bfdbfe;border-radius:8px;background:linear-gradient(135deg,#eff6ff,#ffffff);font-size:10.8px;color:#334155;line-height:1.55}
+.qaf-coach strong{color:#1e3a8a}
+.qaf-coach-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.qaf-coach-btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:7px;padding:5px 10px;background:#dbeafe;color:#1d4ed8;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.qaf-coach-btn:hover{background:#bfdbfe}
 /* In flashcard mode, hide answer body and show reveal button instead */
 .fc-mode .qa-body{display:none !important}
 .fc-mode .qa-body.fc-revealed{display:block !important}
@@ -764,6 +790,53 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
 .wp-week li.done{opacity:.5;text-decoration:line-through}
 .wp-summary{margin-top:12px;padding:10px 14px;background:#f5f3ff;border-radius:6px;font-size:11.5px;color:var(--ai2);border-left:3px solid var(--ai)}
 .wp-summary strong{font-variant-numeric:tabular-nums}
+.sbar .ch-x{display:none}
+.platform-strip{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 16px;border-top:1px solid #dbeafe;border-bottom:1px solid #dbeafe;background:linear-gradient(135deg,#f8fbff,#eef6ff);font-size:11px;color:#334155}
+.platform-strip .ps-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid #bfdbfe;background:#fff;color:#1e3a8a;font-weight:700}
+.platform-strip a{color:#1d4ed8;font-weight:800;text-decoration:none}
+.platform-strip a:hover{text-decoration:underline}
+.platform-more{margin-left:auto}
+.platform-more summary{cursor:pointer;color:#475569;font-weight:700}
+.platform-more div{margin-top:6px;color:#64748b}
+.simple-collapse{margin:10px 0 16px;border:1px solid #dbeafe;border-radius:10px;background:#fff;overflow:hidden}
+.simple-collapse > summary{cursor:pointer;list-style:none;padding:10px 12px;background:#f8fbff;color:#1e3a8a;font-weight:800;font-size:11.5px}
+.simple-collapse > summary::-webkit-details-marker{display:none}
+.simple-collapse-body{padding:10px 12px}
+.usecase-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:10px 0 16px}
+.usecase-card{background:#fff;border:1px solid #dbeafe;border-radius:10px;padding:10px 12px}
+.usecase-title{font-size:11px;font-weight:800;color:#1e3a8a;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.usecase-links{display:flex;flex-wrap:wrap;gap:7px}
+.usecase-link{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:7px;padding:6px 10px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+.usecase-link:hover{background:#dbeafe}
+.hub-contrib{margin:10px 0 18px;padding:10px 12px;background:linear-gradient(135deg,#f0fdf4,#ecfeff);border:1px solid #99f6e4;border-radius:10px;font-size:11.2px;color:#115e59;line-height:1.55}
+.hub-contrib a{color:#0f766e;font-weight:800;text-decoration:none}
+.hub-contrib a:hover{text-decoration:underline}
+.issue-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.issue-link{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #99f6e4;color:#0f766e;font-size:10.5px;font-weight:700;text-decoration:none}
+.issue-link:hover{background:#ccfbf1}
+.arch-align{margin:10px 0 16px;padding:12px;border:1px solid #bfdbfe;border-radius:10px;background:linear-gradient(135deg,#f8fbff,#ffffff)}
+.arch-align h4{margin:0 0 8px;font-size:12px;color:#1e3a8a}
+.arch-align ul{margin:0;padding-left:18px;font-size:11px;line-height:1.6;color:#334155}
+.arch-align-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.change-log{margin:10px 0 16px;padding:12px 14px;border:1px solid #bfdbfe;border-radius:10px;background:linear-gradient(135deg,#eff6ff,#ffffff)}
+.change-log h4{margin:0 0 8px;font-size:12px;color:#1e3a8a}
+.change-list{margin:0;padding-left:18px;font-size:11px;line-height:1.6;color:#334155}
+.change-list li{margin-bottom:4px}
+.mod-rubric{margin-top:10px;border:1px solid #99f6e4;border-radius:8px;background:#ffffff}
+.mod-rubric summary{cursor:pointer;list-style:none;padding:8px 10px;font-size:11px;font-weight:800;color:#0f766e}
+.mod-rubric summary::-webkit-details-marker{display:none}
+.mod-rubric-body{padding:0 10px 10px;font-size:10.8px;color:#134e4a;line-height:1.6}
+.mod-rubric-body ul{margin:6px 0 0 16px;padding:0}
+.mod-rubric-body li{margin-bottom:4px}
+.freshness-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:10px 0}
+.freshness-card{border:1px solid #bfdbfe;border-radius:8px;background:#f8fbff;padding:10px}
+.freshness-title{font-size:11px;font-weight:800;color:#1e3a8a;margin-bottom:4px}
+.freshness-meta{font-size:10.5px;color:#475569;line-height:1.5}
+.freshness-card button{margin-top:8px;background:#dbeafe;border:none;border-radius:6px;padding:5px 10px;font-size:10.5px;font-weight:700;color:#1d4ed8;cursor:pointer;font-family:inherit}
+.freshness-card button:hover{background:#bfdbfe}
+.rhythm-card{margin:10px 0 0;padding:12px;border:1px solid #c7d2fe;border-radius:10px;background:linear-gradient(135deg,#eef2ff,#ffffff)}
+.rhythm-card h4{margin:0 0 8px;font-size:12px;color:#312e81}
+.rhythm-list{margin:0;padding-left:18px;font-size:11px;line-height:1.6;color:#334155}
 </style>
 </head>
 <body>
@@ -791,12 +864,15 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
  </div>
 </div>
 <div class="sbar">
- <span class="chip ch-ai">&#129504; 22 Deep Tabs</span>
- <span class="chip ch-g">&#9989; Concept + Math + Code</span>
+ <span class="chip ch-ai">&#129504; 22 Core Tabs</span>
+ <span class="chip ch-g">&#9989; Concept + Practice</span>
  <span class="chip ch-b">&#128293; 160 Q&amp;A</span>
- <span class="chip ch-a">&#128218; Interactive Learning Plan</span>
- <span class="chip ch-r">&#128295; Live Coding: 8 Implementations</span>
  <span class="chip ch-x">GPT-5.5 &middot; Claude Opus 4.8 &middot; Gemini 3.5 Flash &middot; DeepSeek V4 &middot; Llama 4 &middot; MCP &middot; A2A &middot; vLLM &middot; SGLang &middot; PyTorch &middot; LangGraph &middot; All 2026 Stack</span>
+</div>
+<div class="platform-strip">
+ <span class="ps-pill">&#128197; Last updated: 2026-06-21</span>
+ <span><a href="https://github.com/jkgcg/AI-Gita/issues" target="_blank" rel="noopener">Contribute / report issue</a></span>
+ <details class="platform-more"><summary>More transparency</summary><div>Sources: vendor docs + curated references &middot; <a href="https://github.com/jkgcg/AI-Gita/commits/main" target="_blank" rel="noopener">View change history</a></div></details>
 </div>
 
 <!--  GROUPED TAB NAV  -->
@@ -807,11 +883,11 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
  <div class="tg g-start">
  <div class="tg-lbl" style="color:var(--teal)">&#9733; Start Here</div>
  <div class="tg-row">
- <button class="tb active" data-action="switch-tab" data-tab="plan">&#128218; Learning Plan</button>
- <button class="tb" data-action="switch-tab" data-tab="hub">&#127919; Learning Hub</button>
+ <button class="tb active" data-action="switch-tab" data-tab="plan">&#128218; Start Here</button>
+ <button class="tb" data-action="switch-tab" data-tab="hub">&#127919; Quick Guide</button>
  <button class="tb" data-action="switch-tab" data-tab="landscape">&#127758; AI Landscape</button>
- <button class="tb" data-action="switch-tab" data-tab="paths">&#128741; Paths</button>
- <button class="tb" data-action="switch-tab" data-tab="snapshot">&#128240; Snapshot</button>
+ <button class="tb" data-action="switch-tab" data-tab="paths">&#128741; Role Paths</button>
+ <button class="tb" data-action="switch-tab" data-tab="snapshot">&#128240; What's New</button>
  </div>
  </div>
 
@@ -1176,7 +1252,7 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
 
 
 <div style="margin-top:24px;padding:12px 0;border-top:2px solid var(--border);display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
- <div><button data-action="switch-tab" data-tab="hub" style="background:var(--ai);border:none;border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff">Next: Learning Hub &#8594;</button></div>
+  <div><button data-action="switch-tab" data-tab="hub" style="background:var(--ai);border:none;border-radius:6px;padding:8px 16px;font-size:11.5px;font-weight:700;cursor:pointer;color:#fff">Next: Quick Guide &#8594;</button></div>
 </div>
 
 <!-- 
@@ -1187,7 +1263,7 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
 <div id="tab-hub" class="panel">
 
 <div class="hub-hero">
-  <h2>&#127919; Learning Hub</h2>
+  <h2>&#127919; Quick Guide</h2>
   <div class="hs">
     <strong>One page to orient yourself.</strong> 30 deep tabs is a lot &mdash; this hub gives you a visual map, a path for your role, mental models for the hardest ideas, a glossary, and a &ldquo;where am I lost?&rdquo; troubleshooter. Use it whenever you feel the rabbit-hole getting too deep.
   </div>
@@ -1197,6 +1273,96 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
     <span class="hh-pill">&#129504; 8 mental models</span>
     <span class="hh-pill" data-action="switch-tab" data-tab="glossary" style="cursor:pointer" title="Open Glossary">&#128218; 74-term glossary &rarr;</span>
     <span class="hh-pill">&#128270; Troubleshooter</span>
+  </div>
+</div>
+
+<div class="sh">Use-case quick routes</div>
+<details class="simple-collapse">
+  <summary>Optional: start from intent instead of topic names</summary>
+  <div class="simple-collapse-body">
+<div class="usecase-grid">
+  <div class="usecase-card">
+    <div class="usecase-title">Build an AI Chatbot</div>
+    <div class="usecase-links">
+      <button class="usecase-link" data-action="switch-tab" data-tab="rag">1) RAG</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="agents">2) Agents</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="sysdesign">3) System Design</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="coding">4) Live Coding</button>
+    </div>
+  </div>
+  <div class="usecase-card">
+    <div class="usecase-title">Learn RAG for Enterprise</div>
+    <div class="usecase-links">
+      <button class="usecase-link" data-action="switch-tab" data-tab="llm">1) LLM Foundations</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="rag">2) RAG &amp; Vector</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="mlops">3) LLMOps</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="safety">4) Safety</button>
+    </div>
+  </div>
+  <div class="usecase-card">
+    <div class="usecase-title">Understand LLM Architecture</div>
+    <div class="usecase-links">
+      <button class="usecase-link" data-action="switch-tab" data-tab="dl">1) Deep Learning</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="llm">2) LLMs</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="longctx">3) Long Context</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="finetune">4) Fine-tuning</button>
+    </div>
+  </div>
+  <div class="usecase-card">
+    <div class="usecase-title">Prepare for AI Interviews</div>
+    <div class="usecase-links">
+      <button class="usecase-link" data-action="switch-tab" data-tab="plan">1) Start Here</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="qa">2) Q&amp;A Vol 1</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="qa2">3) Q&amp;A Vol 2</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="interview">4) Interview Strategy</button>
+    </div>
+  </div>
+  <div class="usecase-card">
+    <div class="usecase-title">Design an Agent Platform</div>
+    <div class="usecase-links">
+      <button class="usecase-link" data-action="switch-tab" data-tab="akp">1) Agentic Platform</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="agentops">2) Agent Runtime Ops</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="gov2">3) Governance</button>
+      <button class="usecase-link" data-action="switch-tab" data-tab="sysdesign">4) System Design</button>
+    </div>
+  </div>
+</div>
+  </div>
+</details>
+
+<div class="hub-contrib">
+  <strong>&#128172; Keep AI Gita evolving:</strong> if something is unclear or outdated, raise it on
+  <a href="https://github.com/jkgcg/AI-Gita/issues" target="_blank" rel="noopener">GitHub Issues</a>.
+  <div class="issue-links">
+    <a class="issue-link" href="https://github.com/jkgcg/AI-Gita/issues/new?template=topic_request.yml" target="_blank" rel="noopener">Request topic</a>
+    <a class="issue-link" href="https://github.com/jkgcg/AI-Gita/issues/new?template=content_correction.yml" target="_blank" rel="noopener">Report correction</a>
+    <a class="issue-link" href="https://github.com/jkgcg/AI-Gita/issues/new?template=freshness_report.yml" target="_blank" rel="noopener">Flag stale content</a>
+  </div>
+  <details class="mod-rubric">
+    <summary>Moderation rubric + response SLA</summary>
+    <div class="mod-rubric-body">
+      <ul>
+        <li><strong>Priority 1 (critical correctness/security):</strong> acknowledge within 24h, target resolution in 72h.</li>
+        <li><strong>Priority 2 (stale vendor facts/pricing):</strong> acknowledge within 48h, target resolution in 5 days.</li>
+        <li><strong>Priority 3 (clarity/formatting/topic requests):</strong> acknowledge within 5 days, schedule into next content cycle.</li>
+      </ul>
+      <div style="margin-top:6px">Template expectation: include impacted tab, current statement, proposed correction, and source link.</div>
+    </div>
+  </details>
+</div>
+
+<div class="arch-align">
+  <h4>&#127970; Architect enablement alignment</h4>
+  <ul>
+    <li>Learning and architecture delivery are now connected through AKP, System Design, Governance, and Dev Experience paths.</li>
+    <li>Issue templates now capture topic requests, corrections, and freshness drift in a reusable structure for documentation initiatives.</li>
+    <li>Operating rhythm in Snapshot provides a monthly review contract to keep architecture knowledge and delivery guidance synchronized.</li>
+  </ul>
+  <div class="arch-align-links">
+    <button class="qaf-coach-btn" data-action="switch-tab" data-tab="akp">Open AKP</button>
+    <button class="qaf-coach-btn" data-action="switch-tab" data-tab="sysdesign">Open System Design</button>
+    <button class="qaf-coach-btn" data-action="switch-tab" data-tab="devexp">Open Dev Experience</button>
+    <button class="qaf-coach-btn" data-action="switch-tab" data-tab="people">Open People &amp; Adoption</button>
   </div>
 </div>
 
@@ -1585,6 +1751,47 @@ Time-sensitive vendor facts in one place: frontier model names, pricing, and ben
 <div class="sh">Cross-Reference</div>
 <div class="ibox">
   When non-snapshot tabs mention a current commercial model, treat that mention as context only. Use this tab as the system of record for date-bound facts.
+</div>
+
+<div class="sh">Freshness Index by Tab</div>
+<div class="freshness-grid">
+  <div class="freshness-card">
+    <div class="freshness-title">AI Landscape</div>
+    <div class="freshness-meta">Status: monitored monthly<br>Focus: vendor launches and pricing tiers</div>
+    <button data-action="switch-tab" data-tab="landscape">Open AI Landscape</button>
+  </div>
+  <div class="freshness-card">
+    <div class="freshness-title">LLMs and Foundation</div>
+    <div class="freshness-meta">Status: monitored monthly<br>Focus: model lineup and context windows</div>
+    <button data-action="switch-tab" data-tab="llm">Open LLMs tab</button>
+  </div>
+  <div class="freshness-card">
+    <div class="freshness-title">Infrastructure and Cloud</div>
+    <div class="freshness-meta">Status: monitored quarterly<br>Focus: serving economics and infra options</div>
+    <button data-action="switch-tab" data-tab="infra">Open Infra tab</button>
+  </div>
+</div>
+
+<div class="change-log">
+  <h4>&#128221; Recent update log</h4>
+  <ol class="change-list">
+    <li><strong>2026-06-21:</strong> Simplified first-run UX labels (Start Here, Quick Guide, Role Paths, What's New).</li>
+    <li><strong>2026-06-21:</strong> Compact command center and horizontal visual overview on the first page.</li>
+    <li><strong>2026-06-20:</strong> Snapshot tab + role-path tagging + retrieval practice interleaving completed.</li>
+    <li><strong>2026-06-20:</strong> Mermaid de-bloat and interactivity centralization applied.</li>
+  </ol>
+  <div style="font-size:10.5px;color:#64748b;margin-top:6px">Source confidence: official vendor docs preferred; community sources used only for supplementary context.</div>
+</div>
+
+<div class="rhythm-card">
+  <h4>&#128197; Architect operating rhythm</h4>
+  <ol class="rhythm-list">
+    <li><strong>Week 1:</strong> refresh Snapshot, AI Landscape, and LLM tabs with vendor-source deltas.</li>
+    <li><strong>Week 2:</strong> run governance/content review using the issue queue and moderation rubric.</li>
+    <li><strong>Week 3:</strong> align role paths and interview sections with newly added enterprise patterns.</li>
+    <li><strong>Week 4:</strong> publish change log updates and archive source links for auditability.</li>
+  </ol>
+  <div style="font-size:10.5px;color:#475569;margin-top:6px">Owners: platform maintainer + domain reviewer. Source policy: official vendor docs first, analyst/community links as secondary support.</div>
 </div>
 
 <div style="margin-top:24px;padding:12px 0;border-top:2px solid var(--border);display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px">
@@ -12013,6 +12220,8 @@ function filterRole(show){
     var queueModeBtn = document.getElementById('tts-queuemode');
     var sectionModeBtn = document.getElementById('tts-sectionmode');
     var autoScrollBtn = document.getElementById('tts-autoscroll');
+    var commuteBtn = document.getElementById('tts-commute');
+    var architectBtn = document.getElementById('tts-architect');
 
     if (!queueModeBtn) {
       queueModeBtn = document.createElement('button');
@@ -12044,6 +12253,28 @@ function filterRole(show){
         hideBtn.parentNode.insertBefore(autoScrollBtn, hideBtn);
       } else {
         bar.appendChild(autoScrollBtn);
+      }
+    }
+
+    if (!commuteBtn) {
+      commuteBtn = document.createElement('button');
+      commuteBtn.id = 'tts-commute';
+      commuteBtn.style.cssText = 'background:rgba(255,255,255,.08) !important;border:1px solid rgba(255,255,255,.2) !important;color:#ddd6fe !important;border-radius:50% !important;padding:0 !important;font-size:13px !important;font-weight:700 !important;cursor:pointer !important;font-family:inherit !important;height:34px !important;min-height:34px !important;width:34px !important;display:flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important;';
+      if (hideBtn && hideBtn.parentNode) {
+        hideBtn.parentNode.insertBefore(commuteBtn, hideBtn);
+      } else {
+        bar.appendChild(commuteBtn);
+      }
+    }
+
+    if (!architectBtn) {
+      architectBtn = document.createElement('button');
+      architectBtn.id = 'tts-architect';
+      architectBtn.style.cssText = 'background:rgba(255,255,255,.08) !important;border:1px solid rgba(255,255,255,.2) !important;color:#ddd6fe !important;border-radius:50% !important;padding:0 !important;font-size:13px !important;font-weight:700 !important;cursor:pointer !important;font-family:inherit !important;height:34px !important;min-height:34px !important;width:34px !important;display:flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important;';
+      if (hideBtn && hideBtn.parentNode) {
+        hideBtn.parentNode.insertBefore(architectBtn, hideBtn);
+      } else {
+        bar.appendChild(architectBtn);
       }
     }
     
@@ -12108,10 +12339,23 @@ function filterRole(show){
       });
       queueModeBtn.dataset.boundClick = '1';
     }
+    if (commuteBtn && commuteBtn.dataset.boundClick !== '1') {
+      commuteBtn.addEventListener('click', function() {
+        startCommuteReading('general');
+      });
+      commuteBtn.dataset.boundClick = '1';
+    }
+    if (architectBtn && architectBtn.dataset.boundClick !== '1') {
+      architectBtn.addEventListener('click', function() {
+        startCommuteReading('architect');
+      });
+      architectBtn.dataset.boundClick = '1';
+    }
 
     updateQueueModeButton();
     updateSectionModeButton();
     updateAutoScrollButton();
+    updateCommuteButtons();
     
     updateVoiceList();
     if (synth.onvoiceschanged !== undefined) {
@@ -12285,6 +12529,38 @@ function filterRole(show){
       var m = oc.match(/sw\('([^']+)'/);
       return m ? m[1] : '';
     }).filter(function(id) { return !!id; });
+  }
+
+  function getListenTracksForPanel(panel) {
+    if (!panel) return [];
+    return Array.prototype.slice.call(panel.querySelectorAll('[data-listen-track]')).map(function(node) {
+      return (node.getAttribute('data-listen-track') || '').replace(/\s+/g, ' ').trim();
+    }).filter(function(text) { return text.length > 40; });
+  }
+
+  function startCommuteReading(mode) {
+    var panel = document.querySelector('.panel.active');
+    if (!panel) return;
+    var tabId = getActiveTabId();
+    var tracks = getListenTracksForPanel(panel);
+    if (!tracks.length) {
+      startReading('', (mode === 'architect' ? 'COMMUTE ARCH' : 'COMMUTE'));
+      return;
+    }
+    var picks = tracks;
+    if (mode === 'architect') {
+      picks = tracks.filter(function(t) {
+        return /(architecture|governance|platform|risk|tradeoff|system|production|control)/i.test(t);
+      });
+      if (!picks.length) picks = tracks;
+    }
+    picks = picks.slice(0, 5).map(function(t) {
+      return t.split(/\s+/).slice(0, 55).join(' ');
+    });
+    var intro = mode === 'architect'
+      ? ('Architect commute brief for ' + String(tabId || 'topic').toUpperCase() + '. Focus on architecture decisions, controls, and tradeoffs.')
+      : ('Commute recap for ' + String(tabId || 'topic').toUpperCase() + '. Focus on mechanism, failure mode, and practical decision cues.');
+    startReading(intro + ' ' + picks.join(' '), mode === 'architect' ? 'COMMUTE ARCH' : 'COMMUTE');
   }
 
   function getTabButton(tabId) {
@@ -12603,6 +12879,25 @@ function filterRole(show){
     btn.style.color = ttsState.queueMode ? '#fcd34d' : '#9ca3af';
     btn.style.background = ttsState.queueMode ? 'rgba(245,158,11,.2)' : 'rgba(255,255,255,.08)';
   }
+
+  function updateCommuteButtons() {
+    var commute = document.getElementById('tts-commute');
+    if (commute) {
+      commute.textContent = 'C';
+      commute.title = 'Commute recap mode (Alt+C)';
+      commute.style.borderColor = 'rgba(56, 189, 248, 0.95)';
+      commute.style.color = '#bae6fd';
+      commute.style.background = 'rgba(14,165,233,.2)';
+    }
+    var arch = document.getElementById('tts-architect');
+    if (arch) {
+      arch.textContent = 'R';
+      arch.title = 'Architect commute mode (Alt+X)';
+      arch.style.borderColor = 'rgba(167, 139, 250, 0.95)';
+      arch.style.color = '#ddd6fe';
+      arch.style.background = 'rgba(109,40,217,.2)';
+    }
+  }
   
   function updatePlayButton() {
     var play = document.getElementById('tts-play');
@@ -12655,6 +12950,12 @@ function filterRole(show){
         ttsState.queueMode = !ttsState.queueMode;
         updateQueueModeButton();
         saveTTSPreferences();
+      } else if (e.altKey && (e.key === 'c' || e.key === 'C')) {
+        e.preventDefault();
+        startCommuteReading('general');
+      } else if (e.altKey && (e.key === 'x' || e.key === 'X')) {
+        e.preventDefault();
+        startCommuteReading('architect');
       }
     });
   }
@@ -13876,6 +14177,33 @@ function filterRole(show){
     });
     return counts;
   }
+  function fcWeakPanelOrder(){
+    return ['qa','qa2','qa3'].map(function(pid){
+      var c = fcCountsForPanel(pid);
+      return { panel: pid, weak: c.weak, total: c.total };
+    }).sort(function(a,b){ return b.weak - a.weak; });
+  }
+  function fcCoachSuggestions(panelId, grade){
+    var map = {
+      qa: {
+        weak:[{tab:'math',label:'Refresh math map'},{tab:'ml',label:'Revisit ML fundamentals'},{panel:'qa',mode:'quiz',label:'Run random quiz (Vol 1)'}],
+        solid:[{tab:'qa2',label:'Move to Vol 2'},{tab:'dl',label:'Deepen deep learning'}],
+        senior:[{tab:'qa3',label:'Stress test Vol 3'},{tab:'interview',label:'Interview strategy drill'}]
+      },
+      qa2: {
+        weak:[{tab:'rag',label:'Reinforce RAG pipeline'},{tab:'agents',label:'Revisit agent loops'},{panel:'qa2',mode:'quiz',label:'Run random quiz (Vol 2)'}],
+        solid:[{tab:'qa3',label:'Advance to Vol 3'},{tab:'sysdesign',label:'Connect to system design'}],
+        senior:[{tab:'gov2',label:'Governance deep dive'},{tab:'agentops',label:'Agent runtime ops'}]
+      },
+      qa3: {
+        weak:[{tab:'sysdesign',label:'Refresh system design stack'},{tab:'gov2',label:'Revisit governance controls'},{panel:'qa3',mode:'quiz',label:'Run random quiz (Vol 3)'}],
+        solid:[{tab:'akp',label:'AKP architecture refresh'},{tab:'infra',label:'Infra tradeoff recap'}],
+        senior:[{tab:'career',label:'Career narrative polish'},{tab:'interview',label:'Senior interview rehearsal'}]
+      }
+    };
+    var group = (map[panelId] && map[panelId][grade]) || (map[panelId] && map[panelId].weak) || [];
+    return group.slice(0, 3);
+  }
   function qaVolumeAnchor(panelId){
     return { qa:'anchor-qa-volume1', qa2:'anchor-qa-volume2', qa3:'anchor-qa-volume3' }[panelId] || '';
   }
@@ -13983,7 +14311,33 @@ function filterRole(show){
           stats.querySelector('.fc-new').textContent = nu+' new';
         }
       }
+      function renderCoach(lastGrade, lastQuestion){
+        var host = toolbar.querySelector('.qaf-coach');
+        if(!host){
+          host = document.createElement('div');
+          host.className = 'qaf-coach';
+          toolbar.appendChild(host);
+        }
+        var counts = fcCountsForPanel(panelId);
+        var weakLeaders = fcWeakPanelOrder().filter(function(x){ return x.weak > 0; });
+        var topWeak = weakLeaders.length ? weakLeaders[0] : null;
+        var gradeLabel = lastGrade ? (lastGrade.charAt(0).toUpperCase()+lastGrade.slice(1)) : 'Not scored yet';
+        var lead = lastQuestion ? ('Latest self-score: <strong>'+gradeLabel+'</strong> on "'+escapeHtml(lastQuestion.slice(0, 84))+'".') : 'Start with any question, reveal the answer, then self-score to unlock adaptive follow-up prompts.';
+        var weakNote = topWeak
+          ? ('Biggest current gap signal: <strong>'+topicLabel(topWeak.panel)+'</strong> ('+topWeak.weak+' weak cards).')
+          : 'No weak-card clusters yet. Keep scoring cards to calibrate your learning path.';
+        var suggestions = fcCoachSuggestions(panelId, lastGrade || 'weak');
+        host.innerHTML = '<div>'+lead+' '+weakNote+'</div>'
+          +'<div class="qaf-coach-actions">'+suggestions.map(function(s){
+            if(s.panel){
+              return '<button class="qaf-coach-btn" type="button" data-action="launch-recall" data-panel="'+s.panel+'" data-mode="'+(s.mode||'flash')+'">'+escapeHtml(s.label)+'</button>';
+            }
+            return '<button class="qaf-coach-btn" type="button" data-action="switch-tab" data-tab="'+s.tab+'">'+escapeHtml(s.label)+'</button>';
+          }).join('')+'</div>'
+          +'<div style="margin-top:6px;color:#64748b">Panel stats: '+counts.weak+' weak, '+counts.solid+' solid, '+counts.senior+' senior, '+counts.new+' new.</div>';
+      }
       updateStats();
+      renderCoach('', '');
 
       function ensureRevealUI(qa){
         if(qa.querySelector('.fc-reveal-btn')) return;
@@ -14030,7 +14384,10 @@ function filterRole(show){
           }
         }
         updateStats();
+        var qtxt = (qa.querySelector('.qs') && qa.querySelector('.qs').textContent || '').replace(/\s+/g,' ').trim();
+        renderCoach(grade, qtxt);
         renderPaths();
+        renderGapDashboard();
         // Briefly highlight + auto-collapse next
         qa.classList.add('fc-flash');
         setTimeout(function(){ qa.classList.remove('fc-flash'); }, 1200);
@@ -14843,6 +15200,10 @@ function filterRole(show){
                        .sort(function(a,b){ return srsDaysToDue(a) - srsDaysToDue(b); });
     var nextUp = TOPICS.filter(function(t){ var d = srsDaysToDue(t); return d !== null && d > 0 && d <= 7; })
                        .sort(function(a,b){ return srsDaysToDue(a) - srsDaysToDue(b); }).slice(0, 8);
+    var weakPanels = ['qa','qa2','qa3'].map(function(pid){
+      var c = fcCountsForPanel(pid);
+      return { panel: pid, weak: c.weak, total: c.total };
+    }).filter(function(x){ return x.total > 0; }).sort(function(a,b){ return b.weak - a.weak; });
     function listHtml(items, emptyMsg, mode){
       if(items.length === 0) return '<div class="gap-empty">'+emptyMsg+'</div>';
       return '<div class="gap-list">' + items.slice(0, 8).map(function(t){
@@ -14859,7 +15220,12 @@ function filterRole(show){
     dash.innerHTML =
       '<div class="gap-col"><div class="gap-col-hd"><span class="gap-icon-red">\u25CF</span> Due for review now ('+dueNow.length+')</div>'+listHtml(dueNow,'Nothing due. Nice work.','due')+'</div>' +
       '<div class="gap-col"><div class="gap-col-hd"><span class="gap-icon-amber">\u25CF</span> Coming up this week ('+nextUp.length+')</div>'+listHtml(nextUp,'No reviews scheduled in the next 7 days.','due')+'</div>' +
-      '<div class="gap-col"><div class="gap-col-hd"><span class="gap-icon-gray">\u25CF</span> Untouched ('+untouched.length+' / '+TOPICS.length+')</div>'+listHtml(untouched,'You\u2019ve started every topic.','none')+'</div>';
+      '<div class="gap-col"><div class="gap-col-hd"><span class="gap-icon-gray">\u25CF</span> Untouched ('+untouched.length+' / '+TOPICS.length+')</div>'+listHtml(untouched,'You\u2019ve started every topic.','none')+'</div>' +
+      '<div class="gap-col"><div class="gap-col-hd"><span class="gap-icon-red">\u25CF</span> Knowledge gaps from self-scores</div>'
+      +(weakPanels.length ? ('<div class="gap-list">'+weakPanels.slice(0,3).map(function(item){
+          return '<div class="gap-item" data-action="launch-recall" data-panel="'+item.panel+'" data-mode="flash"><span>'+topicLabel(item.panel)+'</span><span class="gi-meta gap-icon-red">'+item.weak+' weak</span></div>';
+        }).join('')+'</div>') : '<div class="gap-empty">Start scoring Q&amp;A flashcards to unlock adaptive gap routing.</div>')
+      +'</div>';
   }
 
   //  Learning Paths 

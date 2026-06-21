@@ -1,0 +1,39 @@
+name: Topic request
+description: Suggest a new topic, role path, or enterprise pattern to add.
+title: "[Topic Request] "
+labels:
+  - topic-request
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What gap are you trying to solve?
+      description: Describe the user scenario and why this topic is needed.
+      placeholder: "Example: Need a dedicated section for multi-agent orchestration failure modes."
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope
+      description: Which tabs should be updated and what depth is expected?
+      placeholder: "Tabs: agents, agentops, sysdesign. Depth: practical architecture + interview cues."
+    validations:
+      required: true
+  - type: input
+    id: source_links
+    attributes:
+      label: References (optional)
+      description: Vendor docs or authoritative references.
+      placeholder: "https://..."
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Priority
+      options:
+        - P3 (normal)
+        - P2 (important)
+        - P1 (urgent)
+      default: 0
+    validations:
+      required: true

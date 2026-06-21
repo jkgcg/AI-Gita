@@ -1,0 +1,47 @@
+name: Content correction
+description: Report a correctness issue or misleading statement.
+title: "[Correction] "
+labels:
+  - content-correction
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Impacted tab/section
+      description: Mention the tab and heading where the issue appears.
+      placeholder: "LLMs tab -> Context windows table"
+    validations:
+      required: true
+  - type: textarea
+    id: current_statement
+    attributes:
+      label: Current statement
+      description: Quote or summarize the current statement.
+    validations:
+      required: true
+  - type: textarea
+    id: corrected_statement
+    attributes:
+      label: Proposed correction
+      description: Provide the corrected wording/fact.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source link
+      description: Official vendor/reference link supporting the correction.
+      placeholder: "https://..."
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - P1 (critical correctness/security)
+        - P2 (important factual drift)
+        - P3 (clarity/wording)
+      default: 1
+    validations:
+      required: true
