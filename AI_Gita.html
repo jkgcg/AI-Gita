@@ -13058,11 +13058,12 @@ function filterRole(show){
   //  PROGRESS TRACKING 
   var LS_KEY='aigita.progress.v1';
   var GLOBAL_HIT_NS='aigita-guide';
-  var GLOBAL_HIT_KEY='main';
+  var GLOBAL_HIT_KEY='ai-gita-visits';
   var GLOBAL_HIT_CACHE_KEY='aigita.hits.global.cache.v1';
+  // CounterAPI v1: auth-free public counter. '/up' increments by 1 and returns {"count":N}.
+  // This replaces the now-defunct countapi.xyz service.
   var GLOBAL_HIT_ENDPOINTS=[
-    'https://api.countapi.xyz/hit/{ns}/{key}',
-    'https://countapi.xyz/hit/{ns}/{key}'
+    'https://api.counterapi.dev/v1/{ns}/{key}/up'
   ];
   function renderGlobalHitsUI(n){
     var el=document.getElementById('hit-count');
@@ -13120,7 +13121,9 @@ function filterRole(show){
       if(cached===null) renderGlobalHitsUnavailable();
       return;
     }
-    var key=resolveGlobalHitKey();
+    // Use a single fixed key so every visitor increments the same global counter,
+    // regardless of the URL/path the page is served from.
+    var key=GLOBAL_HIT_KEY;
     var i=0;
     function tryNext(){
       if(i>=GLOBAL_HIT_ENDPOINTS.length) return;
@@ -13129,9 +13132,11 @@ function filterRole(show){
       fetchJsonWithTimeout(url, 2500)
         .then(function(r){ return r && r.ok ? r.json() : null; })
         .then(function(data){
-          if(data && typeof data.value==='number' && data.value>=0){
-            renderGlobalHitsUI(data.value);
-            saveGlobalHitsCache(data.value);
+          var n = data && (typeof data.count==='number' ? data.count
+                          : (typeof data.value==='number' ? data.value : null));
+          if(n!==null && isFinite(n) && n>=0){
+            renderGlobalHitsUI(n);
+            saveGlobalHitsCache(n);
           }else{
             tryNext();
           }
