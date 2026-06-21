@@ -1,0 +1,374 @@
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<div class="ibox">
+  Building an AI system and proving it works are two completely different problems. This module is about the second one.<br><br>
+  It is surprisingly easy to build an AI system that <em>looks</em> like it is working. Your recommendation engine starts recommending things, customers buy some of them, and revenue is up. Is that the AI's contribution — or would those customers have bought those items anyway? Your chatbot resolves a percentage of tickets without human escalation. Are those resolutions actually satisfying customers, or are they just closing the ticket?<br><br>
+  Data science — specifically causal inference, A/B testing, and uplift modelling — is the discipline that answers these questions. It provides the tools to distinguish between an AI system that is genuinely creating value and one that merely appears to be while the business outcome is driven by something else entirely.<br><br>
+  The three central concepts:
+  <ul class="dl" style="margin-top:8px">
+    <li><strong>Causal inference:</strong> understanding the difference between correlation (two things happening together) and causation (one thing making the other happen). This distinction is the difference between making the right decision and making the wrong decision based on correct-looking data.</li>
+    <li><strong>A/B testing:</strong> the most reliable method for proving that an AI intervention caused an observed improvement, by randomly assigning users to conditions and measuring outcomes.</li>
+    <li><strong>Uplift modelling:</strong> a technique for identifying which specific users benefit from an AI intervention, so that resources are targeted where they actually create value rather than deployed broadly on users who would have behaved the same way regardless.</li>
+  </ul>
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    You are often deciding whether to build or buy an AI system, and how to measure its success. Without the ability to distinguish correlation from causation, the success metrics you specify will be misleading.<br><br>
+    Many architects accept vendor claims at face value: "Our recommendation engine increases conversion by 15%." But that 15%, unless measured with a randomised experiment against a control group, is almost certainly not 15% of causal lift. It may be 5% genuine improvement and 10% selection effect (the engine was showing up for customers who were already about to convert).<br><br>
+    <strong>The A/B testing framework is infrastructure.</strong> A system that cannot run controlled experiments cannot learn whether it is working and cannot improve. Specifying the experiment assignment service, the logging, and the analysis pipeline is part of your architecture deliverable.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    At the enterprise level, the stakes of confusing correlation with causation are high. An enterprise that believes its AI is adding 20% to revenue and invests accordingly — in licences, staff, infrastructure — based on a correlation rather than a causal measurement is misallocating capital. The causal measurement might show 5% genuine lift, not 20%.<br><br>
+    This is not hypothetical. It is a pattern that plays out repeatedly in enterprise AI deployments. The algorithm recommends products to customers already in the purchase funnel. The reported lift is a mix of genuine improvement and statistical artefact.<br><br>
+    Causal rigour in AI evaluation is also a <strong>regulatory and governance concern</strong>. Regulators in financial services and healthcare increasingly expect AI systems to demonstrate, not just claim, that their interventions cause the outcomes attributed to them.
+  </div>
+</div>
+
+<!-- S3: Think About It Like This -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox">
+  Imagine a city installs smart traffic signals at an intersection. The following month, accidents drop by 30%. The mayor attributes the decline to the new signals.<br><br>
+  But that same month: a new school opened nearby, reducing heavy vehicle traffic by 15%. It was an unusually dry month, with 40% fewer wet-road incidents. And a nearby construction project finished, removing a lane closure that had been causing erratic driving.<br><br>
+  The 30% reduction is real. But how much was caused by the smart signals versus the school, the dry weather, and the end of construction? Without a controlled experiment — a similar intersection that did <em>not</em> get smart signals during the same period — you cannot separate the signal from the noise.<br><br>
+  <strong>A/B testing</strong> is how you create the equivalent of that control intersection: randomly assign users to experience or not experience your AI system, hold everything else constant, and measure the difference. The randomisation is what creates causal validity — not the fanciness of the model.<br><br>
+  <strong>Uplift modelling</strong> refines this further: not all drivers respond the same way to smart signals. Some would have driven carefully regardless. Uplift modelling finds the "persuadables" — the ones where the intervention actually makes a difference — and focuses resources on them.
+</div>
+
+<!-- S4: Step-by-Step Walkthrough -->
+<div class="sh">Step-by-Step Walkthrough</div>
+
+<div class="sh2">4.1 Confounding: Why Correlation Fails</div>
+
+<div class="ibox">
+  A <strong>confounder</strong> is a third variable that causes both the thing you are measuring as the "treatment" and the outcome you are trying to predict, creating the appearance of a causal relationship that does not exist.<br><br>
+  <strong>Classic example:</strong> ice cream sales are highly correlated with drowning rates. Ice cream does not cause drowning. Summer heat (the confounder) causes both increased ice cream consumption and increased swimming, which leads to more drowning incidents.<br><br>
+  <strong>Enterprise AI example:</strong> your recommendation system shows high correlation between "user received a recommendation" and "user made a purchase." But users who reach the recommendation widget are already deep in the purchase funnel — they have been browsing for 10 minutes, added items to their basket, and reached checkout. The purchase correlation is driven by purchase intent (the confounder), not by the recommendation's persuasive effect.
+</div>
+
+<div class="sh2">Common Confounders in Enterprise AI Evaluation</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Selection-Based Confounders</div>
+    <ul class="dl">
+      <li><strong>Self-selection:</strong> users who opt into AI features (chatbots, recommendations, personalisation) are often higher-value users who behave differently regardless.</li>
+      <li><strong>Recency:</strong> customers who have just made a purchase have different short-term behaviour; showing AI to recently active customers will always look like a strong correlation.</li>
+      <li><strong>Survivorship:</strong> measuring outcomes only for users who completed a workflow ignores users who dropped out — and AI interventions often affect drop-out rates differently.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Temporal Confounders</div>
+    <ul class="dl">
+      <li><strong>Time of day / day of week:</strong> measurements at different times naturally have different conversion rates. If your AI runs on Tuesday and your baseline was measured on Saturday, the difference is not the AI's effect.</li>
+      <li><strong>Seasonality:</strong> any measurement period may contain calendar effects (promotions, holidays, pay cycles) that were not present in the comparison period.</li>
+    </ul>
+    <br>The only clean way to measure recommendation causal impact is to randomly withhold the recommendation from a portion of high-intent users and compare conversion rates.
+  </div>
+</div>
+
+<div class="sh2">4.2 A/B Testing: How You Prove AI ROI</div>
+
+<div class="ibox">
+  An A/B test assigns users randomly to one of two conditions:
+  <ul class="dl" style="margin-top:8px">
+    <li><strong>Control group (A):</strong> the baseline experience — no AI intervention, or the previous system.</li>
+    <li><strong>Treatment group (B):</strong> the new AI intervention.</li>
+  </ul>
+  Because assignment is random, any differences between groups in user characteristics should be small and unbiased. The measured difference in outcome is therefore a reliable estimate of the <strong>causal effect</strong> of the AI intervention.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">Unit of Randomisation</div>
+  What entity is randomly assigned — the user, the session, the order, the store? The unit must match the level at which the intervention is applied. If your AI personalises at the user level, randomise at the user level. If it affects an entire store's operations, randomise at the store level (a "cluster randomised trial").
+</div>
+<div class="alayer al2">
+  <div class="ln">Sample Size and Power</div>
+  Before running the test, calculate how many users you need in each group to detect a meaningful effect. This requires estimating the baseline conversion rate, the minimum effect size you care about, and the desired statistical power (typically 80–90%). Running a test with too few users and declaring victory based on a positive result is a form of false confidence — small samples produce noisy results that can be positive by chance.
+</div>
+<div class="alayer al3">
+  <div class="ln">Duration</div>
+  Run the test for long enough to cover a full business cycle. A test run only on weekdays misses weekend effects. A test run over one week misses weekly patterns. For seasonally affected businesses, tests may need to run for weeks to months to avoid capturing a temporary seasonal effect as a permanent AI improvement.
+</div>
+<div class="alayer al4">
+  <div class="ln">Primary Metric</div>
+  Define your primary metric <em>before</em> the test starts. Changing the primary metric after seeing results is p-hacking. Choose secondary guardrail metrics that catch unintended harms — a recommendation algorithm that increases clicks while decreasing customer satisfaction is harmful even if the click metric looks positive.
+</div>
+<div class="alayer al5">
+  <div class="ln">Multiple Testing</div>
+  If you run many A/B tests simultaneously, some will be "positive" by chance. Apply Bonferroni correction (divide the significance threshold by the number of simultaneous tests) or use sequential testing methods that control the false discovery rate.
+</div>
+<div class="alayer al6">
+  <div class="ln">Novelty Effect</div>
+  Users may behave differently because of the novelty of a new experience, not because of its genuine value. This inflates measured lift in the first few days or weeks. Run tests long enough for novelty to wear off.
+</div>
+
+<div class="sh2">4.3 Advanced A/B Testing Concepts</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Statistical vs Practical Significance</div>
+    A very large sample can make a tiny effect statistically significant. A 0.01% improvement in conversion that is statistically significant at p &lt; 0.001 may not justify the operational cost of deploying the AI system. Always translate your statistical result into a business impact number before making a deployment decision.<br><br>
+    <strong>Two-sided vs one-sided tests:</strong> a two-sided test asks "is there any difference between A and B?" Use two-sided tests in practice — you want to detect both positive and negative effects. Use one-sided tests only when there is no possibility B could be worse than A.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Sequential Testing and Long-Term Holdouts</div>
+    <strong>Sequential testing:</strong> traditional A/B testing requires deciding sample size in advance and not looking at results until complete. Peeking early and stopping when positive inflates false positive rates. Sequential methods (CUPED, e-values, alpha-spending) allow checking results continuously without inflating false positive rates — important for fast-moving teams who cannot wait for a pre-specified sample size.<br><br>
+    <strong>Holdout groups:</strong> some AI interventions have effects that only appear over long timeframes. Maintain permanent holdout groups (users who never receive the AI intervention) to measure long-term causal effects that short-term A/B tests cannot capture.
+  </div>
+</div>
+
+<div class="sh2">4.4 Uplift Modelling: Targeting AI Interventions</div>
+
+<div class="ibox">
+  Standard A/B testing tells you the <em>average</em> effect of an AI intervention. But the average conceals enormous heterogeneity. For most interventions, users fall into four categories:
+</div>
+
+<div class="g2">
+  <div class="card g">
+    <div class="ch g">Persuadables (Target These)</div>
+    Would <em>not</em> take the action without the intervention, but <em>do</em> take it with the intervention. These are the users where your AI creates genuine incremental value. Targeting them creates genuine incremental revenue.
+  </div>
+  <div class="card a">
+    <div class="ch a">Sure Things (Waste to Target)</div>
+    Would take the action regardless of the intervention. Targeting them wastes AI resources and gives discounts to customers who would have paid full price — unnecessary interventions with no incremental value.
+  </div>
+</div>
+<div class="g2" style="margin-top:8px">
+  <div class="card b">
+    <div class="ch b">Lost Causes (Ignore)</div>
+    Would not take the action regardless of the intervention. Targeting them wastes resources and achieves nothing.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Sleeping Dogs (Actively Avoid)</div>
+    Would take the action without the intervention, but the intervention causes them to <em>not</em> take it — the AI contact backfires. Targeting them actively harms your metrics.
+  </div>
+</div>
+
+<div class="ibox" style="margin-top:12px">
+  Standard ML models predict P(outcome = 1). Uplift models predict <strong>P(outcome = 1 | intervention) − P(outcome = 1 | no intervention)</strong> — the marginal effect of the intervention for each individual.<br><br>
+  Building an uplift model requires data from an A/B test: the intervention assignment (treatment or control), the outcome, and features for prediction.
+</div>
+
+<div class="g3" style="margin-top:12px">
+  <div class="card b">
+    <div class="ch b">Two-Model Approach</div>
+    Train one model on treatment group data and one model on control group data. The predicted uplift for a new user is the difference in their predicted outcomes from the two models.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Class Transformation</div>
+    Transform the binary outcome using the treatment assignment to create a single transformed target. A single model trained on this target directly predicts uplift.
+  </div>
+  <div class="card g">
+    <div class="ch g">Meta-Learners</div>
+    Families of approaches using flexible ML models to estimate treatment effects. X-Learner is the most robust for imbalanced treatment/control samples.
+  </div>
+</div>
+
+<div class="ibox" style="margin-top:12px">
+  <strong>For architects:</strong> uplift modelling answers "which customers should we include in this intervention campaign?" (A/B testing answers "does this intervention work at all?"). The two are complementary. Run A/B tests to validate that an intervention works. Build uplift models to optimise who receives it.
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example: Measuring AI-Powered Product Recommendation ROI</div>
+
+<div class="card a">
+  <div class="ch a">Scenario</div>
+  A major European retail group deployed an AI product recommendation engine 6 months ago. The vendor claims a <strong>14% revenue lift</strong>. The enterprise analytics team is tasked with verifying this claim and presenting findings to the CFO, who is deciding whether to renew a €2.4M annual contract.<br><br>
+  <strong>The problem with the vendor's claim:</strong> the vendor measured "revenue from users who saw recommendations" vs "revenue from users who did not see recommendations." But users who reach the recommendation widget are deep in the checkout funnel — they have already added items to their basket. Users who did not see the widget may have left the site earlier. This is classic confounding by purchase intent.
+</div>
+
+<div class="sh2">Designing the Proper Measurement</div>
+
+<div class="alayer al1">
+  <div class="ln">Step 1: Randomised A/B Test</div>
+  From all users who reach the recommendation widget, randomly assign 50% to see AI recommendations and 50% to see a static "You might also like" banner with no personalisation. This controls for purchase intent because both groups are equally deep in the funnel.
+</div>
+<div class="alayer al2">
+  <div class="ln">Step 2: Define Primary Metric</div>
+  Before running the test: "incremental items added to basket from the recommendation area per session." Secondary (guardrail) metrics: average order value, return rate (does AI recommend items that get returned more?), customer satisfaction score from post-purchase surveys.
+</div>
+<div class="alayer al3">
+  <div class="ln">Step 3: Calculate Sample Size</div>
+  At a baseline add-to-basket rate of 8%, to detect a 1% absolute improvement (12.5% relative lift) with 80% power and 5% significance level: approximately 58,000 sessions per group. At current traffic: 3 weeks to reach this.
+</div>
+<div class="alayer al4">
+  <div class="ln">Step 4: Run for Full Business Cycle</div>
+  Run for 4 weeks (to cover a full monthly cycle, including the mid-month payday pattern in customer behaviour).
+</div>
+
+<div class="sh2">Results</div>
+
+<div class="kv">
+  <div class="kvr"><span class="kvk">Treatment (AI recommendations)</span><span class="kvv">Add-to-basket rate = 9.1%</span></div>
+  <div class="kvr"><span class="kvk">Control (static banner)</span><span class="kvv">Add-to-basket rate = 8.3%</span></div>
+  <div class="kvr"><span class="kvk">Absolute lift</span><span class="kvv">0.8 percentage points (10% relative lift)</span></div>
+  <div class="kvr"><span class="kvk">Statistical significance</span><span class="kvv">p = 0.003 (well below 0.05 threshold)</span></div>
+  <div class="kvr"><span class="kvk">Average order value</span><span class="kvv">No statistically significant difference</span></div>
+  <div class="kvr"><span class="kvk">Return rate</span><span class="kvv">No statistically significant difference</span></div>
+</div>
+
+<div class="ibox" style="margin-top:12px">
+  <strong>Reframing the ROI:</strong> the vendor claimed 14% revenue lift. The actual causal lift on the measured metric is 10% relative improvement in add-to-basket rate from the recommendation area. The recommendation area accounts for approximately 6% of total revenue. Therefore, the causal revenue lift is approximately 10% × 6% = <strong>0.6% of total revenue</strong>, not 14%.
+</div>
+
+<div class="card g" style="margin-top:12px">
+  <div class="ch g">Uplift Analysis Add-On</div>
+  The analytics team builds an uplift model on the A/B test data to find which customers have the highest incremental response. Finding: new customers (fewer than 3 orders in the last 12 months) and customers in specific category segments (home and kitchen, sports equipment) have 3–4× higher uplift than the average.<br><br>
+  Showing AI recommendations to these segments specifically would achieve <strong>80% of the total revenue lift</strong> while reducing sessions served by the recommendation engine by 40% — a significant infrastructure cost saving.
+</div>
+
+<div class="kv" style="margin-top:12px">
+  <div class="kvr"><span class="kvk">Governance outcome</span><span class="kvv">CFO receives a methodologically sound analysis correcting the vendor's claim</span></div>
+  <div class="kvr"><span class="kvk">Contract decision</span><span class="kvv">Renew but negotiate on verified 0.6% revenue lift basis, not vendor's 14% claim</span></div>
+  <div class="kvr"><span class="kvk">Negotiation saving</span><span class="kvv">€400K</span></div>
+  <div class="kvr"><span class="kvk">Additional saving</span><span class="kvv">Infrastructure cost reduction via uplift-based targeting strategy</span></div>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Experiment Infrastructure as Core Component</div>
+    <ul class="dl">
+      <li><strong>Experiment infrastructure is not optional reporting.</strong> An AI system without the ability to run controlled experiments cannot learn whether it is working, cannot improve, and cannot be held accountable. Specify the experiment assignment service, event logging pipeline, and analysis pipeline in your architecture design — before launch.</li>
+      <li><strong>Causal metrics require logging most AI platforms do not provide by default.</strong> To measure causal impact, you need to log: which experiment variant each user was assigned to, what intervention they received (or did not receive), and what outcome occurred. Many AI vendor platforms log only what was recommended and what was clicked — not the counterfactual. This is a due-diligence question to ask vendors before purchase.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Governance and Long-Term Measurement</div>
+    <ul class="dl">
+      <li><strong>Guardrail metrics prevent optimising for the wrong thing.</strong> Specify metrics that must not get worse — customer satisfaction score, return rate, customer service contact rate, long-term retention rate. If any guardrail degrades significantly, the AI intervention fails even if the primary metric improves.</li>
+      <li><strong>The "holdout forever" pattern for long-term measurement:</strong> maintain a permanent holdout group (typically 5–10% of users) who never receive AI interventions. This allows you to measure the cumulative effect of AI personalisation over months or years. Without this, you can never measure effects that take longer than a single A/B test to manifest.</li>
+      <li><strong>Uplift model outputs must be operationalised at the campaign planning level.</strong> This requires integration between the data science platform (where uplift scores are generated) and the campaign management system (where targeting decisions are made). This integration is an architecture deliverable.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">Five Architect Self-Test Questions</div>
+  <ol class="sl">
+    <li>
+      <strong>Q: A stakeholder says "Our AI-powered email campaign drove a 23% higher open rate than last month's campaign. The AI is clearly working." What questions do you ask?</strong><br>
+      <em>Expected:</em> Was there a control group — a group who received a non-AI email during the same period? Were the two groups randomly assigned, or did the AI target more engaged users? What changed between the two campaigns beyond the AI personalisation (offer, creative, send time, list)? Is a 23% higher open rate statistically significant given the sample sizes? A proper A/B test with random assignment and pre-determined sample size is the only way to make a defensible causal claim.
+    </li>
+    <li>
+      <strong>Q: After 2 weeks, a chatbot treatment group shows 15% lower contact rate than control, p = 0.04. The PM declares success. What concerns do you raise?</strong><br>
+      <em>Expected:</em> "Lower contact rate" is not "better customer service" — customers who give up also reduce contact rate. Measure resolution rate, customer satisfaction scores, and downstream outcomes (higher cancellation rates?). Two weeks may be too short for novelty effect to wear off. p = 0.04 is marginal — was this significance threshold pre-specified? Are there segment effects where specific groups (elderly customers, complex issues, non-native speakers) are experiencing significantly worse outcomes?
+    </li>
+    <li>
+      <strong>Q: Explain the difference between a "sure thing" and a "persuadable" in uplift modelling, and why this distinction matters for a retail promotion AI system.</strong><br>
+      <em>Expected:</em> A "sure thing" converts regardless of the promotion — targeting them gives discounts to customers who would have paid full price without creating incremental revenue. A "persuadable" converts only because of the promotion — targeting them creates genuine incremental revenue. Uplift modelling identifies persuadables by estimating the marginal effect of the promotion for each individual, improving the efficiency of the promotion budget by 30–50% in typical enterprise deployments.
+    </li>
+    <li>
+      <strong>Q: What is a confounding variable? Give a specific example from a customer data context where a confounder would cause an AI system to appear to be working when it is not.</strong><br>
+      <em>Expected:</em> A confounding variable causes both the treatment (exposure to the AI intervention) and the outcome, creating the appearance of a causal relationship when none exists. Example: a customer retention AI sends re-engagement emails to customers who have not purchased in 60 days, evaluated by measuring purchase rate among customers who opened the email vs those who did not. Email open propensity is the confounder — customers who open emails are already more engaged and likely to return regardless. A correct evaluation would randomly assign 60-day dormant customers to receive or not receive the email, and compare purchase rates between the two groups.
+    </li>
+    <li>
+      <strong>Q: The product team says the AI recommendation engine drove €4.2M in recommendations revenue last quarter. How do you translate this into a causal revenue attribution figure?</strong><br>
+      <em>Expected:</em> The €4.2M is "revenue from purchases that included a recommended item" — not the revenue caused by the recommendation. The causal attribution requires a two-step calculation: (1) from your A/B test results, find the incremental conversion rate lift the AI causes over the control condition (e.g. a 10% relative improvement in add-to-basket rate); (2) apply this lift to the portion of revenue the recommendation area influences (e.g. 6%). Causal attribution = 10% × 6% × total revenue. On a quarterly revenue base of €70M, that is 0.6% × €70M = €420K of genuinely incremental revenue — one-tenth of the €4.2M figure.
+    </li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers quasi-experimental methods (DiD, RDD, instrumental variables) and advanced uplift modelling techniques. Safe to skip on a first pass; return here when your team needs to evaluate causal claims in complex rollout scenarios.</div>
+
+<div class="sh2">8.1 Causal Inference Beyond A/B Tests</div>
+
+<div class="ibox">
+  Pure randomised A/B tests are not always possible. Sometimes you cannot randomise — regulatory constraints, technical limitations, or ethical concerns may prevent withholding a feature from some users. Causal inference provides quasi-experimental alternatives.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Quasi-Experimental Methods</div>
+    <ul class="dl">
+      <li><strong>Difference-in-Differences (DiD):</strong> compare the change in outcome over time between a group that received the treatment and a group that did not. If both groups were trending similarly before treatment (the "parallel trends" assumption), the divergence after treatment estimates the causal effect. Used when the treatment rolled out to some stores/regions but not others.</li>
+      <li><strong>Regression Discontinuity Design (RDD):</strong> exploit a threshold in an assignment rule. If customers above loyalty tier threshold X receive the AI feature and those just below do not, compare outcomes for customers just above and just below the threshold. Near the threshold, assignment is quasi-random.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Further Methods</div>
+    <ul class="dl">
+      <li><strong>Instrumental Variables (IV):</strong> use a third variable (the "instrument") that affects treatment but has no direct effect on the outcome other than through the treatment. Example: if a software bug randomly prevented some users from seeing the AI feature, the bug exposure can be used as an instrument.</li>
+      <li><strong>Propensity Score Matching:</strong> for observational data with no randomisation, match treated and control users who have similar propensity to receive the treatment. The matched groups can then be compared. Weaker than randomisation but stronger than no adjustment — controls for observed confounders but cannot control for unobserved ones.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>As an architect:</strong> You would specify the need for quasi-experimental methods when a clean A/B test is impossible (e.g. a regional rollout, a policy change that affects everyone). Your data science team would select and implement the specific method.
+</div>
+
+<div class="sh2">8.2 Uplift Modelling with the X-Learner</div>
+
+<div class="card b">
+  <div class="ch b">X-Learner: Handling Imbalanced Treatment Groups</div>
+  The X-Learner is a meta-learner for uplift modelling that handles the common situation where treatment and control groups are of different sizes (or where base outcome rates differ substantially between groups).<br><br>
+  <ol class="sl">
+    <li><strong>Step 1:</strong> Train two outcome models — one on the treatment group (predicting outcome given treatment) and one on the control group (predicting outcome given no treatment).</li>
+    <li><strong>Step 2:</strong> Use the control outcome model to impute what treatment group members would have done without treatment. Use the treatment outcome model to impute what control group members would have done with treatment. This creates imputed individual treatment effects for both groups.</li>
+    <li><strong>Step 3:</strong> Train two uplift models — one on the treatment group's imputed effects and one on the control group's imputed effects.</li>
+    <li><strong>Step 4:</strong> Combine the two uplift estimates using a weighting function (often based on propensity scores) to produce a final uplift estimate for each individual.</li>
+  </ol>
+  <br>The X-Learner is preferred over simpler two-model approaches when the treatment and control groups are unbalanced — for example, in a holdout A/B test where 90% received treatment and 10% were in control.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>As an architect:</strong> You encounter X-Learner when your data science team reports that treatment and control groups are very different in size or composition. Your role is to understand why a more complex method was needed, not to implement it.
+</div>
+
+<div class="sh2">8.3 Evaluating Uplift Models</div>
+
+<div class="ibox">
+  Unlike classification models (which have clear accuracy metrics), uplift models are harder to evaluate because the true individual treatment effect is never observed — you can only see what happened under one condition for each user.
+</div>
+
+<div class="g3">
+  <div class="card b">
+    <div class="ch b">Qini Coefficient</div>
+    Measures the cumulative uplift captured as you target progressively more users in order of their predicted uplift score. A perfect uplift model immediately captures all true persuadables. A random model captures them proportionally. The Qini coefficient measures the area between the uplift model curve and the random baseline.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Uplift Curve / Cumulative Gain Chart</div>
+    Plots cumulative incremental outcomes as you target progressively more users by decreasing predicted uplift score. Use this to decide the optimal targeting threshold — the point where marginal uplift equals the cost of the intervention.
+  </div>
+  <div class="card g">
+    <div class="ch g">Uplift@K</div>
+    At the top K% of users by predicted uplift, what is the measured incremental outcome compared to a random sample of the same size? Requires either a holdout experiment or a two-stage A/B test where both treated and untreated users are randomly sampled.
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>As an architect:</strong> When a data science team presents a Qini curve or Uplift@K metric to justify a campaign management system, you now have the vocabulary to ask the right questions: what is the targeting economics, and how much of the benefit comes from the persuadable segment?
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Correlation is not causation, and the difference matters financially:</strong> an AI system that appears to drive 14% revenue lift based on correlational measurement may be driving 0.6% causal lift once confounders are removed — a 20× difference that determines whether the system is worth its cost.</li>
+  <li><strong>A/B testing requires four non-negotiable design elements:</strong> random assignment, pre-specified primary metric, adequate sample size calculated before the test runs, and sufficient duration to cover a full business cycle.</li>
+  <li><strong>Guardrail metrics must be specified alongside success metrics:</strong> an AI system that improves conversion while degrading customer satisfaction, increasing return rates, or reducing long-term retention causes net harm even if its primary metric looks positive.</li>
+  <li><strong>Uplift modelling identifies which specific users benefit from an AI intervention:</strong> enabling targeted deployment that achieves 70–80% of the value at 30–50% of the cost by avoiding "sure things" who would have converted anyway and "sleeping dogs" who are actively harmed by the intervention.</li>
+  <li><strong>Experiment infrastructure must be specified as a core component before launch:</strong> the assignment service, event logging pipeline, and analysis tooling are not optional reporting tools — an AI system that cannot run controlled experiments cannot prove its own value or improve over time.</li>
+</ul>

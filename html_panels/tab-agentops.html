@@ -1,0 +1,319 @@
+<!-- S1: What Is It -->
+<div class="sh">What Is Agent Runtime Ops?</div>
+<div class="ibox">You have deployed an AI agent. It is handling customer queries, processing returns, routing tickets. It worked perfectly in testing. <strong>Agent Runtime Ops</strong> is everything you do to keep it working in production — and to know when it stops.<br><br>This is the operational layer that sits on top of the agent platform. If the Agentic Platform module covered <em>how to build</em> an agent system, Agent Runtime Ops covers <em>how to run it</em>: memory management, monitoring, human-in-the-loop gates, prompt drift detection, and legacy system connectors.<br><br><strong>Key distinction from traditional app operations:</strong> in a conventional system, you monitor <em>errors</em>. In an agent system, the scariest failures produce <strong>no errors</strong> — the agent confidently does the wrong thing, logs a success, and moves on.</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b"><div class="ch b">For Solution Architects</div>
+    <p>Every operational decision you know — SLA, rollback strategy, incident runbook, capacity planning — has an agent-specific equivalent that behaves differently:</p>
+    <ul class="dl">
+      <li><strong>SLA:</strong> a traditional API call has deterministic latency. An agent call has variable latency — 3 tool calls takes 5 seconds; an unexpected loop takes 45 seconds. Your SLA must cover the distribution, not just the average.</li>
+      <li><strong>Rollback:</strong> rolling back an agent version does not undo the actions it already took. Blast radius controls are your primary defence, not rollback.</li>
+      <li><strong>Capacity:</strong> agents make multiple LLM calls per task. A sudden spike in agent activity translates directly to API cost — not just server load. Cost alerting is as critical as latency alerting.</li>
+    </ul>
+  </div>
+  <div class="card ai"><div class="ch ai">For Enterprise Architects</div>
+    <p>The operational maturity model for agent systems is 2–3 years behind traditional application operations. Most teams are figuring out runbooks, dashboards, and escalation paths as they go.</p>
+    <p>Plan for <strong>observability investment upfront</strong>, not as a retrofit. The hardest thing to add after deployment is a comprehensive trace of why the agent made every decision it made. OpenTelemetry instrumentation, prompt logging, tool call capture, and the reasoning chain must be built in from day one.</p>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This — Air Traffic Control</div>
+<div class="ibox">Imagine you are running an air traffic control operation. You have many aircraft (agents) in the air simultaneously, each making decisions based on instructions and sensor readings.
+  <ul class="dl" style="margin-top:8px">
+    <li><strong>Memory management</strong> is like each aircraft's flight computer — limited memory, keeps the last N radar contacts, discards older ones. Before discarding, it writes key facts to the flight recorder.</li>
+    <li><strong>Monitoring</strong> is the radar display — you are not watching every aircraft continuously. You watch for signals that indicate something needs attention: unexpected trajectory changes, radio silence, entering a no-fly zone, fuel below threshold.</li>
+    <li><strong>HITL gates</strong> are the no-fly zones and mandatory clearances. Certain actions require tower clearance regardless of how confident the aircraft's computer is. The aircraft cannot proceed autonomously past those gates.</li>
+    <li><strong>Prompt drift</strong> is like navigational chart updates. If the airspace boundaries changed last month and your charts were not updated, the aircraft follows correct procedures for the wrong map. Everything looks fine on the instruments, but you are heading somewhere unintended.</li>
+  </ul>
+  <strong>Key insight:</strong> air traffic controllers do not control the aircraft directly — they control the boundaries and escalation triggers. That is exactly what Agent Runtime Ops does.
+</div>
+
+<!-- S4: Core Concepts -->
+<div class="sh">Step-by-Step — The Core Concepts</div>
+
+<div class="sh2">4.1 Four-Layer Memory Architecture</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:12px">Using the context window for everything is expensive, slow, and does not persist across sessions. The production pattern is four distinct memory layers with the right storage type, retrieval pattern, and cost profile for each purpose.</div>
+
+<div class="alayer al1"><div class="ln">Layer 1 — Working Memory (In-Context)</div>What the agent holds in the LLM context window right now: current conversation, last few tool call results, task instructions. <strong>Capacity:</strong> 8K–32K tokens reserved. <strong>Lifespan:</strong> one task or session. <strong>Cost:</strong> high — every token is paid on every LLM call. <strong>Use for:</strong> active conversation, current task state, immediate tool results.</div>
+
+<div class="alayer al2"><div class="ln">Layer 2 — Episodic Memory (Short-Term Persistent)</div>A log of what happened in recent sessions: past conversations, prior actions, outcomes observed. <strong>Storage:</strong> relational or document store, not the LLM context. <strong>Retrieval:</strong> query for relevant past episodes before starting a new task. <strong>Lifespan:</strong> days to weeks, then summarised or archived. <strong>Use for:</strong> cross-session continuity, personalisation, avoiding repeating questions the customer already answered.</div>
+
+<div class="alayer al3"><div class="ln">Layer 3 — Semantic Memory (Knowledge Base)</div>Structured knowledge the agent can retrieve: product catalogues, policy documents, FAQs, process guides. <strong>Storage:</strong> vector database (semantic search) + document store (full retrieval). <strong>Retrieval:</strong> RAG — embed the query, find relevant chunks, inject into working memory. <strong>Use for:</strong> policy lookups, product information, process guidance — anything that would otherwise bloat the context.</div>
+
+<div class="alayer al4"><div class="ln">Layer 4 — Procedural Memory (Agent Configuration)</div>The agent's "how to behave" layer: system prompt, persona definition, tool permissions, escalation rules. <strong>Storage:</strong> configuration files / agent registry. <strong>Lifespan:</strong> versioned and deployed, not ephemeral. <strong>Use for:</strong> role definition, tone, boundaries, escalation thresholds, tool access scope.</div>
+
+<p style="margin-top:10px"><strong>Context budget rule — typical production allocation for a 128K window:</strong></p>
+<div class="code">128K context window
+├──  2K  — System prompt (procedural memory)
+├── 20K  — Retrieved knowledge (semantic memory, per-request)
+├── 10K  — Episodic context (relevant past interactions)
+├── 40K  — Working memory (current conversation + tool results)
+└── 56K  — Reserved for model reasoning + output generation
+
+Exceeding the budget forces truncation. Design the truncation policy before it happens in production.</div>
+
+<div class="sh2">4.2 Monitoring — What to Watch</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:10px">Agents fail in ways that traditional applications do not. Your monitoring stack needs to cover <strong>five signal categories</strong>.</div>
+
+<table class="t">
+  <tr><th>Signal Category</th><th>Key Metrics</th><th>Alert Threshold</th></tr>
+  <tr><td><strong>Task Completion</strong></td><td>Completion rate, mean duration, loop detection (same tool + same args &gt; N times), timeout rate</td><td>&lt;95% completion; &gt;2× baseline duration; &gt;3 identical calls; &gt;2% timeout</td></tr>
+  <tr><td><strong>Tool Call Health</strong></td><td>Tool error rate, tool call volume per agent, unauthorized tool attempts, unexpected tool sequences</td><td>&gt;5% error rate; &gt;2× baseline volume; any unauthorized attempt</td></tr>
+  <tr><td><strong>LLM Output Quality</strong></td><td>Hallucination rate (LLM judge), off-topic rate (semantic similarity), refusal rate, confidence calibration</td><td>Requires LLM judge pipeline or labelled ground truth</td></tr>
+  <tr><td><strong>Cost &amp; Resource</strong></td><td>Tokens per task (P95), total hourly cost, context window saturation rate</td><td>&gt;2× rolling average tokens; &gt;budget cap; &gt;5% context saturation</td></tr>
+  <tr><td><strong>Business Outcomes</strong></td><td>Decision accuracy, CSAT score, escalation rate, false escalation rate</td><td>Most important signals — and the hardest to instrument. Skipped by most teams.</td></tr>
+</table>
+
+<div class="sh2">4.3 HITL Gate Design — Risk-Tiered Approvals</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:10px"><strong>Human-in-the-Loop (HITL)</strong> gates are points where the agent must pause and wait for human approval. Getting this wrong in either direction is costly: too few gates and the agent makes consequential mistakes autonomously; too many gates and you have automated nothing — just added an LLM wrapper to manual work. <strong>Design principle: tier approvals by risk, not by task type.</strong></div>
+
+<table class="t">
+  <tr><th>Risk Level</th><th>Criteria</th><th>Gate Behaviour</th></tr>
+  <tr><td><strong>Low</strong></td><td>Read-only, reversible, low-value, customer-initiated</td><td>No gate — agent proceeds autonomously</td></tr>
+  <tr><td><strong>Medium</strong></td><td>Writes to a system, value below threshold, standard case</td><td>Soft gate — agent proceeds, logs for async human review</td></tr>
+  <tr><td><strong>High</strong></td><td>Irreversible action, value above threshold, or non-standard case</td><td>Hard gate — agent pauses, notifies human, waits up to SLA</td></tr>
+  <tr><td><strong>Critical</strong></td><td>PII deletion, regulatory-impacted, security-sensitive</td><td>Mandatory human approval — agent cannot proceed without explicit sign-off</td></tr>
+</table>
+
+<p style="margin-top:10px"><strong>Example matrix — customer service agent at a retail company:</strong></p>
+<table class="t">
+  <tr><th>Action</th><th>Risk Level</th><th>Gate</th></tr>
+  <tr><td>Look up order status</td><td>Low</td><td>Autonomous</td></tr>
+  <tr><td>Issue refund &lt;£50</td><td>Low</td><td>Autonomous</td></tr>
+  <tr><td>Issue refund £50–£200</td><td>Medium</td><td>Proceeds + async review flag</td></tr>
+  <tr><td>Issue refund &gt;£200</td><td>High</td><td>Hard gate — supervisor approval required</td></tr>
+  <tr><td>Cancel order (unshipped)</td><td>Medium</td><td>Proceeds + async review flag</td></tr>
+  <tr><td>Cancel order (shipped)</td><td>High</td><td>Hard gate — ops team approval</td></tr>
+  <tr><td>Send bulk communication</td><td>Critical</td><td>Mandatory human approval</td></tr>
+  <tr><td>Delete customer account</td><td>Critical</td><td>Mandatory human approval + regulatory log</td></tr>
+</table>
+
+<div class="code">Gate implementation pattern:
+
+Agent determines action needed
+        ↓
+Risk classifier (rule-based or LLM judge)
+        ↓
+   Low ──────────────── High
+    ↓                     ↓
+ Proceed           Create approval task
+                   → notify approver (Slack / email / ticket)
+                   → agent suspends (state serialized to DB)
+                         ↓
+              Approved ──────── Rejected / Timeout
+                 ↓                      ↓
+           Agent resumes         Agent notifies user,
+           with approval         logs outcome, closes task
+           context</div>
+
+<div class="sh2">4.4 Prompt Drift Detection</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:10px">Your agent prompts encode assumptions about: the tools that exist, the data formats tools return, the policies the agent should follow, and the model it is running against. Any of these can silently degrade agent performance without a single error being thrown.</div>
+
+<div class="g2">
+  <div class="card b"><div class="ch b">Drift Detection Pipeline</div>
+    <ol class="sl">
+      <li><strong>Golden test set:</strong> 50–200 curated test tasks with known correct outputs — covering edge cases, standard cases, and past production failures</li>
+      <li><strong>Scheduled regression:</strong> run the golden test set daily or on every deployment through the live agent</li>
+      <li><strong>Scoring:</strong> an LLM judge evaluates each output against the reference answer — scores correctness, completeness, and policy compliance</li>
+      <li><strong>Drift alerting:</strong> if mean score drops more than X% from baseline, trigger an alert and flag for investigation</li>
+    </ol>
+  </div>
+  <div class="card b"><div class="ch b">Retrieval Quality Signals</div>
+    <ul class="dl">
+      <li><strong>Retrieval precision drop:</strong> knowledge base documents have drifted from query patterns</li>
+      <li><strong>Low-similarity retrievals:</strong> queries are no longer finding semantically relevant content</li>
+      <li><strong>Stale document rate:</strong> retrieved documents have not been updated in more than N days</li>
+      <li><strong>Coverage gap:</strong> query classes that return no results above threshold</li>
+    </ul>
+    <p><strong>Principle:</strong> treat prompt and retrieval quality as first-class operational signals, not one-time configuration concerns.</p>
+  </div>
+</div>
+
+<div class="sh2">4.5 Enterprise Legacy Connectors</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:10px">Most enterprises have critical data in systems that predate REST APIs: SAP ERP, IBM MQ, TIBCO, COBOL mainframes. <strong>Design principle:</strong> do not expose legacy systems directly to agents. Wrap them in the integration middleware layer you already operate.</div>
+
+<div class="g3">
+  <div class="card b"><div class="ch b">Pattern A — REST Facade</div>
+    <p><em>Recommended for new work.</em> Build a REST/OpenAPI endpoint in your integration middleware (MuleSoft, Azure APIM, IBM APIC) that wraps the legacy system. Register this endpoint as a tool in the tool registry.</p>
+    <div class="code">Agent → Tool Registry
+  → REST Facade (MuleSoft)
+  → SAP RFC → SAP ERP</div>
+  </div>
+  <div class="card b"><div class="ch b">Pattern B — Event-Driven</div>
+    <p><em>For real-time data.</em> Connect the agent's knowledge plane to the event stream. The agent's semantic memory is updated in near-real-time from the event feed rather than via synchronous API calls.</p>
+    <div class="code">SAP ERP → IBM MQ
+  → Event Processor
+  → Agent Knowledge Plane
+Agent reads from knowledge plane
+(no synchronous SAP call at inference)</div>
+  </div>
+  <div class="card b"><div class="ch b">Pattern C — Async Task Dispatch</div>
+    <p><em>For long-running processes.</em> The agent dispatches a task message to the queue and registers a callback. The agent suspends; the runtime resumes it when the callback arrives.</p>
+    <div class="code">Agent → dispatch_warehouse_task()
+  → Message queued to WMS
+  → Agent suspends, state persisted
+  ← WMS completes, sends event
+  → Runtime resumes agent with result</div>
+  </div>
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example — Supply Chain Exception Handler</div>
+<div class="card a"><div class="ch a">Scenario: 2,000 shipments tracked daily, 150–200 exceptions per day</div>
+  <p><strong>Memory architecture for this agent:</strong></p>
+  <ul class="dl">
+    <li><strong>Working memory:</strong> current exception case — shipment ID, delay reason, carrier status, impacted orders</li>
+    <li><strong>Episodic memory:</strong> previous exceptions on the same carrier route (is this carrier frequently delayed in December?)</li>
+    <li><strong>Semantic memory:</strong> supplier SLA agreements, escalation playbooks, carrier contact details, customs documentation requirements</li>
+    <li><strong>Procedural memory:</strong> system prompt defining escalation rules, tool permissions, communication tone</li>
+  </ul>
+  <p><strong>Monitoring dashboard:</strong></p>
+  <table class="t">
+    <tr><th>Metric</th><th>Target</th><th>Current</th><th>Status</th></tr>
+    <tr><td>Exception resolution rate</td><td>&gt;85% autonomous</td><td>88%</td><td>&#10003;</td></tr>
+    <tr><td>Mean resolution time</td><td>&lt;4 hours</td><td>2.3 hours</td><td>&#10003;</td></tr>
+    <tr><td>HITL escalation rate</td><td>&lt;15%</td><td>12%</td><td>&#10003;</td></tr>
+    <tr><td>False escalation rate</td><td>&lt;5%</td><td>8%</td><td>&#9888; Review</td></tr>
+    <tr><td>Tool error rate (carrier API)</td><td>&lt;2%</td><td>6%</td><td>&#128308; Alert</td></tr>
+    <tr><td>Cost per exception</td><td>&lt;£0.15</td><td>£0.22</td><td>&#9888; Review</td></tr>
+  </table>
+  <p><strong>Investigation finding:</strong> the carrier API introduced a new rate limit; the agent retries failed calls, each retry costs LLM tokens to process the error, and 3 retries per failed call × 6% error rate is compounding cost. <strong>Fix:</strong> add a circuit breaker — after 2 failed calls in a row, fail fast and escalate rather than retrying.</p>
+  <p><strong>Prompt drift example:</strong> in March, the supplier SLA was updated — penalty clauses now kick in at 3-day delays instead of 5. The semantic memory (SLA document) was updated but the procedural memory (system prompt) still said "escalate if delay &gt; 5 days." The drift went undetected for 2 weeks because no errors were thrown. The golden test set caught it: a test case with a 4-day delay was not escalating. Fix: update the system prompt and add the 4-day delay scenario to the golden test set.</p>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">Observability Stack for Agent Systems</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:10px">Traditional application observability: logs, metrics, traces. Agent observability: logs, metrics, traces <strong>+ reasoning traces + tool call graphs + LLM quality signals</strong>. Most teams instrument layers 1 and 2 but skip 3 and 4. The failures that matter most show up in layers 3 and 4.</div>
+
+<table class="t">
+  <tr><th>Layer</th><th>What it captures</th><th>Primary use</th></tr>
+  <tr><td>Infrastructure metrics</td><td>CPU, GPU, memory, network</td><td>Capacity planning</td></tr>
+  <tr><td>Application traces (OTel)</td><td>Latency, errors, tool call graph</td><td>Debugging, SLA tracking</td></tr>
+  <tr><td>LLM quality signals</td><td>Hallucination rate, relevance, refusals</td><td>Quality monitoring</td></tr>
+  <tr><td>Business outcome metrics</td><td>Task accuracy, escalation rate, CSAT</td><td>ROI and drift detection</td></tr>
+</table>
+
+<div class="code">OTel trace example: "handle_exception(shipment_12345)"
+  ├── Span: "retrieve_episodic_memory"      [2ms]
+  ├── Span: "retrieve_knowledge(SLA_docs)"  [45ms]
+  ├── Span: "llm_call_1"                   [1.2s]
+  │     attributes: model=gpt-4o, tokens_in=2400, tokens_out=180
+  │     llm.reasoning: "delay is 4 days, check SLA threshold..."
+  ├── Span: "tool_call: get_carrier_status" [340ms]
+  │     attributes: tool=carrier_api, status=success
+  ├── Span: "llm_call_2"                   [0.9s]
+  │     attributes: model=gpt-4o, tokens_in=2800, tokens_out=220
+  └── Span: "tool_call: create_escalation"  [120ms]
+        attributes: tool=ticketing, escalation_type=hard_gate
+
+This trace answers: "why did the agent escalate this shipment exception?"</div>
+
+<div class="sh2">Agent Version Management</div>
+<div class="g2">
+  <div class="card b"><div class="ch b">Agent Version = 4 Components</div>
+    <p>An agent's behaviour is a combination of all four — and all four can change independently:</p>
+    <div class="code">{
+  model:     "gpt-4o-2025-01-15",
+  prompt:    "customer-service-v2.3",
+  tools:     "tool-registry-snapshot-2026-06-15",
+  knowledge: "knowledge-base-2026-06-20"
+}</div>
+  </div>
+  <div class="card b"><div class="ch b">Shadow Mode Deployment</div>
+    <p>A/B testing requires routing at the task level, not the request level — you do not want a multi-turn conversation to switch agent versions mid-session.</p>
+    <p><strong>Shadow mode:</strong> the new agent processes the same tasks as the live agent but its outputs go to a review queue rather than the customer. Compare new vs. old outputs using an LLM judge before promoting the new version to live traffic.</p>
+  </div>
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself — 5 Questions</div>
+<div class="card g"><div class="ch g">Self-Assessment</div>
+  <p>Use these to verify you can reason through operational architecture — not just recall definitions.</p>
+</div>
+<ol class="sl">
+  <li><strong>An agent resolving 90% of refund requests autonomously last month now resolves only 70%, with no errors in the logs. What are the first three things you investigate?</strong> <em>— (1) Prompt drift: did the return policy change? Run the golden test set to check benchmark scores. (2) Retrieval quality: are knowledge base documents still accurate and fresh? Check retrieval precision and document freshness. (3) Model change: did the model gateway route to a different model version? Check model version in LLM call logs around the time the metric changed.</em></li>
+  <li><strong>Your team wants to deploy an agent that sends promotional emails to customer segments based on purchase history. What HITL gate design would you propose?</strong> <em>— Sending bulk communications is irreversible and high blast-radius. Critical-tier HITL gate: the agent prepares the draft, selects the segment, and presents both to a human approver before any send. Approval includes: segment size, sample recipients, email preview, estimated unsubscribe risk.</em></li>
+  <li><strong>What is the difference between episodic memory and semantic memory? Give a concrete supply chain example of each.</strong> <em>— Episodic memory is a record of what actually happened: "Carrier X was 3 days late on the Milan route in November and again in December — flagged as a seasonal pattern." Semantic memory is structured knowledge independent of experience: "The SLA with Supplier Y states delays exceeding 3 days trigger a 2% penalty clause." Episodic is retrieved by temporal/entity-based lookup; semantic by semantic similarity.</em></li>
+  <li><strong>Why is cost monitoring as critical as latency monitoring for agent systems?</strong> <em>— In conventional services, cost is tied to infrastructure (fixed) — load spikes hit latency before cost. In agent systems, cost is proportional to LLM token consumption, which is runtime-determined by agent behaviour. A looping agent or one retrying errors without a circuit breaker can consume 10–100× expected tokens with no latency alert triggering. Cost alerting with per-agent and per-task caps is a hard requirement, not a nice-to-have.</em></li>
+  <li><strong>Your operations team asks for a runbook for "agent is producing wrong answers." What are the five diagnostic steps?</strong> <em>— (1) Check the OTel reasoning trace: what tools did the agent call, what did they return, and what was the LLM reasoning at the decision point? (2) Check retrieval quality: were retrieved documents current and relevant? (3) Check model version: did the gateway change routing recently? (4) Run the golden test set: is the benchmark score below baseline, confirming systematic degradation? (5) Check tool results: did tools return correct data? If tools returned stale or wrong data, the problem is data quality, not agent quality.</em></li>
+</ol>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section goes further for architects who want to understand the mechanisms in detail. Safe to skip on a first pass.</div>
+
+<div class="card b"><div class="ch b">Agent Task Tree Visualization</div>
+  <p>Complex multi-agent workflows create a <strong>task tree</strong>: a hierarchical structure of parent tasks spawning child tasks, with dependencies between them. Visualising the task tree in your monitoring dashboard shows immediately which branches are stuck, which tools are failing, and where HITL gates are creating queues.</p>
+  <div class="code">Task: "Resolve supply chain exception batch (50 exceptions)"
+├── Sub-task: "Resolve EX-001" [autonomous]
+│     ├── Tool: get_carrier_status → delayed
+│     ├── Tool: get_impacted_orders → 3 orders
+│     └── Tool: notify_operations → sent
+├── Sub-task: "Resolve EX-002" [HITL gate triggered]
+│     ├── Tool: get_carrier_status → critical delay
+│     ├── HITL: escalation created → waiting for supervisor
+│     └── [suspended]
+└── Sub-task: "Resolve EX-003" [failed]
+      ├── Tool: get_carrier_status → API error (timeout)
+      ├── Tool: get_carrier_status → API error (timeout)  [retry 1]
+      └── Circuit breaker triggered → escalated to human</div>
+</div>
+
+<div class="card b"><div class="ch b">Context Window Pressure Strategies</div>
+  <p>When working memory approaches the context budget:</p>
+  <ul class="dl">
+    <li><strong>Summarization:</strong> call the LLM to compress conversation history into a compact summary. Cost: one extra LLM call. Gain: 70–80% context reduction. Risk: lossy — some details in raw history may not survive.</li>
+    <li><strong>Structured state extraction:</strong> extract key facts into a structured JSON object at each step. A JSON state object is ~200 tokens; the raw conversation that produced it is ~2,000 tokens. 10× compression with zero information loss for the decision the agent needs to make.</li>
+    <li><strong>Memory offload:</strong> move tool results to episodic memory after each step. The agent retains a summary ("carrier API confirmed 2-day delay"), not the full raw response (which might be 1,500 tokens of JSON).</li>
+  </ul>
+  <div class="code">// Structured state — ~200 tokens vs ~2,000 tokens of raw conversation
+{
+  "customer_id": "C-12345",
+  "issue_type": "missing_item",
+  "order_id": "O-67890",
+  "items_ordered": 3,
+  "items_received": 2,
+  "missing_item": "SKU-ABC",
+  "warehouse_scan_weight_discrepancy": true,
+  "refund_eligible": true,
+  "refund_amount": 79.99
+}</div>
+</div>
+
+<div class="card b"><div class="ch b">Circuit Breakers for Tool Calls</div>
+  <p>Borrowed from distributed systems, a <strong>circuit breaker</strong> wraps tool calls to prevent a failing external system from cascading into agent failure. For agents it serves a second purpose: <strong>preventing retry loops from consuming tokens</strong>.</p>
+  <ul class="dl">
+    <li><strong>Closed (normal):</strong> tool calls proceed normally</li>
+    <li><strong>Open (failing):</strong> after N consecutive failures, the circuit opens — calls fail immediately without hitting the external system</li>
+    <li><strong>Half-open (recovering):</strong> after a timeout, one probe call is allowed through; if it succeeds, the circuit closes again</li>
+  </ul>
+  <div class="code">Tool call: carrier_api.get_status()
+    ↓
+Circuit breaker check:
+  - Error count in last 60s: 4
+  - Threshold: 3
+  - State: OPEN
+    ↓
+Fast fail → return: {status: "circuit_open", escalate: true}
+    ↓
+Agent: "Tool unavailable — escalating to human"</div>
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>Agent failures are often silent.</strong> The agent confidently does the wrong thing, logs a success, and moves on — no errors thrown. Your monitoring strategy must watch for behavioral anomalies (unexpected tool sequences, cost spikes, quality score drops), not just error rates.</li>
+  <li><strong>Design HITL gates by risk tier, not by task type.</strong> The question is not "which tasks need human approval?" but "which outcomes are irreversible, high-value, or regulatory-impacted?" Low-risk reversible actions should be autonomous. Irreversible or high-value actions need hard gates — regardless of how confident the agent is.</li>
+  <li><strong>Four-layer memory is not optional overhead — it is cost and quality management.</strong> Putting everything in the context window is expensive and unreliable at scale. Working memory for the current task, episodic memory for history, semantic memory for knowledge, and procedural memory for behavior — each layer has the right storage type, retrieval pattern, and cost profile for its purpose.</li>
+  <li><strong>Prompt drift is a production reliability concern, not a one-time setup task.</strong> Your system prompt, knowledge base, tool definitions, and model version all change over time. A golden test set run on a schedule is the only reliable way to detect when those changes have silently degraded agent quality.</li>
+  <li><strong>The observability stack for agents requires LLM-specific extensions.</strong> Standard application traces (latency, errors, throughput) are necessary but not sufficient. You need reasoning traces, tool call graphs, and LLM quality signals. Instrument with OTel + GenAI semantic conventions from day one — not as a retrofit after an incident.</li>
+</ul>

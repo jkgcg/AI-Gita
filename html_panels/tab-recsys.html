@@ -1,0 +1,365 @@
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<div class="ibox">
+  Three types of AI problems appear constantly in enterprise data products, and they look superficially similar — all three take data and make predictions — but each models a fundamentally different kind of structure in the world.<br><br>
+  <strong>Structured prediction (tabular):</strong> you have a table of facts about an entity and want to predict a property of that entity. Will this customer churn? What is the likely basket size for this transaction? The data is structured, the prediction is about a single point in isolation.<br><br>
+  <strong>Time series forecasting:</strong> you have a sequence of measurements over time, and you want to predict what comes next. How many units of SKU-9823 will be sold next week? The key is that time ordering matters — the pattern is sequential, and yesterday's value tells you something about tomorrow's.<br><br>
+  <strong>Collaborative filtering (recommendation systems):</strong> you have a sparse matrix of interactions between users and items, and you want to predict which items a user would like that they have not yet seen. The signal comes from the pattern of who-liked-what across the whole population.<br><br>
+  These are three different problem structures, and they call for different approaches. The decision framework is: <em>what is the structure of the signal you are trying to exploit?</em>
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    When a business asks for "an AI system that predicts demand and personalises promotions", you are actually looking at at least two distinct AI problems: demand forecasting (time series) and promotion personalisation (recommendation). They share data infrastructure but have different modelling requirements, latency requirements, retraining cadences, and evaluation metrics.<br><br>
+    Conflating them into a single "AI system" creates a specification that is impossible to build coherently. Your job is to decompose the problem correctly before the team starts building.<br><br>
+    The cascade pipeline pattern — retrieval then ranking then filtering — is the most important structural concept in production recommendation systems. Understanding this pattern lets you design the system architecture without needing to understand the specific ML models in detail.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    Recommendation systems are high-visibility AI systems — customers interact with them directly, and their quality (or poor quality) is immediately visible. Enterprise risk comes from three sources:<br><br>
+    <ul class="dl">
+      <li><strong>Filter bubbles and reinforcing loops:</strong> systems optimising for engagement tend to show users more of what they already like, gradually narrowing exposure and reducing basket diversity.</li>
+      <li><strong>Cold start:</strong> new users and new items cannot be recommended effectively because there is no interaction history — a known structural limitation that must be designed around.</li>
+      <li><strong>Feedback loop contamination:</strong> if only recommended items are ever purchased, the training data reflects what was recommended, not what customers would have chosen in an unbiased environment.</li>
+    </ul>
+    For time series, the enterprise risk is primarily forecast accuracy at scale — a 5% systematic error across a 2,000-store network is a supply chain crisis.
+  </div>
+</div>
+
+<!-- S3: Think About It Like This -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox">
+  Imagine a large city department store with many floors, and think about how three different staff members use knowledge to help customers:<br><br>
+  <strong>The tabular prediction person</strong> is the customer service agent who looks at a single customer's purchase history and account details: "This customer is a VIP member, they have not shopped in 60 days, and their last purchase was a full-price item. Probability of churn: high. Send the retention offer." They make decisions about individuals based on factual profile.<br><br>
+  <strong>The time series person</strong> is the stock room manager who watches weekly sales patterns for each item and predicts how many to order — knowing that umbrellas spike when it rains, that chocolate gift boxes peak before Valentine's Day, and that summer sportswear starts climbing in mid-April regardless of weather. They exploit temporal patterns in the data.<br><br>
+  <strong>The recommendation system person</strong> is the experienced sales associate who has watched thousands of customers and noticed that customers who buy the Italian espresso machine almost always come back for the stainless steel milk frother and single-origin beans — not because the products are similar, but because a certain type of person buys all three. They exploit the pattern of human taste across the population.<br><br>
+  These three people use completely different knowledge. Asking the stock room manager to recommend personalised products, or asking the sales associate to forecast umbrella demand, would produce poor results. Same with their algorithmic counterparts.
+</div>
+
+<!-- S4: Step-by-Step Walkthrough -->
+<div class="sh">Step-by-Step Walkthrough</div>
+
+<div class="sh2">4.1 Decision Framework: Which Approach Applies When</div>
+<div class="ibox">
+  Before choosing a model, identify the structure of the problem:
+</div>
+
+<table class="t">
+  <tr><th>Question</th><th>If Yes →</th></tr>
+  <tr><td>Is the data a table of entity attributes with a target label?</td><td>Tabular (XGBoost, logistic regression)</td></tr>
+  <tr><td>Does the historical sequence of values over time matter for the prediction?</td><td>Time Series (ARIMA, LightGBM on lags, Temporal Fusion Transformer)</td></tr>
+  <tr><td>Does the prediction depend on patterns of interaction across many users/items?</td><td>Collaborative Filtering (Matrix Factorisation, Two-Tower)</td></tr>
+  <tr><td>Do you have rich content features AND interaction data?</td><td>Hybrid: content features + collaborative filtering (Two-Tower with side features)</td></tr>
+  <tr><td>Do you have very little interaction data (cold start) but rich item content?</td><td>Content-based filtering (item embeddings from text/image, no collaboration needed)</td></tr>
+</table>
+
+<div class="ibox" style="margin-top:12px">
+  In practice, production systems often need more than one approach — for example, tabular prediction of "will this user click?" combined with collaborative filtering of "what items are most likely to be clicked?" combined with time series of "what items are trending this week?"
+</div>
+
+<div class="sh2">4.2 Tabular Prediction — The Structured Foundation</div>
+
+<div class="alayer al1">
+  <div class="ln">Input</div>
+  A row in a database: a vector of features about a single entity (customer, order, SKU).
+</div>
+<div class="alayer al2">
+  <div class="ln">Features</div>
+  Hand-engineered from domain knowledge — days since last purchase, category preference ratios, engagement scores. Missing values are common and must be handled explicitly.
+</div>
+<div class="alayer al3">
+  <div class="ln">Model</div>
+  Gradient-boosted trees (XGBoost, LightGBM) are the default. Feature relationships may be non-linear and involve interactions — the combination of "high value customer" and "recent engagement drop" matters more than either alone.
+</div>
+<div class="alayer al4">
+  <div class="ln">Output</div>
+  A label or a number: churn probability, basket size prediction, return likelihood.
+</div>
+<div class="alayer al5">
+  <div class="ln">In Rec Systems</div>
+  A "propensity score" for each user-item pair. Scales only for small catalogues — for large catalogues, collaborative filtering is more efficient.
+</div>
+
+<div class="sh2">4.3 Time Series Forecasting</div>
+
+<div class="ibox">
+  Time series problems have one structural property that distinguishes them from all other ML: <strong>the order of data points is meaningful</strong>. Last week's sales affect this week's sales. This temporal dependence violates the standard ML assumption that examples are i.i.d.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Key Concepts</div>
+    <ul class="dl">
+      <li><strong>Seasonality:</strong> recurring patterns at fixed periods — daily, weekly, annual. Identifying and modelling seasonality correctly is the difference between a useful forecast and a dangerously wrong one.</li>
+      <li><strong>Trend:</strong> the long-term direction of a time series. Must be separated from seasonality to model each correctly.</li>
+      <li><strong>Lag features:</strong> the most powerful features — historical values of the target at various time offsets (yesterday, same day last week, same day last year). These capture temporal dependence in a form tree-based models can use.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Approaches by Scale</div>
+    <ul class="dl">
+      <li><strong>Single series, statistical:</strong> ARIMA, Holt-Winters exponential smoothing. Fast, interpretable, no ML required.</li>
+      <li><strong>Many series, ML:</strong> one LightGBM model (with lag features) trained on all series simultaneously — learns cross-series patterns (e.g. all items in "sports" category share seasonal patterns). Called a "global" forecasting model.</li>
+      <li><strong>Many series, complex dependencies:</strong> Temporal Fusion Transformer (TFT) or N-BEATS — deep learning, high complexity, justified only at scale or when covariates (weather, promotions, price) are important.</li>
+    </ul>
+    <br><strong>Critical rule:</strong> Never use random train/test splits. Always split by time — train on data up to date T, test on data from T onwards.
+  </div>
+</div>
+
+<div class="sh2">4.4 Collaborative Filtering — The Recommendation Core</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Matrix Factorisation</div>
+    The classic approach. Represent each user and each item as a vector of latent factors. The predicted interaction score is the dot product of the user vector and the item vector. Training finds the vectors that best explain the observed interaction matrix.<br><br>
+    Vectors capture latent characteristics — a user vector with high values in certain dimensions might implicitly represent "prefers premium products in the outdoor category."<br><br>
+    <strong>Limitation:</strong> Cannot handle cold start — new users/items have no embeddings until they accumulate interactions.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Two-Tower Model</div>
+    A deep learning evolution of matrix factorisation. Two separate neural networks (towers) process user features and item features to produce embeddings. Similarity between embeddings predicts interaction.<br><br>
+    <strong>Why it matters architecturally:</strong> The two towers can be computed separately. User embeddings: pre-computed once per hour or day. Item embeddings: pre-computed for the entire catalogue. At serving time, only a nearest-neighbour lookup is needed — extremely fast and scalable.<br><br>
+    <strong>Cold start mitigation:</strong> ensure the item tower uses rich content embeddings (text, image) so new items can be retrieved even without interaction history.
+  </div>
+</div>
+
+<div class="sh2">4.5 The Production Recommendation Cascade Pipeline</div>
+
+<div class="ibox">
+  In a large-scale system, you cannot score every item for every user at request time. With 1 million users and 500,000 items, full scoring at even 1 microsecond per pair would take 500 seconds per user. The cascade pipeline solves this with three stages.
+</div>
+
+<div class="code">User Request
+     │
+     ▼
+┌─────────────────────────────────────────┐
+│  RETRIEVAL STAGE                        │
+│  Millions of items → ~2,000 candidates  │
+│  Method: ANN vector search + BM25       │
+│  Target latency: 5–15ms                 │
+└─────────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────────┐
+│  RANKING STAGE                          │
+│  2,000 candidates → 20 candidates       │
+│  Method: ML ranker (XGBoost / Two-Tower)│
+│  Target latency: 30–80ms                │
+└─────────────────────────────────────────┘
+     │
+     ▼
+┌─────────────────────────────────────────┐
+│  FILTERING STAGE                        │
+│  20 candidates → 10 final results       │
+│  Method: Business rules (stock, promo)  │
+│  Target latency: 1–5ms                  │
+└─────────────────────────────────────────┘
+     │
+     ▼
+Response to User</div>
+
+<div class="g3" style="margin-top:16px">
+  <div class="card b">
+    <div class="ch b">Stage 1: Retrieval</div>
+    <strong>Goal:</strong> reduce from the full item catalogue to ~2,000 candidates.<br>
+    <strong>Method:</strong> fast approximate nearest-neighbour (ANN) search in embedding space. Libraries: FAISS (Facebook) or ScaNN (Google).<br>
+    <strong>Optimise for:</strong> recall — do not miss good candidates. Tolerate low precision.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Stage 2: Ranking</div>
+    <strong>Goal:</strong> score and rank the candidates from retrieval.<br>
+    <strong>Method:</strong> a more expensive model (gradient-boosted tree or small neural network) with rich joint user-item features, recent interaction signals, contextual features (time of day, device, session behaviour).<br>
+    <strong>Optimise for:</strong> precision and business metrics — not just click probability, but also revenue, margin, diversity.
+  </div>
+  <div class="card g">
+    <div class="ch g">Stage 3: Filtering</div>
+    <strong>Goal:</strong> apply constraints the ML models do not know about.<br>
+    <strong>Method:</strong> rule-based post-processing. Remove out-of-stock items. Apply legal restrictions. Enforce diversity. Apply business rules (boost promoted items). Deduplicate against recently shown items.<br>
+    <strong>Updated by:</strong> operations teams without model retraining.
+  </div>
+</div>
+
+<div class="ibox" style="margin-top:12px">
+  <strong>Architectural implication:</strong> the three stages have different scaling properties, different update cadences, and different ownership. Design them as separate, independently deployable components with separate SLAs.
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example: Retail Group Personalised Promotion System</div>
+
+<div class="card a">
+  <div class="ch a">Scenario</div>
+  A European retail group: 340 stores, 8 countries, 6.2 million loyalty members. They want personalised promotional offers — the right promotion, to the right customer, at the right time. Three business questions map to three AI problem types:
+  <ul class="dl" style="margin-top:8px">
+    <li><strong>What to offer?</strong> Collaborative filtering — what items/promotions have similar customers responded to?</li>
+    <li><strong>When to send it?</strong> Time series — when is this customer most likely to be in-market?</li>
+    <li><strong>Which customers to target?</strong> Tabular prediction — which customers have high propensity to respond AND high lifetime value?</li>
+  </ul>
+</div>
+
+<div class="g3" style="margin-top:12px">
+  <div class="card ai">
+    <div class="ch ai">Collaborative Filtering — What to Offer</div>
+    Two-Tower model on 18 months of purchase and promotion interaction history.<br><br>
+    <strong>User tower:</strong> purchase category history, promotion response history, country, loyalty tier, demographic segment.<br><br>
+    <strong>Item/promotion tower:</strong> product category, discount depth, promotion mechanics (BOGO vs % vs fixed), campaign creative type.<br><br>
+    Customer embeddings pre-computed nightly. ANN retrieval finds 200 most relevant promotion candidates. LightGBM ranker scores each with contextual features (time since last purchase in category, inventory pressure, budget remaining).
+  </div>
+  <div class="card b">
+    <div class="ch b">Time Series — When to Send</div>
+    LightGBM model on lag features of purchase history, predicting probability distribution of purchase timing.<br><br>
+    <strong>Features:</strong> days since last purchase, historical inter-purchase interval (mean and variance), seasonal index for this customer's typical purchase categories, day-of-week purchase probability.<br><br>
+    <strong>Output:</strong> a "send window" — a 7-day period within which the customer has the highest predicted probability of being in-market.
+  </div>
+  <div class="card g">
+    <div class="ch g">Tabular — Who to Target</div>
+    Customer value score and campaign response propensity score computed daily for all active members using XGBoost.<br><br>
+    <strong>Features:</strong> historical campaign response rate, average order value, purchase frequency trend (improving/stable/declining), loyalty tier, channel preference.<br><br>
+    Only customers meeting both a minimum value score <em>and</em> a minimum propensity score threshold enter the promotion funnel.
+  </div>
+</div>
+
+<div class="kv" style="margin-top:12px">
+  <div class="kvr"><span class="kvk">Pipeline</span><span class="kvv">Daily batch → compute customer embeddings → rank eligible customers → retrieve promotion candidates → rank candidates → apply business rules (budget, inventory, legal, recency) → generate personalised assignments → trigger communication platform</span></div>
+  <div class="kvr"><span class="kvk">Click-through rate</span><span class="kvv">2.3× higher vs prior segment-based approach</span></div>
+  <div class="kvr"><span class="kvk">Conversion rate</span><span class="kvv">1.8× higher</span></div>
+  <div class="kvr"><span class="kvk">Promotional spend efficiency</span><span class="kvv">22% reduction in budget consumed per incremental sale</span></div>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Decomposition and Pipeline Design</div>
+    <ul class="dl">
+      <li><strong>Decompose multi-objective AI products first.</strong> Map business objectives to problem types (collaborative filtering, time series, tabular) before designing the architecture. Conflating them into a single model increases complexity without increasing capability.</li>
+      <li><strong>The cascade pipeline is the only practical approach at scale.</strong> Attempting to score all user-item pairs at request time is computationally impossible beyond ~10K items. Design the three stages as independent microservices with separate SLAs, update cadences, and ownership.</li>
+      <li><strong>Pre-computation is the key to recommendation latency.</strong> User and item embeddings should be pre-computed asynchronously. Anything requiring real-time computation over the full catalogue will not meet production latency requirements.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Data Discipline and Governance</div>
+    <ul class="dl">
+      <li><strong>Time series models require temporal train/test discipline.</strong> A common failure: the training lag feature is "sales yesterday" but the serving pipeline computes "sales at midnight on the day of serving" — not the same when serving happens at 2pm.</li>
+      <li><strong>Cold start is a product problem, not just an ML problem.</strong> New users and new items require dedicated strategies: onboarding flows, content-based fallbacks, popularity-based bootstrapping. Architecture must include these fallback paths explicitly.</li>
+      <li><strong>Feedback loop monitoring is non-negotiable.</strong> Log not just what was recommended and clicked, but also the counterfactual. Require an exploration strategy — occasionally surfacing non-top-ranked items. Without this, training data for future iterations is systematically biased by the current model.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">Five Architect Self-Test Questions</div>
+  <ol class="sl">
+    <li>
+      <strong>Q: A PM asks for "an AI system that forecasts demand and personalises promotions." What architectural decomposition do you perform?</strong><br>
+      <em>Expected:</em> Decompose into at least two distinct AI problem types. Demand forecasting = time series (exploits temporal patterns in sales history). Promotion personalisation = recommendation (collaborative filtering) + tabular prediction for response propensity. Different data requirements, model families, retraining cadences, and serving architectures. The decomposition also matters for ownership: demand forecasting often belongs to supply chain; promotion personalisation to marketing.
+    </li>
+    <li>
+      <strong>Q: Retrieval is fast at 8ms for 2,000 candidates, but end-to-end latency is 450ms against a 150ms SLA. Where is the bottleneck?</strong><br>
+      <em>Expected:</em> Almost certainly the ranking stage — it scores 2,000 candidates with rich features. Investigate: CPU vs GPU? Feature computation real-time vs pre-computed? Can retrieval return fewer candidates (e.g. 200 instead of 2,000, reducing ranking load 10×)? Can the ranking model be quantised or distilled? Also check whether the 450ms includes network round trips that could be parallelised or cached.
+    </li>
+    <li>
+      <strong>Q: Collaborative filtering works well for your top 20% of customers but gives poor recommendations for the other 80% (infrequent purchasers). What is the problem, and what strategies address it?</strong><br>
+      <em>Expected:</em> Cold start for sparse users. Strategies: (1) supplement user tower with content features available for all users regardless of purchase history; (2) fall back to popularity-based or content-based recommendations below an interaction threshold; (3) design onboarding flows to capture preference signals explicitly; (4) train a separate model for sparse users with different feature sets.
+    </li>
+    <li>
+      <strong>Q: A data scientist proposes random cross-validation for the time series demand model. Why is this wrong?</strong><br>
+      <em>Expected:</em> Random splits allow data from month 12 to appear in training while month 6 appears in test — the model "learns from the future." Correct approach: temporal (walk-forward) cross-validation — train on months 1–12, test on months 13–14; train on months 1–14, test on months 15–16; etc.
+    </li>
+    <li>
+      <strong>Q: 8,000 new items go live on the website. How long until they appear in recommendations?</strong><br>
+      <em>Expected:</em> Not until they have embeddings in the ANN index. Timeline = item ingestion time + embedding computation batch time + index rebuild time + serving tier cache refresh. For a daily batch pipeline: 12–24 hours. For a near-real-time pipeline: under an hour. The business must decide how much cold start exposure is acceptable and design the pipeline cadence accordingly.
+    </li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers matrix factorisation vs two-tower architectures, Temporal Fusion Transformer internals, and recommendation metrics. Safe to skip on a first pass and return here when evaluating specific model architectures with your data science team.</div>
+
+<div class="sh2">8.1 Matrix Factorisation vs Two-Tower — Choosing Between Them</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Matrix Factorisation</div>
+    Trains directly on the interaction matrix. Uses only implicit feedback (clicks, purchases) or explicit ratings — no content features. Extremely fast to implement and effective when you have dense interaction data.<br><br>
+    <strong>Cannot handle cold start</strong> — new users/items have no embeddings until they accumulate interactions.<br><br>
+    <strong>Choose when:</strong> catalogue is relatively stable, users are mostly existing (low cold start pressure), team is small, and you need something working quickly.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Two-Tower</div>
+    Strictly more flexible: uses content features, handles cold start better (item tower uses content even for new items), supports contextual signals (add a context tower for time of day, device, current session).<br><br>
+    <strong>Trade-off:</strong> higher complexity — two separate neural networks to train, feature pipelines for both towers, more hyperparameters to tune.<br><br>
+    <strong>Choose when:</strong> large or frequently changing catalogue, significant new user/item volume, contextual personalisation is important, or content features carry significant signal.
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>As an architect:</strong> The choice between MF and Two-Tower is primarily about cold start volume and catalogue churn. If your business has a stable catalogue and mature user base, MF is sufficient. If you are in retail with a constantly changing seasonal catalogue and significant new customer acquisition, Two-Tower is the right investment.
+</div>
+
+<div class="sh2">8.2 Temporal Fusion Transformer for Multi-Series Forecasting</div>
+
+<div class="card b">
+  <div class="ch b">Temporal Fusion Transformer (TFT)</div>
+  A deep learning architecture specifically designed for multi-horizon forecasting with mixed input types. Unlike simple lag-feature models, TFT handles:<br><br>
+  <ul class="dl">
+    <li><strong>Multiple time series simultaneously</strong> — e.g. all SKUs across all stores</li>
+    <li><strong>Static features per series</strong> — e.g. store size, product category (does not change over time)</li>
+    <li><strong>Known future covariates</strong> — e.g. promotion schedule, holiday calendar (known in advance)</li>
+    <li><strong>Unknown future covariates</strong> — e.g. past weather, sales (only known historically)</li>
+  </ul>
+  <br>
+  TFT uses LSTM layers (sequential processing), gated mechanisms (to select relevant temporal features), and multi-head attention (to capture long-range dependencies). It outputs <strong>quantile forecasts</strong> rather than point forecasts — a range of likely outcomes, critical for supply chain planning where you need to reason about risk.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>As an architect:</strong> TFT is appropriate when the scale of the forecasting problem (thousands of series with rich covariates) justifies the investment. For simple demand forecasting with a small SKU set, LightGBM with lag features will perform comparably with a fraction of the operational complexity.
+</div>
+
+<div class="sh2">8.3 Recommendation Metrics</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Quality Metrics</div>
+    <ul class="dl">
+      <li><strong>Precision@K:</strong> of the K items recommended, what fraction is relevant (clicked, purchased)? Measures quality of the top-K list.</li>
+      <li><strong>Recall@K:</strong> of all items the user would eventually interact with, what fraction appeared in the top-K? Measures coverage of user preferences.</li>
+      <li><strong>NDCG@K:</strong> Normalised Discounted Cumulative Gain — measures whether relevant items appear near the top of the ranking, penalising relevant items lower in the list. Logarithmic penalty: a relevant item at position 1 is worth much more than at position 10.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">System Health Metrics</div>
+    <ul class="dl">
+      <li><strong>Coverage:</strong> what fraction of all available items ever appear in recommendations? Low coverage = popularity feedback loop — the same popular items repeatedly recommended, the long tail never exposed.</li>
+      <li><strong>Diversity:</strong> how different are the items in a single user's recommendation list? High diversity reduces filter bubble effects but is often traded off against precision.</li>
+      <li><strong>Offline/online evaluation gap:</strong> offline metrics (precision@K on held-out interactions) often predict online performance (CTR in A/B test) poorly — historical interactions were shaped by the previous recommendation system. The only reliable evaluation is an online A/B test with randomised exposure.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Three distinct AI problem types:</strong> tabular prediction, time series forecasting, and collaborative filtering require different model families, different data structures, and different evaluation approaches. Decomposing a business request into the correct problem types before designing is the most important architectural move.</li>
+  <li><strong>The cascade pipeline is canonical:</strong> retrieval → ranking → filtering partitions the problem into a fast approximate retrieval stage over millions of items and a slower, richer ranking stage over hundreds of candidates, making both quality and latency simultaneously achievable.</li>
+  <li><strong>Time series models require temporal train/test splits without exception:</strong> random splits allow future data to leak into training and produce optimistic evaluation metrics that collapse in production.</li>
+  <li><strong>Cold start is a structural limitation that must be designed around:</strong> new users and new items require dedicated fallback strategies (content-based, popularity-based, or onboarding flows) that are part of the system architecture, not edge cases.</li>
+  <li><strong>Recommendation system feedback loops are a governance risk:</strong> without deliberate exploration (occasionally surfacing non-top-ranked items) and unbiased logging, training data for future iterations will be systematically shaped by the current model's biases, causing progressive narrowing of recommendations.</li>
+</ul>

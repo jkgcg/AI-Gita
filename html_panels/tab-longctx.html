@@ -1,0 +1,307 @@
+<div class="preq"><span class="preq-lbl">Prereq:</span> <a data-action="switch-tab" data-tab="dl">Deep Learning</a>, <a data-action="switch-tab" data-tab="transformers">Transformers</a></div>
+
+<div class="ibox">Every LLM has a context window — the maximum text it can read and reason about in one interaction. Long Context techniques (smarter positional encoding, efficient attention algorithms, and new State Space Model architectures) are what pushed that window from 1K tokens in 2019 to 1M+ tokens today. As an architect, you need to know when to put a whole document in context versus when to build a RAG pipeline — and what the real cost difference is. Getting it wrong can mean $50,000/day in API spend vs. $500.</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro above — you're done with this topic at a conceptual level.<br>
+  <strong>&#128993; Keep going for the full architect-level detail.</strong> The structured content below builds a complete mental model.
+</div>
+
+<div class="sh">1. What Is It</div>
+
+<div class="ibox">
+  Every LLM has a <strong>context window</strong> — the maximum amount of text it can read and reason about in a single interaction. Think of it as the model's working memory.<br><br>
+  Early models (GPT-2, 2019) had a context of 1,024 tokens — roughly two pages of text. Today, models like Gemini 1.5 Pro and Claude 3.5 Sonnet handle 1 million tokens or more — roughly an entire novel, or a year of Slack messages.<br><br>
+  <strong>Long Context</strong> refers to the collection of techniques that make this possible: smarter positional encoding (how the model keeps track of where each word sits), efficient attention algorithms (so it doesn't run out of memory), and new architectures (State Space Models, or SSMs) that process long sequences without the quadratic cost of standard attention.<br><br>
+  <strong>SSMs (State Space Models)</strong> are an alternative architecture to the Transformer. Where a Transformer reads every token against every other token (expensive at scale), an SSM compresses past context into a fixed-size "state" — like a running summary — and updates it as new text arrives. The most prominent SSM is <strong>Mamba</strong> (2023).<br><br>
+  You don't need to implement any of this. But as a Solution Architect, you need to know when to reach for a long-context model versus a RAG pipeline, and what the hidden cost of using a 1M-token context window actually is.
+</div>
+
+<div class="sh">2. Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">&#128101; For Solution Architects</div>
+    <p>The core decision you'll face: <strong>"Should I put the whole document into the context, or should I build a RAG pipeline?"</strong> This is not rhetorical. Getting it wrong costs real money.</p>
+    <ul class="dl">
+      <li><strong>Full context cost:</strong> A 1M-token prompt at GPT-4o pricing costs roughly $2.50–$5.00 per request. At 10,000 requests/day, that's $25,000–$50,000/day.</li>
+      <li><strong>RAG advantage:</strong> Retrieves only the 3–10 most relevant chunks — a 1M-token job becomes a 2,000-token job. That's 500x cheaper.</li>
+      <li><strong>RAG limitation:</strong> RAG can miss context spread across a document. A contract clause in section 2 that modifies language in section 47 — RAG might retrieve one but not the other.</li>
+    </ul>
+    <p>The right answer depends on your use case, document structure, and latency/cost envelope.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">&#127970; For Enterprise Architects</div>
+    <p>Long-context models change the <strong>integration surface</strong> of AI in your enterprise stack:</p>
+    <ul class="dl">
+      <li><strong>New viable use cases:</strong> Legal document review, audit trail analysis, code repository understanding, long email thread summarization — all become viable without building a chunking/retrieval pipeline.</li>
+      <li><strong>"Lost in the Middle" problem:</strong> The model's ability to extract information from the <em>middle</em> of a long document degrades significantly. A 500K-token document is not the same as one the model reliably reads end-to-end.</li>
+      <li><strong>Governance implication:</strong> Putting entire contracts or customer records into an LLM context window raises data residency and PII exposure questions that a chunked RAG system can more easily scope.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh">3. Think About It Like This</div>
+
+<div class="ibox">
+  <strong>The Analyst Desk Analogy</strong><br><br>
+  Imagine you hire an analyst to review a massive due diligence report — 800 pages. You have two options:<br><br>
+  <strong>Option A — Long Context:</strong> You slide the entire 800-page binder across the desk. The analyst reads every page. This takes longer, costs more (hourly rate), and the analyst's attention starts to wander around page 400. But nothing is missed from the index, and they can see patterns that span the whole document.<br><br>
+  <strong>Option B — RAG:</strong> You hire a junior researcher to first pre-read the report and create a searchable index. When you have a question, the researcher pulls the 5 most relevant pages and hands them to the analyst. The analyst reads 5 pages instead of 800 — 160x less work. Much cheaper and faster. But the quality of the answer depends entirely on how good the junior researcher (your retriever) is at finding the right pages.<br><br>
+  <strong>SSMs</strong> are a third option: hire an analyst who, instead of reading everything, takes running notes as they go — a compact summary they update continuously. At any point you can ask a question, and they'll answer from their notes. They never go back and re-read. This is much faster and cheaper for very long documents, but their notes might have missed a nuance on page 312.<br><br>
+  <strong>The punchline:</strong> The right choice depends on whether you trust the junior researcher (retriever quality), how important page-312 nuances are (needle-in-a-haystack vs. synthesis), and what you're willing to pay.
+</div>
+
+<div class="sh">4. Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="alayer al1">
+  <div class="ln">4.1 Why Context Windows Were Small</div>
+  <p>Standard Transformer attention has a cost that grows as <strong>O(n²)</strong> with sequence length — doubling the context quadruples the memory and compute. A 32K context takes 16x the attention compute of an 8K context.</p>
+  <p>Two problems had to be solved:</p>
+  <ul class="dl">
+    <li><strong>Positional encoding:</strong> The model learns relationships between tokens partly based on their <em>position</em> in the sequence. If you train on sequences up to 4K tokens, the model has never seen position 100,000. You can't just extend the context at inference time.</li>
+    <li><strong>Memory wall:</strong> Attention scores must fit in GPU memory. At 1M tokens, this is physically impossible without algorithmic tricks.</li>
+  </ul>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">4.2 RoPE and Why It Matters</div>
+  <p><strong>Rotary Position Embeddings (RoPE)</strong> encode position by rotating token vectors in a mathematical space. Think of it like a compass bearing stamped on each word: two words close together point in nearly the same direction, two words far apart point in very different directions — so the model always knows their relative distance, no matter how long the sequence.</p>
+  <p>The important property: RoPE is <em>relative</em>, not absolute. The model learns to ask "how far apart are these two tokens?" rather than "what is position 47,832?" This makes it much easier to generalize to longer sequences than were seen during training.</p>
+  <ul class="dl">
+    <li><strong>YaRN (Yet another RoPE extensioN):</strong> Scales some frequency dimensions more than others and fine-tunes on long-sequence data to help the model adapt to scaled positions.</li>
+    <li><strong>LongRoPE:</strong> Searches for the optimal per-dimension scaling factors that minimize perplexity on long documents — treating it as an optimization problem rather than a formula.</li>
+  </ul>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> When you see a model marketed as "128K context" or "1M context," part of what's happening under the hood is RoPE extension. A model trained natively on long sequences performs better than one whose context was extended post-training.
+  </div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">4.3 Flash Attention</div>
+  <p><strong>Flash Attention</strong> is not a new model — it's an algorithm that makes the existing Transformer attention mechanism run faster and with less GPU memory.</p>
+  <p>Standard attention computes a large intermediate matrix (attention scores between all token pairs) and stores it in GPU memory. For long sequences, this matrix is enormous. Flash Attention rewrites the computation to work in smaller tiles — it never materializes the full attention matrix. Same mathematical result, 3–8x less memory, 2–4x faster.</p>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> Flash Attention is now standard in all serious production LLM deployments. When evaluating an inference provider or self-hosted stack, ensure Flash Attention (v2 or v3) is enabled — it's the difference between "this works" and "this runs out of memory."
+  </div>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">4.4 State Space Models (Mamba)</div>
+  <p>SSMs handle long sequences differently: instead of each token attending to all past tokens, they maintain a fixed-size <strong>state</strong> — a compressed summary of everything seen so far — and update it with each new token.</p>
+  <p>The <strong>Mamba</strong> architecture (2023) is the most prominent SSM:</p>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Cost scaling</span><span class="kvv">Subquadratic — processes roughly linearly with sequence length instead of quadratically</span></div>
+    <div class="kvr"><span class="kvk">State</span><span class="kvv">Fixed-size; past context is compressed, not stored fully — specific fact recall from 200K tokens back is less reliable</span></div>
+    <div class="kvr"><span class="kvk">Speed</span><span class="kvv">Much faster per-token generation than Transformers of similar parameter count</span></div>
+  </div>
+  <p>Mamba and successors (Jamba, which combines Mamba with Transformer layers) are used in production for streaming/real-time applications, extremely long sequence tasks where Transformers are cost-prohibitive, and edge inference where memory is limited.</p>
+  <div class="wbox">
+    <strong>Architectural note:</strong> Mamba is not a drop-in replacement for a Transformer-based LLM. In 2026, pure Mamba models are not at GPT-4 quality for general reasoning tasks, but they excel in specific long-sequence niches.
+  </div>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">4.5 Multi-head Latent Attention (MLA)</div>
+  <p>DeepSeek's <strong>MLA</strong> compresses the KV cache (the memory needed to avoid recomputing past tokens during generation) into a lower-rank representation. This reduces the memory footprint of serving long-context models by 5–10x.</p>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> MLA is relevant when evaluating open-weight models for self-hosting. A model with MLA support can serve longer contexts at a given hardware budget — this directly affects your per-request cost model.
+  </div>
+</div>
+
+<div class="sh">5. Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">&#127970; Enterprise Example: Contract Intelligence at a Retail Company</div>
+  <p>Your enterprise legal team wants an AI system to review supplier contracts and flag clauses that conflict with the new Master Services Agreement (MSA) template. The average contract is 40 pages. The MSA template is 30 pages. Together: ~70 pages, roughly 56,000 tokens.</p>
+
+  <div class="sh2">Option 1 — Full Context Window (simple)</div>
+  <p>Put both documents into a 128K-context model and ask: "Identify all clauses in the supplier contract that conflict with our MSA template."</p>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Works</span><span class="kvv">Reliably at this document size — the model sees both documents in full</span></div>
+    <div class="kvr"><span class="kvk">Cost</span><span class="kvv">~$0.50–$1.50 per contract at typical API rates ($5,000–$15,000/year at 10K contracts)</span></div>
+    <div class="kvr"><span class="kvk">Governance risk</span><span class="kvv">Full contract including price terms and counterparty names is in the prompt — ensure your API vendor's DPA covers this</span></div>
+  </div>
+
+  <div class="sh2">Option 2 — RAG (optimized)</div>
+  <p>Embed both documents, chunk by clause, and retrieve the top-N most semantically similar clause pairs for comparison.</p>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Cost</span><span class="kvv">Much cheaper — a retrieval query + 2K-token comparison window is ~$0.01/contract</span></div>
+    <div class="kvr"><span class="kvk">Risk</span><span class="kvv">The retriever might miss a conflict where the relationship spans two non-adjacent clauses</span></div>
+    <div class="kvr"><span class="kvk">Overhead</span><span class="kvv">Requires building and maintaining the embedding/retrieval pipeline</span></div>
+  </div>
+
+  <div class="sh2">Option 3 — Hybrid (best practice for enterprise)</div>
+  <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4">
+    Use RAG for the first pass (flag 90% of obvious conflicts cheaply), then route only the flagged sections to a long-context model for deep cross-document reasoning on the ambiguous cases.
+  </div>
+
+  <div class="wbox">
+    <strong>Architecture decision point — "Lost in the Middle":</strong> If you use full-context, structure your prompt to put the most important reference material (the MSA template) at the beginning and end of the context, not in the middle — models are empirically more reliable at those positions.
+  </div>
+</div>
+
+<div class="sh">6. Architecture Perspective</div>
+
+<div class="sh2">When to Use Long Context vs. RAG — Decision Framework</div>
+
+<table class="t">
+  <tr><th>Signal</th><th>Use Long Context</th><th>Use RAG</th></tr>
+  <tr><td>Document size</td><td>&lt; 200K tokens (fits comfortably)</td><td>&gt; 500K tokens, or many documents</td></tr>
+  <tr><td>Relationships</td><td>Cross-document, cross-section reasoning needed</td><td>Single-passage lookups</td></tr>
+  <tr><td>Cost sensitivity</td><td>Low volume, high-value queries (legal, audit)</td><td>High volume, latency-sensitive (customer support)</td></tr>
+  <tr><td>Latency</td><td>Acceptable 5–30s per query</td><td>&lt; 2s required</td></tr>
+  <tr><td>Retriever quality</td><td>Can't build/trust a good retriever yet</td><td>High-quality retriever available</td></tr>
+  <tr><td>Data sensitivity</td><td>Compliant with your data residency requirements</td><td>Prefer minimal data exposure per query</td></tr>
+</table>
+
+<div class="sh2">Long Context in Your Integration Stack</div>
+
+<div class="code-label">Routing Architecture</div>
+<div class="code">User Query
+     │
+     ▼
+ Router / Orchestrator
+     │
+     ├── Short doc, single lookup → RAG pipeline (cheap, fast)
+     │
+     ├── Medium doc, cross-section → Full context window (high-value route)
+     │
+     └── Streaming, real-time, edge → SSM-based model (Mamba/Jamba)</div>
+
+<div class="ibox">
+  <strong>Note:</strong> As of 2026, Jamba-class models are available via AI21 Labs API and select cloud marketplaces; pure Mamba models are primarily self-hosted — factor this into your routing decision.
+</div>
+
+<div class="sh2">Key Integration Considerations</div>
+
+<div class="g3">
+  <div class="card b">
+    <div class="ch b">1. KV Cache Warming</div>
+    <p>For repeated queries against the same long document, many providers now offer KV cache reuse — you pay to process the document once, then reuse the cached key-value pairs. This can reduce per-query cost by 80–90% for document-heavy workflows.</p>
+  </div>
+  <div class="card b">
+    <div class="ch b">2. Context Budget Management</div>
+    <p>Don't fill the context to maximum — leave room for the model's chain-of-thought and output. A rule of thumb: fill at most <strong>70% of the context window</strong> with input.</p>
+  </div>
+  <div class="card b">
+    <div class="ch b">3. Chunking Strategy for Hybrid Systems</div>
+    <p>When RAG fails (low recall), the fallback is often "expand the context window around the retrieved chunk" — not "send the whole document." This staged fallback approach is a good middle ground.</p>
+  </div>
+</div>
+
+<div class="sh">7. Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">&#10003; Check Yourself</div>
+  <ol class="sl">
+    <li>
+      <strong>Your team proposes putting a 300-page customer service knowledge base (~240K tokens) into a long-context model for every support ticket query. What's the main cost concern, and how would you address it?</strong>
+      <br><em>Expected answer: Each query costs proportional to the full 240K-token input, which is expensive at scale. The fix is RAG — retrieve only the relevant 3–5 articles per query, reducing input to ~2K tokens. Reserve the full-context approach for complex escalations.</em>
+    </li>
+    <li>
+      <strong>A vendor tells you their model "supports 1M token context." What two questions should you ask before trusting that claim in production?</strong>
+      <br><em>Expected answer: (1) Is the 1M context natively trained or post-training extended via RoPE scaling? Natively trained is more reliable. (2) How does the model perform on the RULER benchmark at 1M tokens, particularly on tasks where the answer is in the middle of the sequence? Marketing claims often don't survive this test.</em>
+    </li>
+    <li>
+      <strong>What is the "Lost in the Middle" problem and why does it matter for system design?</strong>
+      <br><em>Expected answer: LLMs are empirically better at using information from the beginning and end of their context window than from the middle. In a 1M-token context, facts placed at token position 500,000 may be less reliably recalled than the same facts at position 1,000 or 999,000. Prompt structure matters — put your reference material at the edges, not buried in the middle.</em>
+    </li>
+    <li>
+      <strong>What is the main practical difference between Mamba (SSM) and a Transformer for long-sequence tasks? In which enterprise scenario would you prefer Mamba?</strong>
+      <br><em>Expected answer: Mamba uses a fixed-size recurrent state (linear cost in sequence length) rather than attending to all past tokens (quadratic cost). It's faster and cheaper for long sequences, but less reliable at exact recall of specific facts from the past. You'd prefer Mamba for streaming applications — real-time log analysis, continuous sensor monitoring, or edge inference where you need low latency and limited memory.</em>
+    </li>
+    <li>
+      <strong>What is KV cache reuse and when should you ask your inference provider if they support it?</strong>
+      <br><em>Expected answer: When multiple queries are made against the same long document, the key-value (KV) pairs computed for that document can be cached and reused — you pay to process the document once, not once per query. Ask about it whenever your use case involves repeated queries against the same large context: contract review, codebase Q&amp;A, policy document analysis.</em>
+    </li>
+  </ol>
+</div>
+
+<div class="sh">8. Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin:10px 0">
+  <strong>&#128993; Optional depth —</strong> This section goes further for architects who want to understand the mechanisms in detail. Safe to skip on a first pass.
+</div>
+
+<div class="sh2">8.1 The RULER Benchmark</div>
+
+<div class="card t">
+  <div class="ch t">RULER — The Standard for Long-Context Evaluation</div>
+  <p><strong>RULER</strong> (Ruler for Evaluating Long-Context Understanding and Retrieval) is the standard benchmark for evaluating whether a model <em>actually</em> uses its claimed context length. It tests:</p>
+  <ul class="dl">
+    <li><strong>NIAH (Needle in a Haystack):</strong> Can the model find a specific fact buried at varying positions in a long document?</li>
+    <li><strong>Multi-key retrieval:</strong> Can it find multiple facts scattered through the document?</li>
+    <li><strong>Variable tracking:</strong> Can it trace a variable value through a long chain of assignments?</li>
+    <li><strong>Aggregation:</strong> Can it count or list things from across a long document?</li>
+  </ul>
+  <div class="wbox">
+    Most models perform well at 32K but degrade significantly beyond 128K. A model marketed as "1M context" might score 95% on NIAH at 128K and drop to 40% at 512K. Always ask for RULER scores at your intended context length — not just the maximum supported length.
+  </div>
+</div>
+
+<div class="sh2">8.2 YaRN and LongRoPE in More Detail</div>
+
+<div class="card t">
+  <div class="ch t">RoPE Extension Techniques</div>
+  <p>Standard RoPE uses rotation frequencies fixed at training time. When you extend beyond the training context, the model has never seen those rotation angles, and quality degrades.</p>
+  <div class="g2">
+    <div class="card ai">
+      <div class="ch ai">YaRN</div>
+      <p>Adjusts RoPE by:</p>
+      <ol class="sl">
+        <li>Scaling some frequency dimensions more than others (not all position dimensions need the same amount of scaling)</li>
+        <li>Fine-tuning on long-sequence data to help the model adapt to the scaled positions</li>
+      </ol>
+    </div>
+    <div class="card ai">
+      <div class="ch ai">LongRoPE</div>
+      <p>Takes a different approach: searches for the optimal per-dimension scaling factors that minimize perplexity on long documents — treating it as an optimization problem rather than a formula.</p>
+    </div>
+  </div>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>Practical implication:</strong> When comparing two models with the same "claimed" 128K context, ask whether the extension was done with fine-tuning (stronger) or just algorithmic scaling at inference time (weaker). Both YaRN and LongRoPE require some continued fine-tuning on long documents to work reliably.
+  </div>
+</div>
+
+<div class="sh2">8.3 Flash Attention Under the Hood</div>
+
+<div class="card t">
+  <div class="ch t">Why Flash Attention Changes Everything for Long Context</div>
+  <p>Standard attention loads Q, K, V matrices into GPU SRAM (fast cache), computes QK<sup>T</sup> (the attention scores), stores the full scores matrix in HBM (slow memory), then loads it back to apply the softmax and multiply by V.</p>
+  <p>For a 100K-token sequence, the full attention scores matrix is 100K × 100K = 10 billion float16 values = <strong>20GB</strong>. This doesn't fit in GPU memory for a single sequence.</p>
+  <p>Flash Attention rewrites this as a tiled computation:</p>
+  <ul class="dl">
+    <li>Process attention in small blocks that fit in SRAM</li>
+    <li>Never materialize the full attention matrix in HBM</li>
+    <li>Use online softmax normalization to maintain numerical correctness across tiles</li>
+  </ul>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Flash Attention v2</span><span class="kvv">Further optimizes parallelism strategy — now standard across frameworks</span></div>
+    <div class="kvr"><span class="kvk">Flash Attention v3</span><span class="kvv">Targets Hopper-class GPUs (H100/H200)</span></div>
+  </div>
+  <div class="wbox">
+    <strong>For architects evaluating self-hosted stacks:</strong> Verify that the inference framework (vLLM, SGLang, TGI) uses Flash Attention v2 or v3. Without it, you cannot practically serve long-context requests at any reasonable cost or scale.
+  </div>
+</div>
+
+<div class="sh2">8.4 Hybrid Architectures: Jamba and the Mamba+Transformer Trend</div>
+
+<div class="card t">
+  <div class="ch t">Why the Industry is Converging on Hybrid Layers</div>
+  <p>Pure Mamba models (as of 2026) have not matched Transformer quality on reasoning-heavy tasks. But pure Transformers become expensive at very long sequences. The answer the industry is converging on: <strong>hybrid layers</strong>.</p>
+  <p><strong>Jamba</strong> (AI21 Labs, 2024) interleaves Mamba layers with Transformer attention layers in a ratio of approximately 7:1. Result: it retains Transformer-quality reasoning while handling 256K+ contexts at a fraction of the memory cost of a pure Transformer.</p>
+  <div class="ibox" style="border-left-color:#2563eb">
+    Expect more hybrid architectures in the enterprise model landscape over 2025–2026. When evaluating models for long-document workflows, ask: (1) What is the architecture — pure Transformer / hybrid / pure SSM? (2) At what sequence length does quality degrade, and how was that measured?
+  </div>
+</div>
+
+<div class="sh">9. Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Long context does not mean unlimited or free.</strong> Cost scales with input length. A 1M-token context window can cost $2–$5 per query at current API rates. For high-volume use cases, RAG is almost always cheaper — often 100–500x cheaper per query.</li>
+  <li><strong>RAG vs. long context is a design decision, not a technology choice.</strong> Use long context when cross-document reasoning matters and volume is low. Use RAG when speed, cost, and scalability matter and retrieval quality is high. Use both (hybrid) when neither alone is sufficient.</li>
+  <li><strong>The "Lost in the Middle" problem is real and design-relevant.</strong> Structure your prompts to place reference material at the beginning or end of the context, not buried in the middle. Models are less reliable at recalling facts from mid-context positions.</li>
+  <li><strong>SSMs (Mamba) are a different architectural trade-off, not a better Transformer.</strong> They excel at streaming, real-time, and edge scenarios where linear cost and low latency matter. They're weaker than Transformers on tasks requiring exact recall of specific facts from deep in the sequence. Hybrid models (Jamba) aim to combine both.</li>
+  <li><strong>Flash Attention is the prerequisite for long-context serving, not optional.</strong> Any serious long-context deployment must use Flash Attention v2+. Without it, memory constraints make 128K+ contexts impractical in production.</li>
+</ul>

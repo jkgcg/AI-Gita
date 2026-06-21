@@ -1,0 +1,673 @@
+<!-- prereq bar placeholder — inject via platform -->
+<div class="ibox">
+  <strong>RAG (Retrieval-Augmented Generation)</strong> solves the LLM knowledge cutoff problem. Instead of expecting the model to "know" your information, you retrieve the relevant pieces at query time and hand them directly to the model as context. The model reads the retrieved information and answers from it — not from its training weights.<br><br>
+  <strong>Vector search</strong> is the retrieval mechanism that makes this work at scale. Rather than matching keywords, it converts text into numerical vectors (embeddings) that capture semantic meaning — so "What is your returns policy?" and "How do I send something back?" find the same documents, even though they share no words.
+</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S1 -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine hiring a consultant who knows everything about your industry — but nothing about your specific company. If you ask them "what's our late-payment penalty clause?", they'll guess. RAG is how you fix that: before the consultant speaks, your assistant photocopies the relevant pages from your filing cabinet and hands them over. The consultant reads those pages and answers from them. They don't need to have memorised your policies — they just need to be able to read and synthesise. RAG is that photocopying step, done automatically, for every question.
+</div>
+
+<div class="ibox">
+  Every LLM has a knowledge cutoff — a date after which it knows nothing. GPT-4o's training ended in early 2024. It doesn't know about your company's products, your internal policies, last quarter's results, or the contract your legal team signed yesterday.<br><br>
+  The name explains the pattern:
+  <ul class="dl">
+    <li><strong>Retrieval:</strong> find the most relevant documents or passages for the query</li>
+    <li><strong>Augmented:</strong> add those passages to the context before asking the model</li>
+    <li><strong>Generation:</strong> the model generates its answer grounded in what was retrieved</li>
+  </ul>
+  RAG is the <strong>single most widely deployed AI pattern in enterprise in 2026</strong>. If you're integrating AI into a system that needs to answer questions about your organisation's information — products, policies, contracts, knowledge base, support history — RAG is almost certainly the right starting point.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "RAG teaches the AI new things, like fine-tuning does." — RAG does not change the model at all. The model's weights are frozen. RAG changes what information the model <em>reads at query time</em> — like giving an exam-taker a reference sheet, not a better brain. The moment the context window closes, the model "forgets" everything retrieved. Fine-tuning bakes knowledge into weights permanently; RAG delivers knowledge temporarily at query time. They solve different problems.</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "If I have a big enough context window, I don't need RAG." — For small, stable document sets this is sometimes true. But for large corpora (thousands of documents), it is cost-prohibitive to stuff everything in context for every query. RAG retrieves only the 3–5 most relevant chunks — dropping token cost by 99%+ compared to sending all documents. Context window replaces RAG only when documents are few, stable, and the query genuinely needs all of them.</div>
+
+<!-- S2 -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    RAG changes the integration model for AI completely. Without RAG, the model's knowledge is fixed at training time. With RAG, the model's effective knowledge is your retrieval index — which you can update instantly by updating the documents in the index.<br><br>
+    Key design decisions:
+    <ul class="dl">
+      <li><strong>What goes in the index?</strong> Product catalogues, policy documents, support ticket history, contracts, FAQs — each has different freshness requirements, sensitivity levels, and chunking challenges.</li>
+      <li><strong>How fresh does it need to be?</strong> Nightly index refresh is cheap and simple. Near-real-time indexing (document changed → available in minutes) requires an event-driven pipeline and is significantly more complex.</li>
+      <li><strong>What retrieval quality is good enough?</strong> If your retriever misses the right document 20% of the time, 20% of your AI answers will be wrong or hallucinated — regardless of how good the LLM is. Retrieval quality is the ceiling on answer quality.</li>
+      <li><strong>RAG or long context?</strong> For small, stable document sets (&lt; 50K tokens), stuffing everything into context is simpler. For large, changing, or sensitive document sets, RAG is almost always better.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    RAG is where AI meets your knowledge architecture. The decisions your organisation has already made — how documents are stored, how they're structured, who can access what, how they're versioned — all directly affect the quality of a RAG system built on top.<br><br>
+    Three enterprise-wide implications:
+    <ul class="dl">
+      <li><strong>Knowledge quality is AI quality.</strong> If your internal documentation is inconsistent, outdated, or poorly structured, your RAG system will retrieve and surface that at scale to every user. RAG is a forcing function for knowledge management improvement.</li>
+      <li><strong>Access control surfaces in retrieval.</strong> A RAG system must enforce the same access controls that governed direct document access. A user who can't see a confidential policy document shouldn't get answers based on it. This is a retrieval design problem, not just an application security problem.</li>
+      <li><strong>PII and sensitive data flow through the LLM.</strong> Every retrieved document chunk passes through the LLM context window. If your documents contain PII, trade secrets, or commercially sensitive data, you need a data handling strategy at the retrieval boundary — not just at the application layer.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="sh">Think About It Like This</div>
+<div class="ibox">
+  <strong>The Open-Book Exam Analogy</strong><br><br>
+  <strong>Closed-book (standard LLM):</strong> The student memorises everything during training. On exam day, they answer entirely from memory. Very good at things studied intensively — but if the exam includes questions about events after they stopped studying, or about your company's specific internal processes, they're guessing.<br><br>
+  <strong>Open-book (RAG):</strong> The student walks in with a well-organised reference library. When a question comes up, they scan the index, find the relevant pages, read them, and write their answer based on what's in front of them. The quality of their answer depends on two things: how well-organised the library is (retrieval quality) and how well they can synthesise what they read (LLM quality).<br><br>
+  <strong>The vector search part:</strong> in a traditional library, you search by keyword. Vector search is like a librarian who understands what you <em>mean</em>, not just what you said. You ask "what's the rule about returning damaged goods?" and the librarian retrieves the relevant policy section even though it's titled "Product Return Conditions" and doesn't contain the word "damaged."<br><br>
+  <strong>The enterprise insight:</strong> the quality of the open-book exam is only as good as the library. A disorganised library with outdated books produces bad answers, even with a brilliant student. Investing in knowledge quality — clean documents, consistent structure, regular updates — is investing in RAG quality.
+</div>
+
+<!-- S4 -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 The RAG Pipeline: End to End</div>
+<div class="ibox">The production RAG pipeline has two phases — build time (happens once, or on a schedule) and query time (happens on every user request).</div>
+
+<div class="alayer al1">
+  <div class="ln">Build time — indexing pipeline</div>
+  <div class="code">Document sources (SharePoint, Confluence, PDFs, databases)
+    │
+    ▼
+Document ingestion
+  → format normalisation (PDF → text, HTML → text)
+  → metadata extraction (title, author, date, category, access level)
+    │
+    ▼
+Chunking
+  → split documents into retrievable segments
+  → target: 300–800 tokens per chunk, with overlap
+    │
+    ▼
+Embedding
+  → each chunk → embedding model → dense vector (e.g., 1536 dimensions)
+    │
+    ▼
+Indexing
+  → vectors stored in vector database (Pinecone, Weaviate, pgvector, Qdrant)
+  → metadata stored alongside for filtering
+  → BM25 index built for keyword search</div>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Query time — retrieval and generation pipeline</div>
+  <div class="code">User query
+    │
+    ▼
+Query embedding
+  → same embedding model as indexing
+    │
+    ▼
+Hybrid retrieval (semantic + keyword)
+  → vector search: top-K semantically similar chunks
+  → BM25 search: top-K keyword-matching chunks
+  → RRF fusion: merge and re-score the two result sets
+    │
+    ▼
+Reranking
+  → cross-encoder reranker scores each retrieved chunk against the query for precision
+  → top 3–5 chunks selected
+    │
+    ▼
+Context assembly
+  → retrieved chunks formatted and injected into the prompt
+  → source metadata included for citation
+    │
+    ▼
+LLM generation
+  → model answers from the retrieved context
+  → instructed to cite sources and say "I don't know" if context is insufficient
+    │
+    ▼
+Output + citations → user
+    │
+    ▼
+Evaluation (async, on sample)
+  → RAGAS or LLM judge scores answer quality</div>
+  <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+    <strong>The 2026 production standard:</strong> hybrid retrieve → rerank → generate → evaluate. Any simpler pipeline (semantic-only retrieval, no reranking, no evaluation) is leaving quality on the table.
+  </div>
+</div>
+
+<div class="sh2">4.2 Embeddings: What They Actually Are</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of every word or passage of text as having an address in a giant city — except this city has 1,536 dimensions instead of two. Words and passages that mean similar things get assigned addresses that are close together in this city. "Returns policy" and "how to get a refund" end up in the same neighbourhood. "Invoice payment terms" ends up in a different neighbourhood. An embedding is simply that address — a list of 1,536 numbers that pinpoints where a piece of text lives in meaning-space. When you search, you look up the address of your question, then find all the documents in the same neighbourhood. That's semantic search: finding neighbours in meaning-space, not matching exact words.
+</div>
+
+<div class="ibox">
+  An <strong>embedding</strong> is a dense numerical vector — a list of floating-point numbers (typically 768 to 3,072 values depending on the model) — that encodes the semantic meaning of a piece of text. The key property: texts with similar meanings produce vectors that are close together in vector space; texts with different meanings produce vectors that are far apart.<br><br>
+  This is produced by a neural network (the embedding model) trained specifically to map text to vectors such that semantic similarity corresponds to vector proximity. Common embedding models in 2026:
+  <ul class="dl">
+    <li><strong>text-embedding-3-large</strong> (OpenAI): 3,072 dimensions; strong general-purpose performance</li>
+    <li><strong>text-embedding-3-small</strong> (OpenAI): 1,536 dimensions; good quality-cost balance</li>
+    <li><strong>embed-english-v3.0</strong> (Cohere): strong multilingual and retrieval-focused</li>
+    <li><strong>nomic-embed-text</strong>: open-source, self-hostable, competitive quality</li>
+  </ul>
+  <strong>Critical rule:</strong> the query and the documents must be embedded with the <em>same model</em>. Mixing models produces incoherent similarity scores — the addresses are in incompatible coordinate systems.
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Why cosine similarity instead of ordinary (Euclidean) distance? Imagine two colleagues describing the same project — one is very verbose and writes 2,000 words, the other is concise and writes 200 words. Their meaning is the same, but if you measure straight-line distance between their vector addresses, the verbose one will appear "further away" simply because longer text tends to produce larger vector values. Cosine similarity ignores the magnitude (how far from the origin) and only measures the angle between the vectors — the direction they're pointing. Same direction = same meaning, regardless of how much text there was. That's why cosine is the right similarity measure for text: it cares about what the text is about, not how much of it there is.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Cosine vs Euclidean distance:</strong> Two similarity measures are commonly used:
+  <ul class="dl">
+    <li><strong>Cosine similarity:</strong> measures the angle between two vectors. Value 1 = identical direction (same meaning); 0 = orthogonal (unrelated); -1 = opposite direction. Length-invariant — robust to differences in text length. Standard for RAG.</li>
+    <li><strong>Euclidean distance (L2):</strong> measures straight-line distance between two vector tips. Sensitive to vector magnitude — longer texts produce larger vectors, which appear "farther" even when semantically similar. Less suitable for text retrieval unless vectors are normalised.</li>
+  </ul>
+  Most production systems use cosine similarity (or equivalently: dot product on normalised vectors).
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Embeddings capture exact facts — so if my document says 'the penalty is 14 days', the embedding will remember that number." — Embeddings capture <em>meaning and topic</em>, not precise facts or numbers. "14 days" and "30 days" may produce nearly identical embeddings because their semantic context (return windows, penalty clauses) is the same. The exact figure is in the text of the retrieved chunk — that's why you must return the raw text to the LLM, not just the embedding. The embedding is the address; the document text is the content at that address.</div>
+
+<div class="sh2">4.3 Chunking Strategy: Why It Matters</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine you're filing a technical manual into a cabinet where each folder can hold exactly one page. If a procedure spans three pages, you must split it — but now each page is in a separate folder with no indication it belongs to the others. Someone looking for "how to reset the device" might find the middle page (step 4 of 7) with no context about what step 1 was. That's the chunking problem: how do you cut a large document into retrievable pieces without losing the context that makes each piece meaningful? Too small = context lost. Too large = you retrieve a whole chapter when you only needed one paragraph.
+</div>
+
+<div class="ibox">
+  A chunk is the unit of retrieval — the piece of text that gets stored as a vector and retrieved as a result. Getting chunking right is one of the highest-leverage decisions in a RAG system.<br><br>
+  <ul class="dl">
+    <li><strong>Too small:</strong> each chunk lacks context. "The penalty is 2% of order value" retrieved without knowing what penalty or what condition triggers it is useless.</li>
+    <li><strong>Too large:</strong> each chunk contains multiple topics. Retrieving a 2,000-token chunk because one sentence is relevant means the model gets 1,900 tokens of noise — inflating cost and confusing the model.</li>
+    <li><strong>Wrong boundaries:</strong> splitting at page boundaries may split a sentence across chunks; splitting a table by row may split header context from data rows.</li>
+  </ul>
+  Think of chunking like copying pages from a reference manual: too small and you lose context; too large and retrieval becomes imprecise. The right chunk size depends on how your users ask questions.
+</div>
+
+<table class="t">
+  <tr><th>Strategy</th><th>How it works</th><th>Best for</th></tr>
+  <tr><td><strong>Fixed-size with overlap</strong></td><td>Split at N tokens, overlap by M tokens</td><td>Simple documents, consistent prose, fast to implement</td></tr>
+  <tr><td><strong>Sentence-based</strong></td><td>Split at sentence boundaries, group into chunks of ~N tokens</td><td>Conversational text, FAQs, where sentence integrity matters</td></tr>
+  <tr><td><strong>Semantic chunking</strong></td><td>Embed sentences, split where embedding similarity drops (topic change)</td><td>Mixed-topic documents, research papers, policy documents</td></tr>
+  <tr><td><strong>Hierarchical (parent-child)</strong></td><td>Store both large "parent" chunks and small "child" chunks; retrieve by child but return parent for context</td><td>Long structured documents where local context is small but surrounding context matters</td></tr>
+  <tr><td><strong>Document-structure-aware</strong></td><td>Split by markdown headers, HTML sections, PDF headings</td><td>Structured documents (wikis, technical docs, contracts with sections)</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>The overlap trick:</strong> when splitting at fixed size, include the last 10–20% of the previous chunk at the start of the next. This ensures a concept mentioned at the end of one chunk is also findable from the next chunk's query — preventing boundary miss.<br><br>
+  <strong>Practical guidance:</strong> for a pilot, start with fixed-size (512 tokens, 50-token overlap). For production, invest in document-structure-aware chunking for your primary document types. Review quality by inspection: take 20 random chunks and ask "is this a self-contained unit of information?"
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Chunking is a one-time setup decision." — Chunking is an ongoing quality concern. As your documents evolve (new formats, longer policies, structured tables, multilingual content), your chunk strategy must evolve with them. Poor chunking is the single most common root cause of retrieval quality failures in production RAG systems. Budget for chunking refinement as a regular engineering activity, not a one-off.</div>
+
+<div class="sh2">4.4 Vector Database: Why You Can't Use a Regular Database</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> In a relational database, you find a row by asking "WHERE name = 'returns policy'" — exact match. You cannot write "WHERE meaning IS SIMILAR TO 'how do I get a refund'" because SQL has no concept of meaning. A vector database is built from the ground up to answer exactly that question: given this query vector (address in meaning-space), find me the 10 document vectors with the most similar addresses. It is a spatial index over a high-dimensional coordinate system, built to run that nearest-neighbour lookup in milliseconds across millions of documents. Regular databases simply don't have this data structure — it would be like asking your filing cabinet to measure the distance between two postcodes.
+</div>
+
+<div class="ibox">
+  A <strong>vector database</strong> stores document embeddings (dense vectors) and provides efficient similarity search: given a query vector, return the K most similar document vectors. This requires a specialised index structure (HNSW — see Section 8.1) that does not exist in relational or document databases.<br><br>
+  In addition to vector search, most vector databases also store metadata alongside each vector, enabling hybrid filtering: "find the 20 most semantically similar chunks, but only among documents tagged <code>access_group: logistics</code>." This is how access control is enforced at retrieval time.<br><br>
+  <strong>Popular vector databases in 2026:</strong>
+  <ul class="dl">
+    <li><strong>Pinecone:</strong> managed cloud, enterprise SLA, easy integration</li>
+    <li><strong>Weaviate:</strong> open-source, self-hostable, built-in hybrid search</li>
+    <li><strong>Qdrant:</strong> open-source, Rust-based, strong performance</li>
+    <li><strong>pgvector:</strong> PostgreSQL extension — adds vector search to your existing Postgres; simplest path if you already run Postgres</li>
+    <li><strong>Azure AI Search / OpenSearch:</strong> managed services with built-in hybrid search</li>
+  </ul>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "We can just add a vector column to our existing SQL database." — pgvector does allow this for Postgres, and for small-to-medium corpora (&lt;1M documents) it works well. But at large scale, a general-purpose database lacks the specialised HNSW index and query optimisations of a dedicated vector database. The right choice depends on scale: Postgres + pgvector for PoC and small production; dedicated vector DB (Pinecone, Weaviate, Qdrant) for large-scale or high-throughput deployments.</div>
+
+<div class="sh2">4.5 Hybrid Search: Why You Need Both Semantic and Keyword</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Semantic search is like a brilliant librarian who understands concepts — ask them about "supplier payment terms" and they'll find the "vendor invoice conditions" document without you saying those exact words. But if you say "find everything about order ORD-20241105-8823", the brilliant librarian is useless — they've never seen that specific code and it doesn't fit any concept they know. You need a second librarian who just does exact text matching. Hybrid search runs both librarians simultaneously and combines their ranked lists. The conceptual librarian handles meaning; the exact-match librarian handles codes, product IDs, and technical jargon. Together they handle everything.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Semantic search (vector similarity)</div>
+    Finds documents that <em>mean</em> the same thing as the query, regardless of exact wording. Handles synonyms, paraphrases, and conceptual similarity.<br><br>
+    "How do I return a product?" finds "Product Return Conditions."<br><br>
+    <strong>Misses:</strong> proper nouns, product codes, technical terms, and jargon that don't embed distinctively.
+  </div>
+  <div class="card b">
+    <div class="ch b">Keyword search (BM25)</div>
+    Finds documents that contain the exact terms in the query. Handles proper nouns, product codes, and technical jargon.<br><br>
+    "Return policy for SKU-ABC123" finds documents containing "SKU-ABC123."<br><br>
+    <strong>Misses:</strong> conceptual queries where words differ, typos, and synonym-based matches.
+  </div>
+</div>
+
+<table class="t">
+  <tr><th>Query type</th><th>Semantic handles it?</th><th>BM25 handles it?</th></tr>
+  <tr><td>Conceptual: "How do I get a refund?"</td><td>&#10003;</td><td>&#10007; (word mismatch)</td></tr>
+  <tr><td>Exact term: "SKU-ABC123 return"</td><td>&#10007; (rare term, may not embed well)</td><td>&#10003;</td></tr>
+  <tr><td>Mixed: "How do I return SKU-ABC123?"</td><td>Partial</td><td>Partial</td></tr>
+  <tr><td>Typo: "retrun policy"</td><td>&#10003; (embedding robust to typos)</td><td>&#10007; (exact match fails)</td></tr>
+  <tr><td>Acronym: "What is the OMS integration spec?"</td><td>&#10007; (OMS may not embed distinctively)</td><td>&#10003;</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4">
+  <strong>Reciprocal Rank Fusion (RRF)</strong> is the standard algorithm for merging the two result sets:
+</div>
+<div class="math">RRF_score(d) = &sum; 1 / (k + rank(d, result_set_i))
+
+where k = 60 (empirically tuned constant)
+      rank(d, result_set_i) = rank of d in each individual result set</div>
+<div class="ibox">RRF gives high combined scores to documents that rank highly in <em>both</em> result sets — and reasonable scores to documents that rank highly in only one. It's parameter-free and robust across different retrieval configurations.</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Semantic search is always better than keyword search — it's more intelligent." — Semantic search is better at conceptual queries, but systematically worse at exact-term queries. In enterprise systems, a large proportion of queries include product codes, order numbers, employee IDs, system names, and other tokens that the embedding model has rarely or never seen in training. For those queries, BM25 is not just "also useful" — it's the only approach that works reliably. Semantic-only RAG is almost always a first-implementation shortcut that must be upgraded to hybrid before production.</div>
+
+<div class="sh2">4.6 Reranking: Precision After Recall</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of a recruitment process. First, HR does a CV screen and passes 50 candidates to the hiring manager — they're casting a wide net (recall). The hiring manager then interviews all 50 and selects the top 5 — they're doing precision selection. Vector retrieval is the CV screen: fast, broad, gets the right candidates in the pool but includes some noise. Reranking is the interview: slower, more expensive, but far more accurate at identifying who's actually the best fit. You can't interview 10 million people (too slow), but you can interview 50 (practical). That's why you do retrieval first, then reranking.
+</div>
+
+<div class="ibox">
+  Retrieval optimises for <strong>recall</strong> — get the right document in the top-K results, even if some noise comes with it. Reranking optimises for <strong>precision</strong> — from those top-K results, identify the 3–5 that most precisely answer the query.<br><br>
+  Vector search uses dot product or cosine similarity — fast (milliseconds for millions of documents) but coarse. A <strong>cross-encoder reranker</strong> takes the query and each candidate document together, runs them through a model jointly, and produces a fine-grained relevance score. Much more precise, but too slow to run on millions of documents — so you run it only on the top 20–50 retrieval results.
+</div>
+<div class="code">Vector search: 10M documents → top 50 in 50ms
+Cross-encoder reranker: top 50 → top 5 in 150ms
+LLM generation: top 5 chunks as context → answer</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">When reranking matters most</div>
+    <ul class="dl">
+      <li><strong>Similar-looking documents:</strong> queries where multiple documents are superficially similar but only one is actually relevant</li>
+      <li><strong>Multi-hop questions:</strong> where the relevant chunk needs to match the full question, not just part of it</li>
+      <li><strong>High-precision domains:</strong> legal, medical, compliance — where retrieval noise in the context causes hallucination</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">Popular reranker models</div>
+    <ul class="dl">
+      <li><strong>Cohere Rerank:</strong> managed API, easy integration</li>
+      <li><strong>BGE Reranker:</strong> open-source, self-hostable</li>
+      <li><strong>Jina Reranker:</strong> API or self-hosted</li>
+    </ul>
+    All expose an API or can be self-hosted.
+  </div>
+</div>
+
+<div class="sh2">4.7 Context Window Limits: Why RAG Is a Two-Stage Pipeline</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> An LLM's context window is like a whiteboard in a meeting room — it can only hold so much information at once. GPT-4o's whiteboard fits about 128,000 tokens (roughly 100,000 words). Your enterprise knowledge base is probably 10 million words. You physically cannot put everything on the whiteboard. So RAG is the process of deciding what to write on the whiteboard before the meeting starts: retrieve the 5 most relevant pages from the library, write those on the whiteboard, and let the model answer from what's in front of it. Without this selection step, you either overflow the whiteboard (error) or spend a fortune writing it all out every time (cost). The two-stage pipeline — retrieve many, send few — is how you fit a library's worth of knowledge onto a whiteboard.
+</div>
+
+<div class="ibox">
+  Even with today's 128K–2M token context windows, sending all documents for every query is:
+  <ul class="dl">
+    <li><strong>Expensive:</strong> LLM pricing is per input token. Sending 500K tokens per query at scale costs orders of magnitude more than sending 3–5 chunks (~2K tokens).</li>
+    <li><strong>Slower:</strong> larger context = longer time-to-first-token, directly impacting user experience.</li>
+    <li><strong>Less accurate:</strong> research shows LLM accuracy on retrieval from long contexts degrades — "lost in the middle" effect — where relevant content in the middle of a very long context is retrieved less reliably than content at the start or end.</li>
+  </ul>
+  RAG solves all three: retrieve 3–5 chunks (tiny context), run the LLM fast and cheap, get accurate grounded answers.
+</div>
+
+<div class="sh2">4.8 Hallucination in RAG vs Without RAG</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Without RAG, the LLM is an expert who must answer entirely from memory. When they don't know the answer, they may confabulate confidently — like a consultant who bluffs rather than admitting they don't know your company's policies. With RAG, the expert is handed the relevant policy pages. They can now either (a) answer from the pages (grounded, faithful answer) or (b) ignore the pages and still answer from memory (a RAG-specific failure mode: "context was provided but ignored"). RAG reduces hallucination significantly, but does not eliminate it — the model can still prefer its training knowledge over the provided context. This is why faithfulness evaluation is essential even with RAG.
+</div>
+
+<div class="g2">
+  <div class="card r">
+    <div class="ch r">Hallucination WITHOUT RAG</div>
+    The model invents plausible-sounding but false information from its parametric memory. Common patterns:
+    <ul class="dl">
+      <li>Fabricates specific numbers ("the return window is 14 days" — invented)</li>
+      <li>Confuses your company's policies with those of a competitor</li>
+      <li>Invents product features based on category patterns</li>
+      <li>Answers with outdated information (post-training cutoff events)</li>
+    </ul>
+    <strong>Detection:</strong> very hard — the model is confidently wrong with no traceable source.
+  </div>
+  <div class="card r">
+    <div class="ch r">Hallucination WITH RAG</div>
+    The model ignores or misweights the retrieved context and substitutes its own knowledge. Patterns:
+    <ul class="dl">
+      <li>Correct documents retrieved, but model uses parametric knowledge anyway</li>
+      <li>Multiple conflicting chunks retrieved (e.g., old and new policy versions); model synthesises incorrectly</li>
+      <li>Model extrapolates beyond what's in the retrieved text</li>
+    </ul>
+    <strong>Detection:</strong> much easier — compare the answer against retrieved chunks. RAGAS faithfulness measures this.
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+  <strong>Why RAG hallucination is more manageable:</strong> when hallucination occurs in RAG, you have the retrieved chunks as evidence to trace the failure. You can ask: "was the correct answer in the retrieved context?" If yes, the model failed faithfulness. If no, retrieval failed. This diagnostic clarity — absent in pure parametric generation — makes RAG failures debuggable and measurable. Pure LLM hallucination is much harder to detect because there's nothing to compare against.
+</div>
+
+<div class="sh2">4.9 When RAG Is the Wrong Answer</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> RAG is the right tool when the answer lives in a document and the LLM needs to read it. But not every question is like that. "What is the current EUR/USD exchange rate?" is not in any document you indexed — it changes by the second. "Is order #12345 shipped?" is not in a document — it's a live database row. "Write me a function that sorts a list" needs no document at all. RAG is a document retrieval and reading pattern. When the question requires live data, structured database queries, calculations, or pure reasoning, RAG is either irrelevant or wrong. Recognising when NOT to use RAG is as important as knowing how to use it.
+</div>
+
+<table class="t">
+  <tr><th>Scenario</th><th>RAG appropriate?</th><th>Better approach</th></tr>
+  <tr><td>Real-time data (live prices, stock levels, order status)</td><td>No — indexed data is stale</td><td>Tool call / API integration in an agent</td></tr>
+  <tr><td>Very short facts (single values, lookup tables)</td><td>Marginal — overhead exceeds value</td><td>Structured lookup / SQL query tool</td></tr>
+  <tr><td>Highly structured queries (analytics, aggregations)</td><td>No — documents aren't the right format</td><td>Text-to-SQL with database tool</td></tr>
+  <tr><td>Reasoning over the full corpus (e.g., "summarise all support tickets this month")</td><td>No — retrieval selects fragments</td><td>Batch processing / summarisation pipeline</td></tr>
+  <tr><td>Knowledge in the LLM's training data (general coding, maths, language)</td><td>Not needed</td><td>Direct LLM query</td></tr>
+  <tr><td>Proprietary long-form documents, policies, contracts</td><td>Yes — this is RAG's sweet spot</td><td>RAG</td></tr>
+</table>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "If we build a RAG system, the AI can answer any question about our business." — RAG answers questions whose answers are written down in your indexed documents. It cannot answer questions that require live database lookups, API calls, real-time calculations, or information that was never written into a document. An enterprise AI system that handles all question types typically combines RAG (for document knowledge) with tool-calling (for live data and structured queries) inside an agent architecture.</div>
+
+<div class="sh2">4.10 RAG Evaluation: Measuring What Actually Matters</div>
+<div class="ibox">RAG quality breaks down into three independent dimensions that must all be measured.</div>
+
+<div class="alayer al1">
+  <div class="ln">Dimension 1 — Retrieval quality: did the retriever find the right documents?</div>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Recall@K</span><span class="kvv">Of the relevant documents, what fraction were in the top K results?</span></div>
+    <div class="kvr"><span class="kvk">Precision@K</span><span class="kvv">Of the top K results, what fraction were actually relevant?</span></div>
+    <div class="kvr"><span class="kvk">MRR (Mean Reciprocal Rank)</span><span class="kvv">How highly was the first relevant document ranked on average?</span></div>
+  </div>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Dimension 2 — Answer quality given the retrieved context</div>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Faithfulness (RAGAS)</span><span class="kvv">Is every claim in the answer supported by the retrieved context? Measures hallucination.</span></div>
+    <div class="kvr"><span class="kvk">Answer relevance (RAGAS)</span><span class="kvv">Does the answer address the question that was asked? Measures instruction following.</span></div>
+  </div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Dimension 3 — End-to-end quality</div>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Context relevance (RAGAS)</span><span class="kvv">Are the retrieved chunks actually relevant to the question? Measures retrieval precision.</span></div>
+    <div class="kvr"><span class="kvk">Human evaluation</span><span class="kvv">For a sample of queries, do actual users find the answer correct and complete?</span></div>
+  </div>
+  <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">
+    <strong>RAGAS</strong> (Retrieval-Augmented Generation Assessment) is the open-source framework that automates measurement of faithfulness, answer relevance, and context relevance using an LLM judge. It produces a score between 0 and 1 for each dimension.
+  </div>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">The failure mode quadrant — what goes wrong and where</div>
+  <table class="t">
+    <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+    <tr><td>Correct topic, wrong detail</td><td>Retrieval precision problem — right document, wrong chunk</td><td>Improve chunking or reranking</td></tr>
+    <tr><td>Completely off-topic answer</td><td>Retrieval recall problem — wrong documents retrieved</td><td>Improve embedding model or add keyword search</td></tr>
+    <tr><td>Answer contradicts retrieved content</td><td>LLM faithfulness failure — model ignores context</td><td>Stronger grounding instruction; faithfulness guardrail</td></tr>
+    <tr><td>Answer is vague / non-committal</td><td>Retrieved content insufficient</td><td>Expand knowledge base; improve document coverage</td></tr>
+    <tr><td>Correct answer, wrong citation</td><td>Metadata problem — chunks not tagged with source correctly</td><td>Fix metadata pipeline</td></tr>
+  </table>
+</div>
+
+<div class="sh2">4.11 RAG in 2026: What Changed</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> These are advanced variants used once a baseline RAG pipeline is running well. If this is your first RAG system, note the section titles and return here later. The core pipeline from Sections 4.1–4.10 is what you need first.</div>
+
+<div class="g2">
+  <div class="card t">
+    <div class="ch t">Late Interaction Models (ColBERT / ColPali)</div>
+    Instead of a single vector per document, store a vector for every <em>token</em> in the document. At query time, each query token scores against each document token; the final relevance score is the sum of max-similarity scores. Much higher precision than bi-encoder models — at the cost of larger index size.<br><br>
+    <em>Use when:</em> precision is critical and you can afford 10–20× the storage.
+  </div>
+  <div class="card t">
+    <div class="ch t">GraphRAG</div>
+    Microsoft's extension: before indexing, an LLM extracts entities and relationships from all documents and builds a knowledge graph. Queries traverse the graph before retrieval — enabling multi-hop reasoning ("what are the dependencies of the system that processes returns?") that vector similarity alone cannot handle.<br><br>
+    <em>Use when:</em> your knowledge base has dense entity relationships and users ask multi-hop questions.
+  </div>
+</div>
+<div class="g2">
+  <div class="card t">
+    <div class="ch t">HyDE — Hypothetical Document Embedding</div>
+    Before searching, generate a hypothetical answer to the query using the LLM, then use the hypothetical answer's embedding to search — instead of the query's embedding. Works because the hypothetical answer looks more like the documents you want to retrieve than the short query does.<br><br>
+    <em>Use when:</em> queries are short and retrieval recall is poor.
+  </div>
+  <div class="card t">
+    <div class="ch t">Contextual Retrieval</div>
+    Before chunking, use an LLM to prepend a brief context summary to each chunk: "This chunk is from the Returns Policy document, section 3, discussing conditions for refunds on perishable items." Each chunk now carries its own context — it can be understood even without the surrounding document.<br><br>
+    <em>Use when:</em> your documents have chunks that make sense in context but are ambiguous in isolation.
+  </div>
+</div>
+<div class="card t">
+  <div class="ch t">Long Context as RAG Fallback</div>
+  For critical queries where RAG retrieval might miss something, use a two-stage approach: RAG for the fast path (95% of queries), long context for the escalation path (queries where the model's confidence in the retrieved context is low). This hybrid gives the cost efficiency of RAG with the coverage of long context for edge cases.
+</div>
+
+<!-- S5 -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">Scenario: Product Knowledge RAG for a Retail Customer Service Platform</div>
+  A retail organisation has 45,000 SKUs, 12 product category guides, a 180-page returns policy, carrier-specific shipping guides for 8 carriers, and a loyalty programme FAQ — all maintained in Confluence and SharePoint. Customer service agents spend 40% of their time searching for this information.
+
+  <br><br><strong>Index architecture decisions:</strong>
+  <table class="t">
+    <tr><th>Content type</th><th>Chunking strategy</th><th>Refresh frequency</th><th>Access scope</th></tr>
+    <tr><td>Product specifications</td><td>Document-structure-aware (by attribute section)</td><td>Nightly</td><td>All agents</td></tr>
+    <tr><td>Returns policy</td><td>Semantic chunking (policy sections are variable length)</td><td>Weekly</td><td>All agents</td></tr>
+    <tr><td>Carrier guides</td><td>Fixed-size with overlap (structured prose)</td><td>Monthly</td><td>Logistics-trained agents only</td></tr>
+    <tr><td>Loyalty FAQ</td><td>Sentence-based (Q&amp;A pairs)</td><td>Weekly</td><td>All agents</td></tr>
+  </table>
+
+  <br><strong>Retrieval configuration:</strong>
+  <ul class="dl">
+    <li><strong>Embedding model:</strong> text-embedding-3-large (OpenAI) — higher precision for product terminology</li>
+    <li><strong>Hybrid search:</strong> semantic (weight 0.7) + BM25 (weight 0.3) — heavier semantic weight because agents phrase queries conversationally</li>
+    <li><strong>Reranker:</strong> Cohere Rerank — reduced context noise from 20 candidate chunks to 5</li>
+    <li><strong>Top-K to reranker:</strong> 20; top-K to LLM: 5</li>
+  </ul>
+
+  <strong>Access control implementation:</strong> carrier guides are restricted to logistics-trained agents. Every chunk in the carrier guides index is tagged with <code>access_group: logistics</code>. The metadata filter is enforced at the vector database query layer, not in application code.
+  <div class="code-label">Python</div>
+  <div class="code">results = vector_db.query(
+    embedding=query_embedding,
+    filter={"access_group": {"$in": user.access_groups}},
+    top_k=20
+)</div>
+
+  <strong>Evaluation results at 8 weeks post-launch:</strong>
+  <table class="t">
+    <tr><th>Metric</th><th>Week 1</th><th>Week 8</th><th>Target</th></tr>
+    <tr><td>Retrieval Recall@5</td><td>71%</td><td>89%</td><td>&gt; 85%</td></tr>
+    <tr><td>RAGAS Faithfulness</td><td>0.81</td><td>0.93</td><td>&gt; 0.90</td></tr>
+    <tr><td>RAGAS Answer Relevance</td><td>0.76</td><td>0.88</td><td>&gt; 0.85%</td></tr>
+    <tr><td>Agent satisfaction (CSAT)</td><td>3.4/5</td><td>4.2/5</td><td>&gt; 4.0/5</td></tr>
+    <tr><td>Query resolution time</td><td>45s</td><td>12s</td><td>&lt; 15s</td></tr>
+  </table>
+
+  <strong>What improved Recall@5 from 71% to 89%:</strong>
+  <ul class="dl">
+    <li><strong>Week 2:</strong> added BM25 hybrid search (was semantic-only at launch) — +8% recall for SKU-specific queries</li>
+    <li><strong>Week 4:</strong> switched from fixed-size to document-structure-aware chunking for product specs — +6% precision, fewer irrelevant chunks in top-5</li>
+    <li><strong>Week 6:</strong> added contextual retrieval (LLM-prepended context summaries) for returns policy — +4% on policy-related queries</li>
+  </ul>
+
+  <strong>What improved RAGAS Faithfulness from 0.81 to 0.93:</strong>
+  <ul class="dl">
+    <li><strong>Grounding instruction:</strong> "Answer only from the retrieved documents. If the answer is not in the documents, say 'I don't have information about that.'"</li>
+    <li><strong>Reduced top-K:</strong> from 8 to 5 — fewer noise chunks reduced instances of the model synthesising across irrelevant context</li>
+  </ul>
+</div>
+
+<!-- S6 -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">RAG vs Fine-Tune vs Long Context: The Decision Matrix</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Three ways to give an LLM knowledge about your domain: (1) RAG — hand it the relevant pages at query time, like an open-book exam. The model doesn't change; the knowledge lives in your index. Update documents, update answers. (2) Fine-tuning — retrain the model on your domain. The model now "speaks your language" — it knows your terminology, your document style, your abbreviations. But it's expensive, takes weeks, and doesn't update automatically when your policies change. (3) Long context — put everything in the prompt. Simple, but eye-wateringly expensive at scale. The right mental model: RAG for knowledge that changes; fine-tuning for language style that doesn't; long context for small stable corpora where simplicity wins.
+</div>
+
+<table class="t">
+  <tr><th>Signal</th><th>RAG</th><th>Fine-tune</th><th>Long context</th></tr>
+  <tr><td>Knowledge changes frequently</td><td>&#10003; Best</td><td>&#10007; Expensive to update</td><td>&#10003; If docs fit</td></tr>
+  <tr><td>Knowledge is large (&gt; 200K tokens)</td><td>&#10003;</td><td>&#10003;</td><td>&#10007; Cost-prohibitive</td></tr>
+  <tr><td>Need to cite sources</td><td>&#10003; Native</td><td>&#10007; Hard</td><td>&#10003; If structured well</td></tr>
+  <tr><td>Domain language is highly specialised</td><td>&#10003; + fine-tune</td><td>&#10003;</td><td>&#10003;</td></tr>
+  <tr><td>Low query volume, high value</td><td>&#10003; or long context</td><td>&#10003;</td><td>&#10003;</td></tr>
+  <tr><td>High query volume, cost sensitive</td><td>&#10003;</td><td>&#10003;</td><td>&#10007;</td></tr>
+  <tr><td>Cross-document reasoning</td><td>Partial (GraphRAG)</td><td>&#10003;</td><td>&#10003; Best</td></tr>
+  <tr><td>Data is sensitive / can't send to LLM</td><td>&#10003; (retrieve only relevant)</td><td>&#10007; (full corpus in training)</td><td>&#10007; (full corpus in context)</td></tr>
+</table>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4">
+  <strong>Rule of thumb:</strong> start with RAG. Add fine-tuning if domain language adaptation is needed. Add long context only for specific high-value, low-volume queries where cross-document reasoning matters. The most common production pattern is RAG + fine-tuning on domain language, not RAG <em>vs</em> fine-tuning.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Fine-tuning is better than RAG because the knowledge is baked in — it can't forget." — Fine-tuned knowledge becomes stale the moment the document changes, and retraining costs thousands of pounds and weeks of work. RAG knowledge updates the instant you update the index — no retraining required. For organisational knowledge that evolves (policies, products, personnel), RAG + fast index refresh is almost always superior to fine-tuning. Fine-tuning is better for style and tone adaptation, not for keeping facts current.</div>
+
+<div class="sh2">RAG Pipeline in Your Enterprise Architecture</div>
+<div class="code">Document Sources                    Query Path
+(SharePoint, Confluence,       User / Agent query
+ PDFs, databases)                     │
+      │                               ▼
+      ▼                        Query embedding
+Ingestion pipeline                    │
+(scheduled or event-driven)    Hybrid retrieval
+      │                        (vector + BM25 + RRF)
+      ▼                               │
+Chunking + embedding           Reranking
+      │                               │
+      ▼                        Context assembly
+Vector DB + BM25 index                │
+(with access metadata)         LLM generation
+      │                               │
+      ▼                        Output + citations
+Evaluation pipeline                   │
+(RAGAS on sample)              Evaluation (async)</div>
+
+<strong>Integration points with enterprise stack:</strong>
+<table class="t">
+  <tr><th>Component</th><th>Enterprise integration</th></tr>
+  <tr><td>Document sources</td><td>SharePoint connector, Confluence connector, S3 listener, database change feed</td></tr>
+  <tr><td>Identity / access</td><td>AAD groups → retrieval metadata filters; enforced at vector DB query layer</td></tr>
+  <tr><td>Observability</td><td>OTel traces per retrieval call; RAGAS scores in metrics pipeline; cost per query</td></tr>
+  <tr><td>Knowledge governance</td><td>Document freshness tracking; stale document alerting; content review workflow</td></tr>
+  <tr><td>Data residency</td><td>Vector embeddings are derived data, not raw PII — but check with legal; on-prem vector DB option if required</td></tr>
+</table>
+
+<!-- S7 -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">Self-Check Questions</div>
+  <ol class="sl">
+    <li>Your knowledge assistant is returning correct-sounding but wrong answers for queries about product codes (e.g., "SKU-AB7723"). The product code is in your documents. What is the most likely retrieval failure, and how would you fix it?
+      <details><summary>Expected answer</summary><p>Product codes are rare tokens — they don't appear frequently enough in training data for the embedding model to represent them meaningfully. Vector similarity search will not reliably find documents containing "SKU-AB7723" from a query including that code. This is the classic failure mode of semantic-only retrieval for exact terms. Fix: add BM25 keyword search alongside semantic search (hybrid retrieval with RRF fusion). BM25 is exact-term matching — it will reliably find documents containing the exact product code. The hybrid approach handles both conceptual queries (semantic wins) and exact-term queries (BM25 wins).</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The embedding model has likely never encountered "SKU-AB7723" as a meaningful unit — it's a rare token with no semantic representation. Semantic (vector) search will fail for this query because similarity in meaning-space requires shared context, which unique codes lack. The fix is hybrid search: add BM25 keyword search alongside vector search, fused with RRF. BM25 does exact-term matching and will reliably surface documents containing "SKU-AB7723" verbatim.<br>
+        <strong>Simple explanation:</strong> Vector search finds similar meanings; BM25 finds exact words — product codes need exact-word matching, so BM25 is essential.<br>
+        <strong>Architecture takeaway:</strong> Never deploy RAG with semantic-only retrieval in enterprise systems. Any corpus with product codes, order numbers, employee IDs, or technical jargon requires hybrid search from day one. This is a non-negotiable architectural requirement.
+      </div>
+    </li>
+    <li>A business stakeholder says "the AI gave wrong information about our returns policy — it said the return window is 14 days but it's 30 days." Walk through the diagnostic steps to identify whether this is a retrieval problem or a generation problem.
+      <details><summary>Expected answer</summary><p>Run the same query through the retrieval pipeline in isolation and inspect the top-5 retrieved chunks. (1) If the correct 30-day policy is NOT in the top-5 chunks: retrieval problem — the retriever failed to surface the right document section. Check if the returns policy is in the index, whether the relevant chunk was created correctly, and retrieval recall metrics. (2) If the correct 30-day policy IS in the top-5 chunks: generation problem — the model ignored or misread the retrieved context. Check RAGAS faithfulness score; check whether another retrieved chunk contained the 14-day figure (perhaps from an old version of the policy still in the index). The distinction matters because retrieval problems and generation problems have completely different fixes.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Run the query through the retrieval pipeline in isolation and inspect the actual top-5 chunks. Two branches: (1) The 30-day policy text is NOT in top-5 — this is a retrieval failure. The retriever didn't surface the right document. Check index coverage, chunking around that policy section, and recall metrics. (2) The 30-day policy text IS in top-5 — this is a faithfulness failure. The model ignored or contradicted the retrieved context, either from parametric memory or because a conflicting chunk (old 14-day policy) was also retrieved. Fix: update your index to remove stale versions; strengthen grounding instructions; check RAGAS faithfulness score.<br>
+        <strong>Simple explanation:</strong> RAG has two failure modes — wrong documents retrieved, or right documents ignored — and the fix is completely different for each.<br>
+        <strong>Architecture takeaway:</strong> Always design your RAG system so you can inspect the retrieved chunks for any given query. Observability into the retrieval layer is as important as observability into the generation layer — without it, you cannot diagnose failures.
+      </div>
+    </li>
+    <li>Your team is debating whether to use 256-token chunks or 1024-token chunks for your product specification knowledge base. What are the tradeoffs and what would you recommend?
+      <details><summary>Expected answer</summary><p>256-token chunks are precise but risk splitting related attributes. "Operating temperature: -10°C to 60°C" without surrounding context is meaningless. 1024-token chunks preserve context but send more noise to the LLM alongside the relevant content. Recommendation: hierarchical (parent-child) chunking. Index small child chunks (256 tokens) for retrieval precision. But when returning context to the LLM, return the parent chunk (the full product specification section, ~1024 tokens) for full context. Retrieve small, generate with large.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> 256-token chunks give precise retrieval — the query matches a small, focused segment — but the chunk may lack context to be useful on its own ("the penalty is 2%... of what? when?"). 1,024-token chunks preserve context but degrade retrieval precision — you retrieve a whole section because one sentence matched, sending 900 tokens of noise to the LLM. The recommended resolution is hierarchical (parent-child) chunking: index the small 256-token child chunk for retrieval precision, but when sending context to the LLM, return the full 1,024-token parent section. You get the best of both: precise retrieval + full context for generation.<br>
+        <strong>Simple explanation:</strong> Search with small chunks (precise), answer with big chunks (contextual) — you don't have to pick one size.<br>
+        <strong>Architecture takeaway:</strong> Chunk size is not a single decision. Decouple retrieval granularity (small) from generation context (large) using parent-child chunking. This pattern is especially important for structured enterprise documents like product specs, contracts, and technical guides.
+      </div>
+    </li>
+    <li>Six weeks after deploying your RAG knowledge assistant, a new product range is launched with 2,000 new SKUs. How would you ensure the assistant can answer questions about the new products immediately, and what are the risks if the indexing pipeline isn't designed for this?
+      <details><summary>Expected answer</summary><p>The assistant can only answer questions about products that are in the index. If the indexing pipeline runs nightly on a schedule, there is a gap of up to 24 hours between product launch and assistant availability. Design requirements: (1) event-driven indexing — when a new product is added to the PIM/product catalogue, trigger an ingestion event immediately. (2) Deletion handling — when a product is discontinued, remove its chunks; a retriever returning chunks about discontinued products causes hallucination about product availability. (3) Version management — when a product specification is updated, delete old chunks and add new ones atomically; partial updates leave contradictory information in the index. The risk without event-driven indexing: stale responses with high user confidence during product launch day — when accuracy matters most.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> A nightly batch indexing pipeline would leave up to a 24-hour gap — the assistant would confidently tell customers "that product doesn't exist" on launch day. The fix is event-driven indexing: when a product is created in the PIM/catalogue system, trigger an immediate indexing event so the chunk is in the vector DB within minutes. Equally important: deletion handling (remove chunks for discontinued products immediately to prevent hallucination about product availability) and atomic version management (when a spec is updated, delete old chunks and add new ones in a single transaction to avoid conflicting information in the index).<br>
+        <strong>Simple explanation:</strong> The AI can only answer about what's in the index — stale or missing index means wrong answers exactly when the business needs correct ones most.<br>
+        <strong>Architecture takeaway:</strong> Design indexing pipelines as event-driven from day one, not as scheduled batch jobs. Batch is simpler to build but creates accuracy gaps at the worst possible moments (product launches, policy changes, urgent updates). Treat the index as a real-time operational system, not a weekly refresh job.
+      </div>
+    </li>
+    <li>What is RAGAS faithfulness, why is it the most important RAG quality metric for an enterprise deployment, and what score threshold would you set as a production gate?
+      <details><summary>Expected answer</summary><p>RAGAS faithfulness measures whether every factual claim in the model's answer is supported by the retrieved context. A faithfulness score of 1.0 means every claim traces back to a retrieved document. A score of 0.7 means 30% of claims are not grounded in the retrieved context — the model is either hallucinating or relying on its parametric knowledge. Faithfulness is the most important metric because it directly measures hallucination risk — the failure mode with the highest harm potential for enterprise. Typical production thresholds: &gt; 0.90 for general knowledge assistants; &gt; 0.95 for domains where accuracy is regulated or high-stakes (legal, medical, financial). At launch, measure on a golden test set of 100–200 curated queries. In production, monitor on a 10% sample with automated RAGAS scoring, alert when the rolling average drops below the threshold.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> RAGAS faithfulness measures whether every factual claim in the model's answer is traceable to the retrieved context. A score of 1.0 means every claim has a source in the documents you provided. A score of 0.8 means 20% of claims are invented — the model is drawing from parametric memory rather than the retrieved text. Faithfulness is the primary RAG metric because it directly quantifies hallucination rate — the highest-consequence failure mode in enterprise AI. Production thresholds: above 0.90 for general knowledge assistants; above 0.95 for regulated or high-stakes domains (legal, compliance, medical, financial). Measure on a curated golden test set of 100–200 queries at launch; monitor on 10% sample in production with automated RAGAS scoring and alerts on rolling average drops.<br>
+        <strong>Simple explanation:</strong> Faithfulness measures how often the AI answers from your documents vs making things up — for enterprise, that number must be very high.<br>
+        <strong>Architecture takeaway:</strong> Set a faithfulness threshold as a production deployment gate, not as a post-launch aspiration. If your RAG system doesn't pass the faithfulness threshold on your golden test set before launch, it is not production-ready — regardless of how impressive the demo looked. Treat RAGAS faithfulness as the AI equivalent of a security penetration test: mandatory before go-live.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- S8 -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers advanced RAG patterns (ColBERT, GraphRAG, HyDE, FLARE). You do not need these for a first production RAG deployment. Return here once your baseline pipeline is stable.</div>
+
+<div class="sh2">8.1 HNSW: How Vector Search Works at Scale</div>
+<div class="ibox">
+  A naïve vector search compares the query vector against every document vector — an O(N) operation. At 10 million documents, this is too slow for real-time retrieval.<br><br>
+  <strong>HNSW (Hierarchical Navigable Small World)</strong> is the algorithm used by most production vector databases (Pinecone, Weaviate, Qdrant, pgvector with HNSW extension). It builds a hierarchical graph structure that enables approximate nearest neighbour search in O(log N).
+</div>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>The intuition:</strong> HNSW builds multiple layers of graphs. The top layer is sparse — only the most "important" nodes, connected to a small number of neighbours. Each lower layer is denser. Search starts at the top layer: navigate toward the query by hopping to whichever neighbour is closest. When you can't get closer, descend to the next layer. Repeat until you reach the bottom.
+</div>
+
+<table class="t">
+  <tr><th>Parameter</th><th>Controls</th><th>Tradeoff</th></tr>
+  <tr><td><strong>M</strong></td><td>Number of bidirectional connections per node</td><td>Higher → better recall, more memory</td></tr>
+  <tr><td><strong>ef_construction</strong></td><td>Beam width during index construction</td><td>Higher → better index quality, slower build</td></tr>
+  <tr><td><strong>ef_search</strong></td><td>Beam width during query</td><td>Higher → better recall, slower query</td></tr>
+</table>
+<div class="ibox">For most enterprise RAG systems, default HNSW parameters give &gt; 99% recall on standard benchmarks — the approximation is not practically relevant.</div>
+
+<div class="sh2">8.2 BM25: The Keyword Search Algorithm</div>
+<div class="ibox">
+  <strong>BM25 (Best Match 25)</strong> is the standard probabilistic keyword search algorithm used by Elasticsearch, OpenSearch, and most vector databases for their keyword search component. It extends TF-IDF with two improvements:<br><br>
+  <strong>Term frequency saturation:</strong> TF-IDF scores increase linearly with term frequency. BM25 saturates: the score increase for each additional mention diminishes. The 11th mention adds less than the 1st.<br><br>
+  <strong>Document length normalisation:</strong> shorter documents that mention a term are scored higher than longer documents that mention it the same number of times.
+</div>
+<div class="math">BM25(q, d) = &sum; IDF(t) &times; (TF(t,d) &times; (k1+1)) / (TF(t,d) + k1 &times; (1-b + b&times;|d|/avgdl))
+
+where:
+  IDF(t) = log((N - df(t) + 0.5) / (df(t) + 0.5) + 1)
+  k1 = 1.2 (term frequency saturation parameter)
+  b = 0.75 (length normalisation parameter)
+  |d| = document length; avgdl = average document length</div>
+<div class="ibox" style="border-left-color:#2563eb">For architects: you don't need to know this formula. You need to know that BM25 is the right choice for keyword retrieval alongside semantic search — it handles exact terms that embedding models miss.</div>
+
+<div class="sh2">8.3 Advanced RAG Patterns in Production</div>
+<div class="g2">
+  <div class="card t">
+    <div class="ch t">Query Decomposition</div>
+    Complex multi-part queries are decomposed into sub-queries by an LLM before retrieval. Each sub-query retrieves separately; results are merged before generation.<br><br>
+    <em>Better recall for complex questions spanning multiple document sections.</em>
+  </div>
+  <div class="card t">
+    <div class="ch t">Step-Back Prompting</div>
+    Before the user query, generate a more abstract "step-back" version and retrieve on that. The abstract retrieval surfaces foundational context that the specific query might miss.<br><br>
+    <em>Useful when specific queries are too narrow to surface relevant background context.</em>
+  </div>
+</div>
+<div class="g2">
+  <div class="card t">
+    <div class="ch t">Iterative RAG (FLARE)</div>
+    The model generates forward, identifies when it's about to make a low-confidence claim, pauses, retrieves relevant context, and continues. Retrieval is interleaved with generation — better for long, complex answers.
+  </div>
+  <div class="card t">
+    <div class="ch t">RAG + Structured Data</div>
+    Many enterprise questions require both document retrieval and database lookup ("What are the latest return statistics for Product X, and what does our policy say about that category?"). Architecture: agent with two tools — vector search for documents, SQL query for analytics. The orchestrator assembles context from both before generation.
+  </div>
+</div>
+
+<!-- S9 -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>RAG is the solution to the LLM knowledge cutoff problem — and the most widely deployed AI pattern in enterprise.</strong> It doesn't require retraining. Knowledge is updated by updating the index. The model answers from what was retrieved, not from what it memorised. This makes AI systems maintainable in a way that pure parametric models are not.</li>
+  <li><strong>Retrieval quality is the ceiling on answer quality.</strong> The best LLM in the world cannot give a correct answer if the right document wasn't retrieved. Invest in retrieval quality — hybrid search (semantic + BM25), reranking, and document-structure-aware chunking — before optimising the generation step.</li>
+  <li><strong>Hybrid search (semantic + BM25 + RRF) is the production standard — not semantic-only.</strong> Semantic search misses exact terms (product codes, proper nouns, technical jargon). BM25 misses conceptual matches. RRF fusion gets the best of both. Semantic-only RAG is a common first implementation that almost always needs to be upgraded.</li>
+  <li><strong>Measure all three dimensions of RAG quality independently.</strong> Retrieval recall (did we get the right documents?), faithfulness (did the model answer from the documents?), and answer relevance (did the answer address the question?) can fail independently. A high faithfulness score with low retrieval recall means the model faithfully answers the wrong question. Diagnose which layer is failing before optimising.</li>
+  <li><strong>RAG is a forcing function for knowledge quality.</strong> A disorganised, inconsistent, or outdated knowledge base produces a disorganised, inconsistent, and outdated RAG system — at scale. Treating knowledge governance as a prerequisite to RAG deployment, not a follow-on, dramatically reduces post-launch quality issues.</li>
+  <li><strong>Know when RAG is the wrong tool.</strong> RAG answers questions whose answers are in your indexed documents. For real-time data, live database queries, or calculations, use tool-calling in an agent architecture alongside RAG. Combining RAG (document knowledge) with structured tool calls (live data) is the enterprise standard for comprehensive AI assistants.</li>
+</ul>

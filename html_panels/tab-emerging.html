@@ -1,0 +1,476 @@
+<!-- ============================================================
+     Emerging Trends — AI Gita Panel
+     ============================================================ -->
+
+<div class="sh">Emerging Trends in AI</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- ── S1: What Is It ── -->
+<div class="sh2">What Is It (Plain English)</div>
+
+<div class="ibox">
+  Emerging trends in AI are the capability shifts happening right now that will change what you can build, what it costs, and how it should be governed — within the next 12–24 months.
+</div>
+
+<div class="ibox">
+  As of mid-2026, five shifts are material enough that architects designing systems today need to account for them:
+  <ul class="dl">
+    <li><strong>Reasoning models:</strong> A new class of models that "think before they answer," dramatically improving accuracy on complex multi-step problems at the cost of higher latency and token usage</li>
+    <li><strong>Mixture of Experts (MoE):</strong> The architecture behind every frontier model — explains why large models can be cost-competitive despite their apparent size</li>
+    <li><strong>Computer Use / GUI agents:</strong> Models that can operate software interfaces, opening automation use cases that previously required RPA or custom integration</li>
+    <li><strong>Persistent memory agents:</strong> Agents that maintain context across sessions, enabling genuinely stateful AI assistants</li>
+    <li><strong>Multimodal-first models:</strong> The frontier is no longer text-only; image, audio, and video input/output is standard, changing document intake and media processing architectures</li>
+  </ul>
+  This tab is a radar, not a textbook. The goal is to have enough understanding to know which trends affect your current or near-term projects, and when to revisit the specialist tabs for deeper coverage.
+</div>
+
+<!-- ── S2: Why Should I Care ── -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>Emerging trends affect system design decisions you make today:</p>
+    <ul class="dl">
+      <li><strong>Reasoning models</strong> change when to use expensive frontier models vs cheap models. A task that previously required GPT-4o may now be better served by o3-mini or DeepSeek-R1. The capability tier map needs quarterly recalibration.</li>
+      <li><strong>MoE architecture</strong> explains why model size no longer linearly maps to inference cost. A "400B parameter" MoE model activates only ~40B parameters per token — understanding this prevents you from dismissing large models as automatically too expensive.</li>
+      <li><strong>Computer Use</strong> opens automation of legacy workflows that have no API: reading a CRM screen, filling in a web form, navigating an internal portal. For integration architects dealing with legacy system estates, this is a significant unlock.</li>
+      <li><strong>Persistent memory</strong> changes the architecture of AI assistants. A stateless API call is sufficient for a one-off task; a persistent-memory agent changes how you design conversation history, user context, and personalisation.</li>
+    </ul>
+  </div>
+
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>Trends that create new governance requirements:</p>
+    <ul class="dl">
+      <li><strong>Agentic AI with computer use</strong> can take actions in systems not designed for automation — creating audit trail gaps, bypassing approval workflows, accessing data without conventional access controls. Governance frameworks designed for "AI that answers questions" are insufficient for "AI that operates software."</li>
+      <li><strong>Reasoning model token usage</strong> (thinking tokens) can be 5–20× the output token count, dramatically changing cost projections for use cases that adopt reasoning models.</li>
+      <li><strong>Persistent memory</strong> means AI systems now have state that persists across sessions — creating data residency, retention, and privacy questions that stateless models do not raise.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── S3: Think About It Like This ── -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox">
+  <strong>The Skilled Trades Analogy</strong><br><br>
+  Traditional AI (pre-reasoning models) is like hiring a fast typist: give them a clear task, they execute it immediately. Great at well-defined, single-step tasks. They struggle with problems that require stopping to think, consulting references, and checking work.<br><br>
+  <strong>Reasoning models</strong> are like hiring a junior consultant taught to "think out loud before answering." Before responding, they write a scratchpad: "The question is X. The key constraint is Y. Let me check if approach A satisfies Y... it does partially, but fails on Z. Let me try approach B..." This thinking process is invisible to the client but produces dramatically better final answers on hard problems — at the cost of a longer meeting.<br><br>
+  <strong>Mixture of Experts</strong> is like a law firm with 100 specialist partners, but only 8–10 work on any given client matter. The firm is large (lots of expertise available), but efficient (only the relevant specialists are activated for each task). The per-matter cost is similar to a smaller generalist firm — but quality on specialised matters is much higher.<br><br>
+  <strong>Computer Use agents</strong> are like giving an intern a computer and saying "log in to the supplier portal and download all invoices from last month." You don't write an API integration — you explain the task and they navigate the interface the same way a human would. Powerful for legacy systems; risks the same mistakes an unsupervised intern might make.<br><br>
+  <strong>Persistent memory</strong> is the difference between a new temp who starts fresh every day and a long-tenured colleague who remembers your preferences, past decisions, and project history. The long-tenured colleague is far more useful — but you also need to think carefully about what they "remember" and whether that memory is accurate.
+</div>
+
+<!-- ── S4: Step-by-Step Walkthrough ── -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 Reasoning Models: Thinking Before Answering</div>
+
+<div class="alayer al1">
+  <div class="ln">What they are</div>
+  Reasoning models (OpenAI o1, o3, o4-mini; DeepSeek-R1; Qwen QwQ; Gemini Thinking) are LLMs trained to generate an internal "chain of thought" scratchpad before producing their final answer. The scratchpad — called "thinking tokens" — is typically hidden from the user but consumes tokens (and therefore costs money and time).
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Why this matters</div>
+  Standard LLMs generate responses one token at a time, left-to-right, without backtracking. If the model commits to an incorrect direction early, it continues in that direction. Reasoning models effectively implement a "draft, evaluate, revise" loop at training time — the model learns to explore multiple approaches before committing to an answer.
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Performance uplift</div>
+  On tasks requiring multi-step logic (mathematics, code that must pass tests, legal reasoning, complex planning), reasoning models typically outperform standard models by 20–40% on accuracy benchmarks. The gain is smaller on well-specified, single-step tasks (classification, summarisation, format conversion) — for those, a standard model is usually sufficient and cheaper.
+</div>
+
+<div class="alayer al4">
+  <div class="ln">The cost / latency trade-off</div>
+  <div class="code">Standard model (Claude Sonnet, GPT-4o):
+  Thinking tokens: 0
+  Time to response: 1–5 seconds
+  Cost: £1–5 / M tokens
+
+Reasoning model (o3, DeepSeek-R1):
+  Thinking tokens: 1,000–20,000 per response (hidden but billed)
+  Time to response: 10–60 seconds (variable — depends on problem difficulty)
+  Cost: £5–30 / M tokens (thinking + output)</div>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">When to use reasoning models</div>
+  <table class="t">
+    <tr><th>Use case</th><th>Reasoning model?</th><th>Why</th></tr>
+    <tr><td>Complex code generation (must pass tests)</td><td>&#10003; Yes</td><td>Multi-step logic; quality outweighs cost</td></tr>
+    <tr><td>Mathematical / quantitative analysis</td><td>&#10003; Yes</td><td>Reasoning errors are expensive</td></tr>
+    <tr><td>Legal document analysis with complex dependencies</td><td>&#10003; Yes</td><td>High-stakes; accuracy critical</td></tr>
+    <tr><td>Customer service Q&amp;A</td><td>&#10007; No</td><td>Single-step; speed matters; cost not justified</td></tr>
+    <tr><td>Product description generation</td><td>&#10007; No</td><td>Creative, single-pass; standard model fine</td></tr>
+    <tr><td>Data extraction from documents</td><td>&#10007; No</td><td>Format + instruction following, not logic</td></tr>
+    <tr><td>Architecture / system design planning</td><td>&#10003; Yes</td><td>Complex trade-off analysis benefits from thinking</td></tr>
+  </table>
+  <p><strong>The architect's rule:</strong> use reasoning models when (a) the task requires multi-step logic and (b) the cost of a wrong answer exceeds the cost of the thinking tokens. For high-volume, latency-sensitive tasks: standard models. For low-volume, high-stakes, complex tasks: reasoning models.</p>
+</div>
+
+<div class="sh2">4.2 Mixture of Experts (MoE): Why Frontier Models Stay Affordable</div>
+
+<div class="alayer al1">
+  <div class="ln">The problem MoE solves</div>
+  A dense model with 400B parameters activates all 400B parameters for every input token. This is computationally expensive — cost scales with parameter count.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">How MoE works</div>
+  Instead of a single dense feed-forward network, a MoE model has N "expert" networks (typically 64–256 per layer) and a learned "router" that selects K of them (typically 2–8) for each token. Only the selected experts are activated — the rest are idle.
+  <div class="code">Dense 400B model:
+  Every token → ALL 400B parameters activated
+
+MoE 400B model (e.g. 64 experts, top-2 routing):
+  Every token → router selects 2 of 64 experts
+  Active parameters per token: 400B × (2/64) ≈ 12.5B
+  Inference cost ≈ equivalent to a 12.5B dense model
+  But model quality ≈ a 400B+ dense model (all experts available during training)</div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Why MoE matters for architects</div>
+  <ul class="dl">
+    <li><strong>Quality vs cost decoupling:</strong> MoE models can be larger (and better quality) than their inference cost implies. A "400B parameter MoE model" does not cost 4× what a "100B dense model" costs to serve.</li>
+    <li><strong>Prevalence:</strong> Every major frontier model (GPT-4, Gemini, Claude, Llama-3-405B) is widely believed to use MoE architecture.</li>
+    <li><strong>Reliability risk:</strong> Router failures (load imbalance — too many tokens routed to the same experts) are the primary reliability risk. MoE models need load-balancing losses during training to prevent expert collapse.</li>
+  </ul>
+  <p><strong>For architects:</strong> "Parameter count" is not a reliable proxy for "inference cost" in 2026. A 400B MoE model may be cheaper to serve than a 70B dense model for the same quality level. Always benchmark on your task before making infrastructure decisions based on parameter count alone.</p>
+</div>
+
+<div class="sh2">4.3 Computer Use / GUI Agents: Automation Without APIs</div>
+
+<div class="alayer al1">
+  <div class="ln">What it is</div>
+  Computer Use is the capability of a vision-language model to observe a screenshot of a computer interface and generate mouse/keyboard actions to accomplish a goal — navigating through a GUI the same way a human would.<br><br>
+  Anthropic's Computer Use, available via API, takes input: a screenshot + a task description. Output: a series of mouse clicks, keyboard inputs, and scroll actions that accomplish the task.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Why this matters for enterprise architects</div>
+  Most enterprise systems were built long before they were expected to be automated. Computer Use opens automation for:
+  <ul class="dl">
+    <li><strong>Legacy ERP and CRM:</strong> SAP GUI, legacy Oracle screens without API integration</li>
+    <li><strong>Supplier portals:</strong> No EDI/API support</li>
+    <li><strong>Government / regulatory portals:</strong> Reporting platforms with GUI-only access</li>
+    <li><strong>Internal legacy tools:</strong> Built before API-first design was standard</li>
+  </ul>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">The architecture pattern</div>
+  <div class="code">Task: "Download all invoices from supplier portal for October 2026"
+
+1. Agent receives task + initial screenshot of portal login page
+2. Vision model identifies: username field, password field, login button
+3. Actions: click username → type credentials → click password → type → click login
+4. New screenshot: dashboard
+5. Vision model identifies: "Invoices" menu item
+6. Actions: click Invoices → set date filter → click Download
+7. Screenshot confirms: download started
+8. Task complete; file in local filesystem</div>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Governance risks (non-trivial)</div>
+  <ul class="dl">
+    <li><strong>Unintended actions:</strong> The model may click the wrong button or take an action in a system that cannot be undone. Computer Use agents need sandboxed environments and human review for consequential actions.</li>
+    <li><strong>Audit trail:</strong> Traditional RPA leaves a detailed audit log. Computer Use agents require explicit logging infrastructure — screenshots and action sequences must be captured for compliance.</li>
+    <li><strong>Access control:</strong> The agent operates with the credentials of whoever is logged in. Over-privileged accounts can access more than the task requires.</li>
+    <li><strong>Error recovery:</strong> When the agent gets stuck (unexpected page state, CAPTCHA, error message), it needs explicit fallback logic — unlike a human, it may silently fail or loop indefinitely.</li>
+  </ul>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">When to use Computer Use vs traditional integration</div>
+  <table class="t">
+    <tr><th>Scenario</th><th>Computer Use</th><th>API / RPA</th></tr>
+    <tr><td>No API available, no budget to build one</td><td>&#10003;</td><td>&#10007;</td></tr>
+    <tr><td>Action is high-frequency (&gt;1K/day)</td><td>&#10007; (fragile at scale)</td><td>&#10003;</td></tr>
+    <tr><td>Action requires human judgement on screen</td><td>&#10003;</td><td>&#10007;</td></tr>
+    <tr><td>Regulatory audit trail required</td><td>&#10007; (needs careful logging)</td><td>&#10003;</td></tr>
+    <tr><td>Proof of concept / validation</td><td>&#10003;</td><td>&#10007;</td></tr>
+  </table>
+</div>
+
+<div class="sh2">4.4 Persistent Memory Agents: Stateful AI Assistants</div>
+
+<div class="alayer al1">
+  <div class="ln">The stateless problem</div>
+  Every standard LLM API call is stateless. The model has no memory of previous calls. For a customer service agent, this means the customer must re-explain their context every session. For an internal AI assistant, the model can't remember that "you prefer concise summaries" or "the project uses AWS, not Azure."
+</div>
+
+<div class="alayer al2">
+  <div class="ln">The MemGPT / Letta pattern</div>
+  Persistent memory architectures maintain a structured memory store outside the context window, with explicit read/write operations:
+  <div class="code">User: "What was the conclusion of yesterday's supplier meeting?"
+
+Agent:
+  1. Search memory store: query("supplier meeting", date=yesterday)
+  2. Retrieve: [Meeting notes: Supplier X agreed to 10% price reduction for Q4]
+  3. Include in context → generate response
+  4. After response: update memory if new information emerged</div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Memory taxonomy (four types)</div>
+  <ul class="dl">
+    <li><strong>Working memory:</strong> Current context window — ephemeral, lost after session</li>
+    <li><strong>Episodic memory:</strong> Past interactions and events — retrieved by similarity/recency</li>
+    <li><strong>Semantic memory:</strong> General knowledge and user preferences — structured facts</li>
+    <li><strong>Procedural memory:</strong> Learned workflows and skills — how to do specific tasks</li>
+  </ul>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Enterprise architecture implications</div>
+  Persistent memory creates new data assets that need governance:
+  <ul class="dl">
+    <li><strong>PII in memory stores:</strong> Memory may contain user data subject to data protection regulation</li>
+    <li><strong>Retention policies:</strong> Memory retention must align with data governance — how long do you store AI conversation history?</li>
+    <li><strong>Memory accuracy degradation:</strong> The AI's memory of "the project uses AWS" becomes wrong when you migrate to Azure — there must be a mechanism to correct and expire stale memories</li>
+    <li><strong>Access control:</strong> Multi-user memory systems must enforce ACL — one user's memories must not leak to another</li>
+  </ul>
+</div>
+
+<div class="sh2">4.5 Multimodal-First Architecture: 2026 Standard</div>
+
+<div class="alayer al1">
+  <div class="ln">What changed</div>
+  <table class="t">
+    <tr><th>Capability</th><th>2023</th><th>2026</th></tr>
+    <tr><td>Image input</td><td>GPT-4V only (expensive)</td><td>All frontier models; mid-tier too</td></tr>
+    <tr><td>Document (PDF) input</td><td>Requires OCR preprocessing</td><td>Native in-context PDF reading</td></tr>
+    <tr><td>Audio input</td><td>Whisper transcription then LLM</td><td>End-to-end (GPT-4o, Gemini)</td></tr>
+    <tr><td>Video input</td><td>Not available</td><td>Gemini 1.5 Pro, some others</td></tr>
+    <tr><td>Image generation</td><td>Separate model (DALL-E 3)</td><td>Integrated in some (GPT-4o)</td></tr>
+  </table>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">System design patterns that change</div>
+  Old pattern for document intake:
+  <div class="code">PDF → OCR (Tesseract/AWS Textract) → text → LLM</div>
+  2026 pattern:
+  <div class="code">PDF → multimodal LLM (reads layout + text natively)</div>
+  The old pattern requires an OCR pipeline, error handling for OCR failures, and loses layout information (tables, columns, headings that indicate structure). The 2026 pattern handles the full document natively — at API pricing, often cheaper than maintaining a separate OCR pipeline.
+</div>
+
+<div class="alayer al3">
+  <div class="ln">When to still use dedicated OCR</div>
+  Very high volume (1M+ documents/month where per-document API cost matters), documents requiring 100% field extraction accuracy with structured validation, or regulatory requirements for a specific certified OCR system.
+</div>
+
+<!-- ── S5: Enterprise Example ── -->
+<div class="sh">Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Upgrading a Procurement Automation System</div>
+  <p>A manufacturing company handles 2,000 supplier invoices/month and 500 purchase orders/day across 150 suppliers. Existing automation: EDI connections to 20 large suppliers (60% of volume); manual data entry for the remaining 40% (80 suppliers with no API/EDI); a 3-person team processing manual invoices at ~8 minutes each = 200 hours/month.</p>
+
+  <div class="sh2">Problem 1: Manual invoice processing (40% of volume)</div>
+  <p>80 non-EDI suppliers send invoices via email as PDF attachments, images, or photos of handwritten invoices. Custom OCR pipelines exist for the 5 largest; the long tail is manual.</p>
+  <p><strong>2026 solution: multimodal LLM invoice extraction</strong></p>
+  <ul class="dl">
+    <li>Send each attachment directly to Claude Vision</li>
+    <li>Prompt: extract structured fields (vendor name, invoice number, date, line items, totals, payment terms)</li>
+    <li>Structured output (JSON) feeds directly into the ERP</li>
+    <li>Accuracy on typed invoices: 97%. Handwritten: 88% — human review queue for low-confidence extractions</li>
+    <li><strong>Result:</strong> 80% of previously manual invoices processed automatically; 200 → 40 hours/month manual work</li>
+  </ul>
+
+  <div class="sh2">Problem 2: 15 suppliers with no API and complex portal UIs</div>
+  <p>These suppliers require logging into individual supplier portals to download invoices — everything lives in a portal requiring navigation.</p>
+  <p><strong>2026 solution: Computer Use agent for portal automation</strong></p>
+  <ul class="dl">
+    <li>Agent trained on each portal's navigation pattern</li>
+    <li>Scheduled nightly run: log in, navigate to invoices section, apply date filter, download</li>
+    <li>Files transferred to ERP intake folder</li>
+    <li>Governance: all screenshots captured to audit log; credentials stored in vault (not in agent prompt)</li>
+    <li><strong>Result:</strong> 15 portals automated, covering ~200 invoices/month previously requiring dedicated human time</li>
+  </ul>
+
+  <div class="sh2">Problem 3: Purchase order exception handling</div>
+  <p>500 daily POs have an 8% exception rate (price mismatch, quantity discrepancy, terms issue). Each exception requires reading the PO, comparing to the supplier agreement, and deciding: approve, reject, or escalate.</p>
+  <p><strong>2026 solution: reasoning model for exception analysis</strong></p>
+  <ul class="dl">
+    <li>Exception POs routed to reasoning model pipeline (o3-mini)</li>
+    <li>Context: PO details + relevant supplier agreement clause + approval history</li>
+    <li>Model produces: recommended action + reasoning trace</li>
+    <li>Human reviewer sees: recommendation + the model's reasoning chain</li>
+    <li><strong>Result:</strong> 65% of exceptions processed automatically; manager time on exceptions reduced by 70%</li>
+  </ul>
+
+  <div class="sh2">Combined impact</div>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Manual processing hours</span><span class="kvv">200 → 55/month</span></div>
+    <div class="kvr"><span class="kvk">Portal downloading</span><span class="kvv">40 person-hours/month → near zero</span></div>
+    <div class="kvr"><span class="kvk">Exception handling</span><span class="kvv">30 → 9 person-hours/month</span></div>
+    <div class="kvr"><span class="kvk">Total saving</span><span class="kvv">~200 hours/month at £35/hr = £84,000/year</span></div>
+    <div class="kvr"><span class="kvk">AI cost</span><span class="kvv">~£800/month (API + infrastructure)</span></div>
+    <div class="kvr"><span class="kvk">ROI</span><span class="kvv">8.75× in year 1</span></div>
+  </div>
+</div>
+
+<!-- ── S6: Architecture Perspective ── -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">The Agentic Architecture Evolution</div>
+
+<div class="ibox">
+  The most significant architectural shift is the move from <strong>reactive AI</strong> (model called, model responds, done) to <strong>agentic AI</strong> (model takes multi-step actions, maintains state, operates tools, potentially over extended time periods).
+  <div class="code">2023 AI system architecture:
+  User input → LLM API call → response → user
+
+2026 AI system architecture:
+  User task → Agent runtime
+    ├── Reasoning model (complex planning)
+    ├── Tool calls (APIs, databases, computer use)
+    ├── Memory read/write (persistent context)
+    ├── Sub-agent delegation (specialist agents)
+    └── Human-in-the-loop gates (for consequential actions)
+  → Result delivered (possibly after minutes of work)</div>
+</div>
+
+<div class="kv">
+  <div class="kvr">
+    <span class="kvk">Durability</span>
+    <span class="kvv">Agents may run for minutes or hours — the system must handle interruptions gracefully (agent checkpointing, resume-on-failure).</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Observability</span>
+    <span class="kvv">Multi-step agent traces are much more complex than single API calls — full trace logging with tool call sequences and reasoning steps is required, not optional.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Safety gates</span>
+    <span class="kvv">Consequential actions (sending an email, modifying a database, executing a financial transaction) need explicit human review gates — not assumed approval.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Cost control</span>
+    <span class="kvv">A misbehaving agent can generate thousands of API calls before being stopped — budget limits and circuit breakers are mandatory, not nice-to-have.</span>
+  </div>
+</div>
+
+<div class="sh2">Framework Comparison for Agentic Systems</div>
+
+<table class="t">
+  <tr><th>Framework</th><th>Best for</th><th>Key limitation</th></tr>
+  <tr><td><strong>LangGraph</strong></td><td>Stateful multi-step agents; production-ready; explicit state machine</td><td>More complex to set up than LangChain</td></tr>
+  <tr><td><strong>LangChain</strong></td><td>Rapid prototyping; broad tool ecosystem</td><td>Opaque internals; hard to debug at scale</td></tr>
+  <tr><td><strong>AutoGen (Microsoft)</strong></td><td>Multi-agent conversation patterns</td><td>Less production-hardened than LangGraph</td></tr>
+  <tr><td><strong>CrewAI</strong></td><td>Role-based multi-agent workflows; simple to configure</td><td>Less flexible than LangGraph for complex state</td></tr>
+  <tr><td><strong>Custom (direct SDK)</strong></td><td>Full control; maximum debuggability</td><td>Maximum build effort</td></tr>
+</table>
+
+<div class="ibox">
+  <strong>For production enterprise systems:</strong> LangGraph or direct SDK.<br>
+  <strong>For prototyping and exploration:</strong> LangChain or CrewAI.
+</div>
+
+<!-- ── S7: Check Yourself ── -->
+<div class="sh">Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">Five Architect-Level Questions</div>
+
+  <ol class="sl">
+    <li>
+      <strong>Reasoning model for all chatbot calls:</strong> A developer proposes using a reasoning model (o3) for all LLM calls in a customer service chatbot to "maximise quality." What are the problems with this approach?<br>
+      <em>Expected:</em> Three problems. (1) Cost: thinking tokens (1,000–20,000 per response) at £10–30/M tokens make high-volume use prohibitive for simple queries like "what are your opening hours?" (2) Latency: reasoning models take 10–60 seconds per response — unacceptable for a chatbot requiring 1–3 second response times. (3) Wasted capability: quality improvement from reasoning is concentrated on complex multi-step logic; simple FAQs and order status queries see minimal improvement over a standard model. Correct approach: route by complexity — standard model for simple queries, reasoning model for complex dispute resolution or multi-part technical support.
+    </li>
+    <li>
+      <strong>Computer Use governance controls:</strong> Your organisation wants to automate downloading invoices from 20 supplier portals using Computer Use. What governance controls must be in place before this goes live?<br>
+      <em>Expected:</em> Minimum five. (1) Audit logging: every session must capture a complete screenshot trail and action sequence to an immutable store. (2) Credential management: portal credentials stored in a secrets vault — the agent retrieves credentials at runtime via API call; credentials are never exposed in logs or prompts. (3) Access scoping: minimum-privilege account for each portal — read-only where possible; review for unneeded write/admin permissions. (4) Human review gate: any action that modifies portal data requires explicit human approval. (5) Failure handling and alerting: when the agent gets stuck, it must alert a human rather than retrying indefinitely — define max retries, alert threshold, and fallback to manual process. Additionally: a scope statement limiting what the agent is authorised to do in each portal.
+    </li>
+    <li>
+      <strong>MoE intuition:</strong> Explain Mixture of Experts at an intuition level. Why does it mean "400B parameters" doesn't mean "expensive to run"?<br>
+      <em>Expected:</em> In a dense model, every token processed activates every parameter. In a MoE model, each transformer layer contains multiple "expert" sub-networks and a learned router that selects only 2–8 experts per token. The other experts are idle. A 400B MoE model with 64 experts and top-2 routing activates approximately 400B × (2/64) ≈ 12.5B parameters per token — inference cost is closer to a 12–15B dense model, while model quality reflects having 400B parameters trained across all experts. For architects: always ask whether a model is dense or MoE, and what the active parameter count is, before making cost or infrastructure sizing decisions.
+    </li>
+    <li>
+      <strong>Persistent memory data governance:</strong> A product team wants to build a persistent-memory AI assistant for their sales team that remembers customer preferences, past meeting notes, and deal history across sessions. What data governance questions must be resolved first?<br>
+      <em>Expected:</em> Five minimum. (1) Data classification: what category of data will be stored — customer PII, deal financials, competitive intelligence? Each may have different retention rules, access controls, and geographic restrictions. (2) Retention and deletion: how long is memory retained? What triggers deletion (GDPR request, employee leaving, account closed)? (3) Access control: can salesperson A see salesperson B's customer memories? Memory access must follow the same ACL as the underlying CRM data. (4) Memory accuracy and right to correction: who can correct stale or incorrect memories, and how? (5) Regulatory context: in financial services, customer interaction records may be subject to MiFID II, FCA rules, or similar — memory records may constitute "records of advice" with retention and disclosure requirements.
+    </li>
+    <li>
+      <strong>Standard LLM vs reasoning model:</strong> What is the difference between a standard LLM and a reasoning model, and how does the "thinking tokens" mechanism improve accuracy on complex tasks?<br>
+      <em>Expected:</em> A standard LLM generates tokens left-to-right in a single pass — no mechanism to backtrack and reconsider an early decision. For multi-step reasoning, the model can go down the wrong path early and produce a plausible-sounding but incorrect result. A reasoning model generates a hidden "thinking" sequence before the final answer. During this thinking phase, the model explores multiple approaches, checks intermediate results for consistency, identifies when an approach isn't working, and backtracks. The final answer is generated only after the thinking process reaches a conclusion. Accuracy improvement comes from (a) more compute budget to explore the problem space before committing and (b) training objectives that reward correct final answers. Practically: 20–40% more accurate than standard models on complex logic benchmarks; marginal improvement on simple tasks where the cost/latency overhead is not justified.
+    </li>
+  </ol>
+</div>
+
+<!-- ── S8: Advanced Deep Dive ── -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers structured output (now the 2026 production standard) and agent observability tooling in depth. Safe to skip on a first pass.</div>
+
+<div class="sh2">8.1 Structured Output: The 2026 Production Standard</div>
+
+<div class="card b">
+  <div class="ch b">Why Structured Output Is Now Default</div>
+  <p>Structured output mode (JSON mode with schema enforcement) is now available from all major providers and should be the default for any integration use case. The mechanism: structured output constrains token sampling at the generation layer. The model can only generate tokens that result in valid JSON matching the provided schema — it is not just <em>instructed</em> to produce JSON, it is <em>constrained to</em> at the sampling level. This eliminates the entire category of "model produced invalid JSON" failures.</p>
+  <div class="code">from pydantic import BaseModel
+from typing import Literal
+
+class InvoiceExtraction(BaseModel):
+    vendor_name: str
+    invoice_number: str
+    total_amount: float
+    currency: Literal["GBP", "EUR", "USD"]
+    line_items: list[dict]
+    confidence: Literal["high", "medium", "low"]
+
+# OpenAI structured output
+response = client.beta.chat.completions.parse(
+    model="gpt-4o",
+    messages=[...],
+    response_format=InvoiceExtraction,
+)
+invoice = response.choices[0].message.parsed  # typed InvoiceExtraction object</div>
+  <p>The schema is transmitted to the model and constrains token generation. No JSON parsing errors, no defensive try/except, no format retry logic needed. For any new integration use case: start with structured output mode.</p>
+</div>
+
+<div class="sh2">8.2 Agent Observability Tooling: LangSmith, Langfuse, and Arize</div>
+
+<div class="ibox">
+  When agents run in production, traditional application monitoring is not enough. An agent that calls 12 tools across 4 reasoning steps generates a trace that looks nothing like a standard API call — you need tooling designed for the agent execution model.
+</div>
+
+<table class="t">
+  <tr><th>Tool</th><th>Best for</th><th>Key capability</th><th>Cost model</th></tr>
+  <tr><td><strong>LangSmith</strong> (LangChain)</td><td>Teams using LangChain/LangGraph</td><td>Deep integration with LangChain primitives; trace every agent step</td><td>Paid per trace volume</td></tr>
+  <tr><td><strong>Langfuse</strong> (open-source)</td><td>Teams wanting self-hosted observability</td><td>Full trace capture, LLM-as-judge scoring, dataset management</td><td>Free self-hosted; cloud tier available</td></tr>
+  <tr><td><strong>Arize Phoenix</strong></td><td>Production monitoring at scale</td><td>Drift detection, hallucination scoring, embedding drift</td><td>Enterprise pricing</td></tr>
+</table>
+
+<div class="card t">
+  <div class="ch t">What these tools capture</div>
+  <ul class="dl">
+    <li><strong>Full agent reasoning trace:</strong> Every step, tool call, and intermediate output</li>
+    <li><strong>Token consumption per step:</strong> For cost attribution across use cases</li>
+    <li><strong>Latency per step:</strong> To find the bottleneck in a multi-step agent</li>
+    <li><strong>Output quality scores:</strong> Via LLM-as-judge or human review</li>
+    <li><strong>Prompt version tracking:</strong> Which prompt version produced which output</li>
+  </ul>
+</div>
+
+<div class="ibox">
+  <strong>For architects — centralise or federate?</strong> A single observability platform across all AI systems gives portfolio-level visibility (cost, quality, incidents). Per-team tooling gives flexibility but makes cross-system comparisons hard.<br><br>
+  <strong>Minimum viable monitoring setup for a production agent:</strong> (1) full trace capture to a queryable store, (2) token cost attribution per use case, (3) weekly LLM-as-judge quality sampling on 1–5% of traces, (4) alert on latency or cost anomalies.<br><br>
+  <strong>When to invest in this:</strong> As soon as your first agent goes to production. Debugging a production agent without trace capture is like debugging a distributed system without logs — technically possible, but extremely costly in engineer time.
+</div>
+
+<!-- ── S9: Key Takeaways ── -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Reasoning models are a specialised tool, not an upgrade for all LLM tasks.</strong> Use them when the task requires backtracking, checking intermediate results, or exploring multiple approaches — legal analysis, complex code, quantitative reasoning. For high-volume, latency-sensitive, or single-step tasks, standard models are faster and cheaper with negligible quality loss.</li>
+  <li><strong>Mixture of Experts means parameter count is no longer a reliable proxy for inference cost.</strong> A 400B MoE model may be cheaper to serve than a 70B dense model at equivalent quality. Always ask whether a model uses MoE architecture and what the active parameter count is before making infrastructure sizing or cost decisions based on the headline parameter count.</li>
+  <li><strong>Computer Use opens automation of legacy systems without APIs — but requires explicit governance controls before any enterprise deployment.</strong> Audit logging of all actions, credential vault management, minimum-privilege scoping, and human-in-the-loop gates for consequential actions are not optional. Computer Use without these controls creates audit trail gaps and access control risks that outweigh the automation benefit.</li>
+  <li><strong>Persistent memory agents change AI from a stateless tool into a stateful assistant — with new data governance implications.</strong> Memory stores contain user data subject to retention policies, access control, and deletion rights. Design the governance model for memory before building the capability, not after.</li>
+  <li><strong>Multimodal-first architecture eliminates many preprocessing pipelines.</strong> Document intake that previously required OCR → text extraction → LLM now runs end-to-end through a vision-language model. This simplifies architecture, reduces failure modes in the preprocessing pipeline, and often improves extraction accuracy — especially for complex layouts, tables, and mixed handwritten/printed documents.</li>
+</ul>

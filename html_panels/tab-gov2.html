@@ -1,0 +1,371 @@
+<!-- tab-gov2.html — Governance Deep Dive panel (inner content only) -->
+
+<div class="ibox"><strong>AI governance</strong> is the system of policies, controls, processes, and accountability structures that ensure AI systems behave safely, legally, and in alignment with your organisation's values — consistently, at scale, even when things go wrong. For architects, governance is not someone else's problem: the technical architecture you design either makes governance possible or makes it impossible.</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+<div class="ibox">
+  <strong>Governance answers three questions for every AI system your organisation deploys:</strong><br><br>
+  <ul class="dl">
+    <li><strong>Is it allowed?</strong> Does this AI use case comply with regulation (EU AI Act, GDPR, sector-specific rules), internal policy, and ethical standards?</li>
+    <li><strong>Is it controlled?</strong> Are there technical and process controls in place to prevent the AI from causing harm — intentional or accidental?</li>
+    <li><strong>Is it accountable?</strong> If the AI causes a bad outcome, can you trace why it happened, who is responsible, and what you will do about it?</li>
+  </ul>
+  <br>These questions apply whether you're deploying a simple FAQ chatbot or a multi-agent system that can modify records in your ERP. The rigor of the governance framework should be proportionate to the risk. <strong>Governance must be designed in — not retrofitted.</strong> A system without audit logs, version-controlled prompts, data lineage, or blast radius controls cannot be governed retroactively.
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>You will be asked to sign off on AI systems before they go to production. The Production Readiness Review (PRR) is increasingly an AI-specific checklist. Missing items on that checklist are your exposure.</p>
+    <ul class="dl">
+      <li><strong>No rollback procedure defined:</strong> An agent starts behaving unexpectedly in production, and the team spends 6 hours figuring out how to revert because no rollback plan was designed.</li>
+      <li><strong>No data lineage for training data:</strong> A regulatory audit asks "was any personal data used to train this model?" and no one can answer.</li>
+      <li><strong>No blast radius controls:</strong> An agent with broad write permissions makes a cascading error across 3 systems before anyone notices.</li>
+      <li><strong>No incident response plan:</strong> A prompt injection attack causes the chatbot to leak internal documents; the response is improvised because no runbook existed.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>In 2026, AI governance is a regulatory requirement, not just a best practice.</p>
+    <ul class="dl">
+      <li><strong>EU AI Act</strong> (enforcement from August 2026): classification of AI systems by risk tier, with mandatory requirements for high-risk systems — conformity assessments, technical documentation, human oversight, accuracy and robustness standards.</li>
+      <li><strong>GDPR Article 22:</strong> Automated decision-making that significantly affects individuals requires explainability, human review rights, and the ability to contest.</li>
+      <li><strong>ISO/IEC 42001:</strong> The AI Management System standard — the ISO framework for enterprise AI governance, analogous to ISO 27001 for information security.</li>
+      <li><strong>Sector-specific regulation:</strong> Financial services (FCA guidance on model risk), healthcare (MDR for AI as medical device), HR/employment (EEOC guidance on AI hiring tools).</li>
+    </ul>
+    <p>AI governance is a <em>management system</em> — a set of interconnected policies, processes, and technical controls that need to be designed as a coherent whole and maintained over the system's lifetime.</p>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This</div>
+<div class="ibox">
+  <strong>The Building Regulations Analogy</strong><br><br>
+  When you build a commercial office building, you don't get to decide for yourself whether it's safe. Building regulations exist because the consequences of failure fall on people who had no say in the construction decisions.<br><br>
+  <ul class="dl">
+    <li><strong>Risk tiers:</strong> A garden shed has minimal requirements. A residential house has more. A hospital has extensive mandatory standards — proportionate to the risk of harm if something goes wrong.</li>
+    <li><strong>Technical controls:</strong> Fire sprinklers, emergency exits, load-bearing calculations, electrical insulation. These are requirements baked into the design from day one. You can't add a sprinkler system after the ceiling is plastered.</li>
+    <li><strong>Policy controls:</strong> Fire drills, access control, maintenance schedules, occupancy limits. Even the best physical building can become unsafe without the operational layer.</li>
+    <li><strong>Inspections and sign-off:</strong> Building Control approval / Occupancy Certificate = the PRR. The gate that says "the required controls are in place before people occupy this building."</li>
+    <li><strong>Audit trails:</strong> Construction records — the evidence that materials met specification, inspections were passed, deviations were documented. If something goes wrong five years later, you need those records.</li>
+  </ul>
+  <br>The parallel to AI governance is exact: the consequences of AI failures (discriminatory decisions, financial harm, data breaches) fall on people who had no say in the system design. Governance makes those consequences predictable, bounded, and accountable — not eliminated, but managed.
+</div>
+
+<!-- S4: Step-by-Step Walkthrough -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 Risk Tier Model: T0 to T3</div>
+<p>Not all AI systems carry the same risk. The first governance decision for any AI system is classifying it into a risk tier — which then determines which governance requirements apply.</p>
+
+<div class="alayer al1">
+  <div class="ln">T0 — Minimal Risk</div>
+  Internal tools, read-only, no decisions affecting people. Examples: internal document search, code autocomplete, meeting summarisation. PRR: lightweight. Audit log: basic. Human oversight: none required.
+</div>
+<div class="alayer al2">
+  <div class="ln">T1 — Low Risk</div>
+  Customer-facing but no significant decisions; reversible outcomes. Examples: FAQ chatbot, product recommendations, content generation with human review. PRR: standard. Human oversight: escalation path required.
+</div>
+<div class="alayer al3">
+  <div class="ln">T2 — Medium Risk</div>
+  Automated decisions with material impact; reversible with effort. Examples: automated customer service responses, inventory reordering, fraud flagging with human review of alerts. PRR: full. Explainability required for flagged cases. Full runbook for incident response.
+</div>
+<div class="alayer al4">
+  <div class="ln">T3 — High Risk</div>
+  Automated decisions with significant, hard-to-reverse impact on people. Examples: credit decisions, hiring screening, benefits eligibility, medical triage, law enforcement. PRR: extended + legal review. Mandatory human-in-loop for final decisions. Explainability required for all decisions. Full runbook + regulatory notification plan. Independent external red-team review.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>EU AI Act alignment:</strong> What the regulation calls "high-risk AI" broadly maps to T3, with specific Annex III categories: biometric identification, critical infrastructure management, education and employment, essential services access, law enforcement, border control, justice administration.<br><br>
+  <strong>How to tier your system:</strong> Start conservative. If there is genuine uncertainty between T1 and T2, classify as T2. It is much easier to relax governance controls as you build evidence of safety than to retroactively add them after an incident.
+</div>
+
+<div class="sh2">4.2 Production Readiness Review (PRR) for AI Systems</div>
+<p>The PRR is the gate before a new AI system — or a significant change to an existing system — goes to production. It is a structured checklist that verifies governance requirements are met, not a rubber stamp.</p>
+
+<table class="t">
+  <tr><th>Category</th><th>Key PRR Requirements</th></tr>
+  <tr><td><strong>1 — Risk &amp; Scope</strong></td><td>Risk tier assigned (T0–T3) with documented rationale; use case boundary defined; data processing inventory; DPIA completed if personal data processed; legal review if T3 or regulated domain</td></tr>
+  <tr><td><strong>2 — Technical Controls</strong></td><td>Blast radius controls; HITL gates for actions above risk threshold; rate limits and budget caps; input validation and sanitisation (prompt injection defence); output filtering / guardrails; circuit breakers on all external tool calls</td></tr>
+  <tr><td><strong>3 — Observability &amp; Audit</strong></td><td>Audit log captures input, output, model version, timestamp, user/tenant ID, tool calls; log retention defined and compliant; logs immutable; LLM observability (OTel GenAI spans) instrumented; cost tracking with per-team attribution</td></tr>
+  <tr><td><strong>4 — Quality &amp; Evaluation</strong></td><td>Golden test set ≥ 50 curated cases; evaluation gate defined (minimum pass rate); LLM judge for production monitoring; drift alerting thresholds defined; rollback procedure documented and tested</td></tr>
+  <tr><td><strong>5 — Operations &amp; Response</strong></td><td>Incident response runbook; on-call ownership defined; rollback procedure with target RTO; communication plan when incident affects users</td></tr>
+  <tr><td><strong>6 — Red-Team (T2+)</strong></td><td>Adversarial testing completed: prompt injection, jailbreak attempts, edge case inputs; results documented; mitigations in place for all critical findings</td></tr>
+</table>
+
+<div class="sh2">4.3 Artifact Registry: Versioning Everything</div>
+<p>An artifact registry for AI systems tracks every component that determines system behaviour — not just the code, but the model, the prompt, the retrieval index, the evaluation data, and the configuration.</p>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Why this matters:</strong> In traditional software, the git commit is the full picture of what changed. In AI systems, the git commit is only part of the picture. A system can behave completely differently if the model version changes silently via API, the prompt is tweaked, the knowledge base is re-indexed with different chunking, or the evaluation thresholds are adjusted — none of which necessarily produces a git commit.
+</div>
+
+<table class="t">
+  <tr><th>Artifact</th><th>What it is</th><th>Why it must be versioned</th></tr>
+  <tr><td>Model weights</td><td>The trained model parameters</td><td>Behaviour changes between versions; needed for rollback</td></tr>
+  <tr><td>Prompt templates</td><td>System prompt, few-shot examples</td><td>Prompt changes can be as impactful as retraining</td></tr>
+  <tr><td>RAG index snapshot</td><td>Vector store state at a point in time</td><td>Retrieval changes affect response quality</td></tr>
+  <tr><td>Evaluation dataset</td><td>Golden test set, labelled examples</td><td>Changing the test changes what "passing" means</td></tr>
+  <tr><td>Feature definitions</td><td>Feature computation logic</td><td>Train-serve skew is caused by feature versioning failures</td></tr>
+  <tr><td>Configuration</td><td>Routing rules, thresholds, budget caps</td><td>A threshold change is a behaviour change</td></tr>
+</table>
+
+<div class="sh2">4.4 Policy Controls vs Technical Controls</div>
+<p>Governance requires both. Neither alone is sufficient. The key insight: policy controls fail when humans don't follow them. Technical controls fail when misconfigured or bypassed. A mature governance framework layers both so that a failure in one is caught by the other.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Policy Controls</div>
+    <p>Rules, processes, and accountabilities enforced through human behaviour:</p>
+    <ul class="dl">
+      <li><strong>Acceptable use policy:</strong> What employees are and are not permitted to use AI for</li>
+      <li><strong>Review and approval workflows:</strong> Which AI use cases require sign-off from legal, risk, or compliance before deployment</li>
+      <li><strong>Training requirements:</strong> Which employees must complete AI ethics/governance training</li>
+      <li><strong>Incident reporting procedures:</strong> How employees report suspected AI failures or misuse</li>
+      <li><strong>Supplier and vendor assessments:</strong> Due diligence on LLM providers (data handling, model behaviour, SLA terms)</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Technical Controls</div>
+    <p>Safeguards enforced by the system itself, regardless of human behaviour:</p>
+    <ul class="dl">
+      <li><strong>Input guardrails:</strong> Filters that block or transform harmful, off-topic, or policy-violating inputs before they reach the model</li>
+      <li><strong>Output guardrails:</strong> Filters that screen model outputs for harmful content, PII, confidential information before they reach the user</li>
+      <li><strong>Prompt injection defences:</strong> Structural and heuristic protections against attempts to override the system prompt</li>
+      <li><strong>Access controls:</strong> Who can invoke which tools, with what permissions, in which contexts</li>
+      <li><strong>Budget caps:</strong> Hard limits on token consumption, spend, and action scope</li>
+      <li><strong>Audit logging:</strong> Immutable records of all system actions</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2">4.5 EU AI Act: A Practical Architect's Guide</div>
+<p>The EU AI Act entered into force August 2024, with phased enforcement. Prohibited practices banned August 2025; high-risk requirements fully enforceable August 2026; GPAI model obligations for providers August 2027.</p>
+
+<div class="card a">
+  <div class="ch a">EU AI Act Classification Decision Tree</div>
+  <div class="code">Is the AI system prohibited?
+(social scoring, real-time remote biometric in public,
+subliminal manipulation, exploitation of vulnerabilities)
+    │ Yes → Cannot deploy in EU
+    │ No
+    ▼
+Is it a General Purpose AI model (GPAI)?
+(e.g., you are a foundation model provider, not just a user)
+    │ Yes → GPAI obligations apply (transparency, training data documentation)
+    │ No (you are deploying, not building the foundation model)
+    ▼
+Does it fall in an Annex III high-risk category?
+(biometric ID, critical infrastructure, education, employment,
+essential services, law enforcement, migration, justice)
+    │ Yes → High-risk obligations apply (see table below)
+    │ No
+    ▼
+Is it a limited-risk system?
+(chatbots, deepfakes, emotion recognition)
+    │ Yes → Transparency obligations (disclose AI interaction)
+    │ No
+    ▼
+Minimal risk — no mandatory requirements
+(spam filters, AI in games, most internal tools)</div>
+</div>
+
+<table class="t" style="margin-top:12px">
+  <tr><th>High-Risk Obligation</th><th>What it means in practice</th></tr>
+  <tr><td>Risk management system</td><td>Documented process for identifying, assessing, and mitigating risks throughout the system lifecycle</td></tr>
+  <tr><td>Data governance</td><td>Training data quality controls, relevance, freedom from bias, documented data provenance</td></tr>
+  <tr><td>Technical documentation</td><td>Architecture documentation sufficient to assess conformity with the Act</td></tr>
+  <tr><td>Record-keeping</td><td>Automatic logging of system operation to enable post-market monitoring</td></tr>
+  <tr><td>Transparency</td><td>Users informed they are interacting with a high-risk AI system</td></tr>
+  <tr><td>Human oversight</td><td>Design features that enable meaningful human oversight and intervention</td></tr>
+  <tr><td>Accuracy, robustness, cybersecurity</td><td>Appropriate levels for the use case, with documentation</td></tr>
+  <tr><td>Conformity assessment</td><td>Self-assessment (most cases) or third-party audit before market placement</td></tr>
+</table>
+
+<div class="sh2">4.6 Red-Teaming AI Systems</div>
+<p>Red-teaming is adversarial testing — deliberately trying to make your AI system fail in unsafe or unexpected ways, so you find the failures before your users or attackers do.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Component 1 — Automated Adversarial Testing (Garak)</div>
+    <p><strong>Garak</strong> (open-source, NVIDIA) is an LLM vulnerability scanner. It probes your model/system with a battery of attack types: prompt injection, jailbreaks, data leakage, hallucination probing, toxicity.</p>
+    <div class="code">garak --model openai/gpt-4o \
+      --system-prompt "You are a customer service agent for RetailCo..." \
+      --probes prompt_injection,jailbreak,data_leakage \
+      --report governance/red_team_report_v1.json</div>
+    <p style="margin-top:8px">Review the report: each probe produces a pass/fail and a severity rating. Critical findings (successful data leakage, successful prompt injection overriding system constraints) must be mitigated before deployment.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Component 2 — Human Red-Team Exercises</div>
+    <p>Automated tools cover known attack patterns. Human red-teamers find the creative attacks that don't follow a pattern — social engineering, domain-specific manipulation, multi-step attacks that build context across turns.</p>
+    <p><strong>Recommended for T2 and T3 systems before first production deployment:</strong></p>
+    <ul class="dl">
+      <li><strong>Duration:</strong> 4–8 hours of structured adversarial testing by people who understand the domain and the potential harms</li>
+      <li><strong>Scenarios:</strong> Impersonation, manipulation, extraction of sensitive information, triggering harmful actions</li>
+      <li><strong>Output:</strong> Document findings, severity assessments, and implemented mitigations</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2">4.7 Saga Pattern: Rollback for Multi-Step Agentic Actions</div>
+<p>When an agentic system takes a sequence of actions and a later action fails, you need a way to undo the earlier actions. This is the Saga pattern from distributed systems, applied to AI agents.</p>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Example:</strong> An agent processes an order modification. It successfully cancels the original order (step 1), updates inventory (step 2), but fails to create the replacement order (step 3 — payment API timeout). Without a saga: the original order is cancelled and inventory updated, but no replacement order exists. The customer has been charged but has no order.
+</div>
+
+<table class="t">
+  <tr><th>Step</th><th>Action</th><th>Compensating Transaction</th></tr>
+  <tr><td>1</td><td>Cancel original order</td><td>Reinstate original order</td></tr>
+  <tr><td>2</td><td>Update inventory</td><td>Reverse inventory update</td></tr>
+  <tr><td>3</td><td>Create replacement order</td><td>(this step failed — trigger rollback of steps 1 and 2)</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:10px">
+  <strong>Design requirements for saga-safe agentic systems:</strong><br>
+  Every tool call that modifies state must have a defined compensating transaction. The saga coordinator tracks completed steps. Compensating transactions must be idempotent (safe to execute twice without doubling the effect). Saga state must be persisted — if the orchestrator crashes mid-rollback, it must be able to resume.
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">Scenario: Governance Framework for an AI-Assisted Hiring Screening Tool</div>
+  <p>Your HR team wants to deploy an AI system that screens initial job applications and ranks candidates for human review. 15,000-person retail and supply chain operation.</p>
+  <ul class="dl">
+    <li><strong>Step 1 — Risk tiering:</strong> Hiring screening is explicitly named in EU AI Act Annex III as high-risk. Internal classification: <strong>T3</strong>. Required governance before any deployment: full PRR with legal review, data governance assessment, explainability design, mandatory human oversight for all decisions, independent red-team exercise.</li>
+    <li><strong>Step 2 — PRR highlights (T3):</strong> Legal review completed; EEOC and UK Equality Act compliance assessed; DPIA completed. Human oversight design: AI produces a ranked shortlist with scores and reasoning — AI ranks, humans decide. Every candidate score accompanied by top 3 contributing factors. Right to contest within 14 days. Bias assessment across protected characteristic groups.</li>
+    <li><strong>Step 3 — Technical controls:</strong> CVs processed with PII pseudonymisation (names/contact details replaced with IDs before LLM sees them). Scoring against defined criteria only (job requirements document). Hard gate — no automated rejection letters; all communications require human approval. Full audit with 7-year retention for legal compliance. Separate explainability model generates top 3 factors per score in human-readable form.</li>
+    <li><strong>Step 4 — Red-team findings:</strong>
+      <ul>
+        <li><em>Critical:</em> System prompt partially extractable via multi-turn attack. Mitigation: instruction hierarchy enforcement added; system prompt structure changed.</li>
+        <li><em>High:</em> Disability-related employment gaps caused lower "work continuity" scoring. Mitigation: criterion removed; replaced with "relevant experience depth."</li>
+        <li><em>Medium:</em> CVs &gt;15 pages caused context truncation. Mitigation: CV pre-processing step extracts structured information before LLM.</li>
+      </ul>
+    </li>
+    <li><strong>Ongoing governance cadence:</strong> Monthly bias metrics dashboard review; quarterly 200-case human re-review (recalibration if divergence &gt;10%); annually full red-team re-run, conformity assessment update, legal review of regulatory changes.</li>
+  </ul>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">The Governance Architecture Map</div>
+<div class="kv">
+  <div class="kvr"><span class="kvk">Surface / Client</span><span class="kvv">User authentication, session isolation, terms of service acceptance, disclosure of AI interaction</span></div>
+  <div class="kvr"><span class="kvk">Orchestration</span><span class="kvv">HITL gate logic, Saga coordinator, blast radius enforcement, action logging</span></div>
+  <div class="kvr"><span class="kvk">Model Gateway</span><span class="kvv">Budget caps, model version pinning, provider data processing agreement compliance</span></div>
+  <div class="kvr"><span class="kvk">Knowledge / Retrieval</span><span class="kvv">Data provenance tracking, document freshness, access-scoped retrieval, sensitive data exclusion</span></div>
+  <div class="kvr"><span class="kvk">Data / Integration</span><span class="kvv">Write-back controls, compensating transaction support, PII handling at integration boundary</span></div>
+  <div class="kvr"><span class="kvk">Observability</span><span class="kvv">Immutable audit log, regulatory retention, LLM quality monitoring, incident alerting</span></div>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:10px">
+  <strong>Most important architectural principle:</strong> Governance controls must be enforced at the <em>infrastructure layer</em>, not the application layer. An application-level check can be bypassed by a future developer who doesn't know it exists. An infrastructure-level control (enforced at the model gateway, the tool registry, the audit logger) cannot be accidentally bypassed by application code.
+</div>
+
+<div class="sh2">Policy-Controls-Technology Stack</div>
+<div class="alayer al4">
+  <div class="ln">Accountability Layer</div>
+  Named owners, incident response, board reporting, regulatory liaison
+</div>
+<div class="alayer al3">
+  <div class="ln">Policy Layer</div>
+  Acceptable use, approval workflows, training requirements, supplier due diligence
+</div>
+<div class="alayer al2">
+  <div class="ln">Process Layer</div>
+  PRR checklist, risk tiering, red-team, ongoing monitoring cadence, incident runbook
+</div>
+<div class="alayer al1">
+  <div class="ln">Technical Controls Layer</div>
+  Guardrails, HITL gates, audit logging, prompt injection defence, budget caps, artifact registry, PII handling
+</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:10px">
+  <strong>Common gap:</strong> Most organisations that "have AI governance" have the policy layer without the process and technical layers. A policy that says "AI must be used responsibly" without PRR checklists, artifact registries, and guardrails is aspirational, not operational.
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">Five Questions Every Architect Should Be Able to Answer</div>
+  <ol class="sl">
+    <li><strong>An AI system automatically approves or rejects customer credit limit increase requests. What risk tier, and what governance does it trigger?</strong><br>
+    T3 — high risk. Credit decisions are "access to essential services" under EU AI Act Annex III. Triggers: full PRR with legal review, DPIA for personal financial data, explainability for every decision, mandatory human oversight (no fully automated adverse decisions — customer must be able to request human re-review), bias testing across protected characteristic groups, full audit log with regulatory retention (typically 5–7 years), incident response plan including regulatory notification procedure.</li>
+
+    <li><strong>A developer proposes storing the audit log in the same database as the application data. What is the governance objection?</strong><br>
+    The audit log must be immutable — once written, it cannot be modified. Storing it in the application database means the same code or credentials that operate the system can also modify the log, undermining its evidential value. Correct architecture: audit logs written to a separate, append-only store (e.g., AWS CloudTrail, Azure Monitor, append-only S3 bucket with object lock). Application code has write access but not delete/modify access.</li>
+
+    <li><strong>What is the difference between a policy control and a technical control? Give one example of each for a customer-facing complaints chatbot.</strong><br>
+    A policy control is enforced through human behaviour. A technical control is enforced by the system itself, regardless of human behaviour. Policy example: "agents must review all AI-suggested compensation offers above £200 before communicating them to customers." Technical example: a hard gate in the orchestration layer that prevents the chatbot from generating or sending any compensation offer above £200 without first creating a human approval task and waiting for approval. The technical control cannot be skipped under pressure or oversight; the policy control can.</li>
+
+    <li><strong>An engineer says "we don't need to red-team our internal knowledge assistant — it only has access to public internal documents and can't take actions." Is this sound?</strong><br>
+    Not entirely. Even a read-only system has meaningful attack surface: (1) prompt injection — a malicious document in the knowledge base could contain injected instructions that alter system behaviour when retrieved; (2) data exposure — retrieval scoping misconfiguration could surface documents a user isn't supposed to see; (3) indirect harm — incorrect information about internal policies (safety procedures, HR policies) can cause harm. For a T0/T1 system, a light red-team is appropriate — not zero.</li>
+
+    <li><strong>Explain the Saga pattern and why it is necessary for agentic AI systems.</strong><br>
+    The Saga pattern is a distributed systems pattern for managing transactions that span multiple services. Each step has a defined compensating transaction — an operation that reverses its effect. If any step fails, the saga coordinator executes compensating transactions for all completed steps in reverse order. In agentic AI systems this is necessary because agents take sequences of actions across multiple systems. Without saga-style rollback, a partial failure leaves the system in an inconsistent state. Unlike database transactions, cross-system operations cannot rely on ACID properties, so the compensating transaction pattern provides the consistency guarantee.</li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section is for architects designing enterprise-scale governance systems. Safe to skip on a first pass and return here once you've built a baseline governance model.</div>
+
+<div class="sh2">8.1 OWASP LLM Top 10 — Threat Taxonomy for AI Systems</div>
+<table class="t">
+  <tr><th>#</th><th>Threat</th><th>Architecture Mitigation</th></tr>
+  <tr><td>LLM01</td><td>Prompt Injection</td><td>Instruction hierarchy enforcement, input sanitisation, privilege separation between system and user</td></tr>
+  <tr><td>LLM02</td><td>Insecure Output Handling</td><td>Output filtering before rendering; treat LLM output as untrusted input to downstream systems</td></tr>
+  <tr><td>LLM03</td><td>Training Data Poisoning</td><td>Data governance controls on training data sources; lineage tracking</td></tr>
+  <tr><td>LLM04</td><td>Model Denial of Service</td><td>Rate limiting, budget caps, circuit breakers, max token limits per request</td></tr>
+  <tr><td>LLM05</td><td>Supply Chain Vulnerabilities</td><td>Artifact registry with provenance; model provider security assessment</td></tr>
+  <tr><td>LLM06</td><td>Sensitive Information Disclosure</td><td>PII handling at context assembly; output scanning for secrets/PII</td></tr>
+  <tr><td>LLM07</td><td>Insecure Plugin Design</td><td>Tool registry with explicit permission model; no ambient authority</td></tr>
+  <tr><td>LLM08</td><td>Excessive Agency</td><td>Blast radius controls; minimal permissions per tool; HITL gates</td></tr>
+  <tr><td>LLM09</td><td>Overreliance</td><td>Transparency to users about AI limitations; human review for consequential decisions</td></tr>
+  <tr><td>LLM10</td><td>Model Theft</td><td>Model access controls; inference endpoint authentication; rate limiting on model queries</td></tr>
+</table>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:8px">
+  <strong>Most common unaddressed risks in enterprise deployments:</strong> LLM01 (prompt injection is nearly universal in first deployments), LLM08 (excessive agency — tools given broader permissions than needed), and LLM09 (overreliance — users and downstream systems treating LLM outputs as ground truth).
+</div>
+
+<div class="sh2">8.2 High Availability for MCP Servers</div>
+<div class="card b">
+  <div class="ch b">HA Design for MCP Servers</div>
+  <ul class="dl">
+    <li><strong>Active-active deployment:</strong> Multiple MCP server instances behind a load balancer; any instance can handle any tool call</li>
+    <li><strong>Health checks:</strong> The model gateway or orchestrator probes MCP server health and routes around unhealthy instances</li>
+    <li><strong>Circuit breaker at tool call level:</strong> If a specific tool has been failing, circuit opens and the agent fails fast rather than waiting for timeouts</li>
+    <li><strong>Graceful degradation:</strong> If the tool plane is unavailable, the agent falls back to a reduced-capability mode (answers from knowledge base only, no live tool calls) rather than failing completely</li>
+  </ul>
+</div>
+
+<div class="sh2">8.3 Regulatory Horizon Scanning</div>
+<table class="t">
+  <tr><th>Regulation</th><th>Status (June 2026)</th><th>Architect Impact</th></tr>
+  <tr><td>EU AI Act</td><td>Enforcement active for prohibited uses; Aug 2026 for high-risk</td><td>Risk tiering, conformity assessment, documentation requirements</td></tr>
+  <tr><td>GDPR Article 22</td><td>Existing, actively enforced</td><td>Automated decision-making, explainability, right to contest</td></tr>
+  <tr><td>ISO/IEC 42001</td><td>Published, voluntary but increasingly required by enterprise procurement</td><td>AI management system framework</td></tr>
+  <tr><td>UK AI regulation</td><td>Principles-based, sector-led; no comprehensive law as of 2026</td><td>Sector regulator guidance (FCA, CQC, ICO)</td></tr>
+  <tr><td>US AI Executive Order</td><td>Implemented; sector guidance in progress</td><td>Federal agencies and contractors; voluntary standards</td></tr>
+  <tr><td>China AI regulations</td><td>Algorithmic recommendation rules, generative AI rules active</td><td>For systems deployed in China</td></tr>
+</table>
+<div class="ibox" style="border-left-color:#2563eb;margin-top:8px">
+  <strong>Practical approach:</strong> Designate an owner (typically the enterprise AI governance lead or Chief AI Officer) for regulatory monitoring. For architects: design systems to be governance-adaptable — audit logs, explainability hooks, human oversight mechanisms — so that adding regulatory compliance requirements doesn't require architectural rework.
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>Governance must be designed in, not retrofitted.</strong> Audit logs, blast radius controls, artifact versioning, HITL gates, and explainability hooks are architectural decisions. A system designed without them cannot be made governable by adding a policy layer on top.</li>
+  <li><strong>Risk tiering (T0–T3) determines which governance requirements apply.</strong> Not all AI systems need the same governance rigour. When uncertain, classify conservatively — it is much easier to relax controls as you build evidence of safety than to retroactively add them after an incident.</li>
+  <li><strong>Policy controls and technical controls are both required — neither alone is sufficient.</strong> Policy controls fail when humans don't follow them. Technical controls fail when misconfigured or when attackers find edge cases. Layer both so that a failure in one is caught by the other.</li>
+  <li><strong>The EU AI Act is an architecture requirement for high-risk systems, not a compliance checkbox.</strong> If your system falls in an Annex III high-risk category, you need: a risk management system, data governance controls, technical documentation, automatic logging, transparency, human oversight design, and accuracy/robustness standards — all architectural, not policy-only.</li>
+  <li><strong>Red-teaming is required before production for T2/T3 systems.</strong> Automated tools (Garak) cover known attack patterns. Human red-team exercises find the domain-specific attacks that automated tools miss. The goal is finding failures before users do — not proving the system is perfect, but knowing where its limits are and designing mitigations accordingly.</li>
+</ul>

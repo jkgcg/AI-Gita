@@ -1,0 +1,463 @@
+<!-- ============================================================
+     TAB: Cloud Platforms
+     Source: AI_Gita_Transformed_CloudPlatforms.md
+     ============================================================ -->
+
+<!-- S1: What Is It (Plain English) -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<div class="ibox">
+  Cloud platforms for AI are the managed infrastructure services that make AI capabilities available at enterprise scale — without requiring you to build GPU clusters, manage model serving infrastructure, or procure frontier model access directly.
+  <ul class="dl" style="margin-top:10px;margin-bottom:0">
+    <li><strong>AWS Bedrock:</strong> Amazon's managed LLM API layer, giving access to Anthropic Claude, Meta Llama, Cohere, Mistral, and Amazon Titan models through a unified API, with SageMaker for ML training and deployment</li>
+    <li><strong>Azure OpenAI:</strong> Microsoft's managed deployment of OpenAI's models (GPT-4o, GPT-4o-mini, embedding models) in Azure's infrastructure, with enterprise SLAs and EU data residency options</li>
+    <li><strong>Google Cloud Vertex AI:</strong> Google's unified ML platform, with access to Gemini models, custom model training, MLOps tools, and a model garden covering third-party models</li>
+  </ul>
+  <p style="margin-top:10px;margin-bottom:0"><strong>For architects:</strong> choosing a cloud AI platform is partly a capability decision (which models are available, which compliance certifications are held) and partly a lock-in decision. Most enterprises choose primarily on their existing cloud provider relationship and secondarily on AI-specific capability gaps.</p>
+</div>
+
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>Cloud platform choice affects three concrete things:</p>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Which models are available:</strong> Azure OpenAI has exclusive enterprise access to GPT-4o with SLAs; AWS Bedrock has Anthropic Claude; GCP Vertex has Gemini. If your use case requires a specific model, the platform follows.</li>
+      <li><strong>Data residency and compliance:</strong> Azure OpenAI offers EU-hosted endpoints critical for GDPR-sensitive workloads. AWS Bedrock has region-specific endpoints. Know your data residency requirements before shortlisting platforms.</li>
+      <li><strong>Integration with existing infrastructure:</strong> if your data lives in Snowflake on Azure, your pipelines run in Azure Data Factory, and your applications deploy to AKS, Azure OpenAI is lower-friction than cross-cloud connectivity to AWS Bedrock.</li>
+    </ul>
+  </div>
+
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>Cloud AI platforms introduce new vendor categories into enterprise procurement:</p>
+    <ul class="dl">
+      <li><strong>LLM API endpoints</strong> with per-token pricing (new cost structure, different from traditional compute)</li>
+      <li><strong>Managed model serving</strong> with availability SLAs (different from self-managed model serving)</li>
+      <li><strong>Data processing agreements (DPA)</strong> required for models that process personal data — each cloud provider has a different DPA template</li>
+    </ul>
+    <p style="margin-bottom:0">Enterprise architects also need to track: model deprecation policies (Azure OpenAI gives 6–12 months' notice; AWS Bedrock policies vary by model provider), version pinning options, and what happens to your system if a model is retired without a suitable replacement.</p>
+  </div>
+</div>
+
+
+<!-- S3: Think About It Like This (Analogy) -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox">
+  <strong>The Managed Services Analogy</strong> — Before cloud computing, companies ran their own data centres: buying servers, maintaining them, managing cooling — all in-house. The cloud's value proposition was: let us manage the infrastructure so you can focus on your applications. Cloud AI platforms apply the same logic to model serving.
+  <ul class="dl" style="margin-top:10px;margin-bottom:0">
+    <li><strong>Azure OpenAI</strong> is like a managed database service — you get access to the database engine (GPT-4o) via a standard interface (REST API), in your cloud region, with enterprise SLAs, without managing the database server itself.</li>
+    <li><strong>AWS Bedrock</strong> is like a managed message queue (SQS) — a choice of message queue engines (multiple LLM providers) through a unified API, with AWS handling scale, availability, and infrastructure.</li>
+    <li><strong>GCP Vertex AI</strong> is the most comprehensive — more like a managed ML platform than just a model API. Google integrates training pipelines, feature stores, model monitoring, and model serving into a unified product. More powerful, but more opinionated about how you structure your ML workflows.</li>
+    <li><strong>The HuggingFace Ecosystem</strong> sits alongside all three — a community hub for open-weight models, datasets, and evaluation tools, with managed inference endpoints that work across cloud providers. The model library that all three cloud platforms draw from for their open-weight model support.</li>
+  </ul>
+</div>
+
+
+<!-- S4: Step-by-Step Walkthrough — Core Concepts -->
+<div class="sh">Step-by-Step Walkthrough — Core Concepts</div>
+
+<div class="sh2">4.1 AWS Bedrock vs Azure OpenAI vs GCP Vertex: The Decision Framework</div>
+<p style="margin-bottom:10px">Rather than memorising every service detail (which changes quarterly), use this decision framework:</p>
+
+<div class="alayer al1">
+  <div class="ln">Step 1: Existing Cloud Commitment</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li>Already deep in AWS (Lambda, EKS, RDS, S3)? Start with <strong>Bedrock</strong> — lower integration friction.</li>
+    <li>Microsoft enterprise agreement, Azure data estate? Start with <strong>Azure OpenAI</strong>.</li>
+    <li>GCP data warehouse (BigQuery), Kubernetes (GKE), or Google Workspace? Start with <strong>Vertex</strong>.</li>
+    <li>Multi-cloud or greenfield? Evaluate on capability and compliance first.</li>
+  </ul>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Step 2: Model Requirements</div>
+  <div class="code">Need GPT-4o or GPT-4o-mini?
+  → Azure OpenAI (exclusive enterprise access with SLA)
+  → OpenAI direct API also available but no Azure-tier SLA
+
+Need Anthropic Claude?
+  → AWS Bedrock (full Claude lineup including Opus)
+  → Anthropic direct API also available
+  → Azure has some Claude access but less comprehensive
+
+Need Gemini?
+  → GCP Vertex AI (Gemini 1.5 Pro, Gemini Flash)
+  → Google AI Studio for development
+
+Need open-weight (Llama, Mistral)?
+  → All three platforms + HuggingFace Inference Endpoints + self-hosted
+  → AWS Bedrock has strong Llama support
+  → GCP Vertex model garden has broad selection</div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Step 3: Compliance &amp; Data Residency</div>
+  <div class="code">EU data residency required (GDPR, DPO requirement)?
+  → Azure OpenAI EU regions (France Central, Sweden Central)
+  → AWS eu-west-1 (Ireland), eu-central-1 (Frankfurt)
+  → GCP europe-west (multiple)
+
+Specific compliance certifications required?
+  Check: ISO 27001, SOC 2 Type 2, HIPAA BAA, FedRAMP
+  All three major providers hold most enterprise certifications
+  Verify: does the specific AI service (not just the cloud platform) hold the cert?
+
+Data never leaves your VPC?
+  → All three offer VPC/Private Link options for API calls
+  → Self-hosted on Kubernetes with open-weight model is most complete isolation</div>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Step 4: Operational Integration</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li>MLflow already in use? All three have MLflow integrations.</li>
+    <li>Terraform for infrastructure? All three have providers.</li>
+    <li>Existing monitoring (Datadog, Grafana)? Check native integration vs custom OTel.</li>
+  </ul>
+</div>
+
+<div class="sh2" style="margin-top:20px">4.2 AWS Bedrock: What Architects Need to Know</div>
+<p style="margin-bottom:10px">A managed API layer that gives access to multiple LLM providers (Anthropic, Meta, Cohere, Mistral, Amazon Titan) through a single AWS API, with unified authentication (IAM), logging (CloudWatch), and billing.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Key Architectural Features</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Inference profiles:</strong> pre-configured model deployments with guaranteed throughput — important when you need predictable latency and don't want shared capacity fluctuations</li>
+      <li><strong>Knowledge Bases for Bedrock:</strong> managed RAG infrastructure — upload documents to S3, Bedrock handles chunking, embedding, indexing, and a retrieval API layer. Reduces RAG build time; limits flexibility vs custom implementation.</li>
+      <li><strong>Agents for Bedrock:</strong> managed agent runtime — define tools (Lambda functions) and orchestration logic; Bedrock handles the ReAct loop (Reason + Act pattern). Faster to set up than LangGraph; less flexible for complex state machines.</li>
+      <li><strong>Guardrails for Bedrock:</strong> managed content filtering — topic blocking, PII detection, hate speech filtering. Applied at the API layer before and after model calls.</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">When Bedrock Is the Right Choice</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li>AWS is your primary cloud</li>
+      <li>You need multi-provider model flexibility (today Claude, tomorrow Llama, without infrastructure change)</li>
+      <li>You want to use Claude without direct Anthropic API management (AWS billing, IAM auth)</li>
+      <li>You're building on AWS Lambda / Step Functions and want native integration</li>
+    </ul>
+    <p style="margin-bottom:0;margin-top:8px"><strong>Cost note:</strong> Bedrock typically adds a small markup over direct provider API pricing. The trade-off is unified billing, AWS SLAs, and AWS-native security and compliance infrastructure.</p>
+  </div>
+</div>
+
+<div class="sh2" style="margin-top:20px">4.3 Azure OpenAI: What Architects Need to Know</div>
+<p style="margin-bottom:10px">Microsoft's managed deployment of OpenAI's model family within Azure's infrastructure. Unlike direct OpenAI API: runs in your chosen Azure region, authenticates via Azure AD / Managed Identity, logs to Azure Monitor, and comes with Microsoft enterprise SLAs (99.9% uptime).</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Key Architectural Features</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Provisioned throughput:</strong> reserve capacity (measured in PTU — Provisioned Throughput Units) for predictable latency and guaranteed throughput. Eliminates shared capacity variance. Critical for production customer-facing applications.</li>
+      <li><strong>Azure AI Content Safety:</strong> content moderation as a separate managed service — hate speech, violence, sexual content, self-harm classification. Can be applied to any text, not just model output.</li>
+      <li><strong>Prompt flow:</strong> low-code/no-code pipeline builder for LLM workflows — useful for rapid prototyping; less suited for production engineering teams who want code-first control.</li>
+      <li><strong>Azure AI Search:</strong> managed vector + keyword search service — integrates directly with Azure OpenAI for RAG patterns. Native hybrid search (vector + BM25 keyword relevance) with managed index.</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">When Azure OpenAI Is the Right Choice</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li>Microsoft enterprise agreement in place</li>
+      <li>GPT-4o specifically required (best reasoning, most tested in enterprise contexts)</li>
+      <li>EU data residency required (strongest compliance story)</li>
+      <li>Azure Active Directory already the identity provider (Managed Identity auth — no API key exposure)</li>
+      <li>Existing Azure data estate (Azure SQL, Azure Blob, Azure Data Factory)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2" style="margin-top:20px">4.4 GCP Vertex AI: What Architects Need to Know</div>
+<p style="margin-bottom:10px">Google's most comprehensive AI platform — not just model API access, but a full ML lifecycle platform including training, feature stores, experiment tracking, model registry, and serving infrastructure, plus API access to Gemini models.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Key Architectural Features</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Gemini access:</strong> Gemini 1.5 Pro (1M context window), Gemini 1.5 Flash (fast, cheap), Gemini 2.0 Pro. Gemini 1.5 Pro's 1M token context window enables full-codebase or full-document-library analysis without chunking.</li>
+      <li><strong>Model Garden:</strong> curated collection of open-weight and third-party models (Llama, Mistral, Falcon, Gemma) available as managed endpoints.</li>
+      <li><strong>Feature Store:</strong> managed feature store for ML — centralises feature computation, storage, and serving. Reduces train-serve skew.</li>
+      <li><strong>AutoML:</strong> automated model training for tabular, text, image, and video tasks — low-code option for non-ML-engineer teams.</li>
+      <li><strong>BigQuery ML:</strong> run ML models directly from BigQuery SQL — useful for data teams without Python ML expertise.</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">When Vertex AI Is the Right Choice</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li>GCP is your primary cloud</li>
+      <li>Gemini's long context window (1M tokens) is required for your use case</li>
+      <li>You have a significant traditional ML workload alongside LLM use cases (Vertex's MLOps tooling is more comprehensive than Bedrock's)</li>
+      <li>BigQuery is your primary data warehouse (tight integration)</li>
+      <li>Google Workspace is your productivity suite (Gemini integrations across Docs, Sheets, Gmail)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2" style="margin-top:20px">4.5 The Build vs Buy vs Fine-tune Decision (Cloud Platform Lens)</div>
+<p style="margin-bottom:10px">Cloud platforms add a fourth option to the Build vs Buy vs Fine-tune framework: <strong>Configure</strong>.</p>
+
+<table class="t">
+  <tr><th>Option</th><th>Description</th><th>Example</th></tr>
+  <tr><td><strong>Buy (SaaS)</strong></td><td>Use a pre-built AI product</td><td>Microsoft Copilot, Salesforce Einstein, ServiceNow Now Assist</td></tr>
+  <tr><td><strong>Configure</strong></td><td>Use cloud platform managed services (RAG, agents, guardrails) with your data</td><td>Azure AI Search + Azure OpenAI Prompt Flow</td></tr>
+  <tr><td><strong>Build (custom)</strong></td><td>Build on raw model APIs with your own orchestration, evaluation, storage</td><td>Direct API + LangGraph + custom eval harness</td></tr>
+  <tr><td><strong>Fine-tune</strong></td><td>Adapt a base model for your specific domain/task</td><td>QLoRA on Llama-3 for domain-specific classification</td></tr>
+</table>
+
+<div class="code" style="margin-top:12px">Start with Buy: is there a SaaS product that covers 80%+ of your use case?
+  → YES: use it; build only the integration to your data/systems
+
+If not, start with Configure: do the cloud platform managed services cover your pattern?
+  → YES: use them; custom code only where managed services don't reach
+
+If not, Build: custom implementation with direct APIs
+  → When: managed services add unnecessary constraints; need full control
+
+Fine-tune adds to any of the above: when off-the-shelf models don't meet quality bar</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:12px">
+  <strong>&#128993; Hidden cost of Configure —</strong> Managed services (Knowledge Bases, Prompt Flow, Bedrock Agents) abstract complexity but add vendor lock-in. Migrating from Bedrock Knowledge Bases to a custom Weaviate + LlamaIndex implementation is expensive engineering work. If you might need to migrate, build on portable abstractions from the start. Safe to skip on a first pass.
+</div>
+
+<div class="sh2" style="margin-top:20px">4.6 Technical Debt in AI Systems</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:12px">
+  <strong>Note:</strong> If you are currently evaluating which platform to choose, complete Sections 4.1–4.5 first, then return here for the long-term view.
+</div>
+
+<p style="margin-bottom:10px">AI systems accumulate technical debt faster than traditional software systems because:</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Sources of AI Technical Debt</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Model dependencies:</strong> code written for GPT-4 may need updating for GPT-4o; model updates are more frequent than database version updates</li>
+      <li><strong>Prompt drift:</strong> prompts that worked well 6 months ago may perform worse on newer model versions. Prompts without version control and evaluation gates accumulate silent quality debt.</li>
+      <li><strong>Data pipeline debt:</strong> RAG systems are only as good as their knowledge base. Stale documents, inconsistent chunking, poor metadata degrade retrieval quality over time without visible failures.</li>
+      <li><strong>Evaluation debt:</strong> AI systems without evaluation harnesses have no reliable way to detect quality regressions. The longer you operate without it, the more production issues trace back to undetected model changes.</li>
+      <li><strong>Governance debt:</strong> responsible AI controls added after deployment are much harder than those designed in. PII handling, audit logging, content moderation added retrospectively require touching every AI call in the codebase.</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">Debt Reduction Strategy</div>
+    <p style="margin-bottom:8px">Quarterly AI system reviews covering:</p>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Model version currency</strong> — are you on a deprecated version?</li>
+      <li><strong>Evaluation harness completeness</strong> — are quality regressions detectable?</li>
+      <li><strong>Knowledge base freshness</strong> — are indexed documents still current?</li>
+      <li><strong>Governance control coverage</strong> — are all PII handling, audit logging, and content moderation controls in place?</li>
+      <li><strong>Cost optimisation</strong> — have model pricing changes created better options?</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Scenario: Cloud Platform Selection for a European Retail Bank</div>
+  <p>A European retail bank is deploying three AI capabilities: a customer service chatbot (2M interactions/month), an internal document assistant (50K queries/month from staff), and a credit risk narrative generator (5K reports/month, highly sensitive).</p>
+  <p><strong>Existing infrastructure:</strong> Azure is the primary cloud (Azure SQL, Azure Blob, Active Directory). The bank holds ISO 27001, SOC 2 Type 2, and is subject to EBA guidelines on AI in banking.</p>
+
+  <div class="sh2" style="margin-top:14px">Platform Evaluation</div>
+  <table class="t">
+    <tr><th>Criterion</th><th>Azure OpenAI</th><th>AWS Bedrock</th><th>GCP Vertex</th></tr>
+    <tr><td>EU data residency</td><td>&#10003; France Central</td><td>&#10003; eu-west-1</td><td>&#10003; europe-west</td></tr>
+    <tr><td>GPT-4o access</td><td>&#10003; Native</td><td>&#10007; Not available</td><td>&#10007; Not available</td></tr>
+    <tr><td>Managed Identity auth</td><td>&#10003; Azure AD native</td><td>&#10007; (IAM, not Azure AD)</td><td>&#10007;</td></tr>
+    <tr><td>Existing cloud spend</td><td>&#10003; EA in place</td><td>&#10007; Separate billing</td><td>&#10007; Separate billing</td></tr>
+    <tr><td>Compliance (ISO 27001, SOC 2)</td><td>&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+    <tr><td>EBA AI guidelines audit support</td><td>&#10003; MS enterprise compliance</td><td>Partial</td><td>Partial</td></tr>
+  </table>
+
+  <p style="margin-top:10px"><strong>Decision: Azure OpenAI</strong> — driven by existing cloud relationship, Azure AD native auth (no API key exposure risk), EU data residency, and GPT-4o access.</p>
+
+  <div class="sh2" style="margin-top:14px">Architecture Decisions per Use Case</div>
+
+  <div class="g2">
+    <div class="card b">
+      <div class="ch b">Customer Service Chatbot</div>
+      <div class="kv">
+        <div class="kvr"><span class="kvk">Model</span><span class="kvv">GPT-4o-mini (speed + cost; adequate for well-scoped customer service)</span></div>
+        <div class="kvr"><span class="kvk">Serving</span><span class="kvv">Provisioned Throughput (predictable latency; shared capacity risk unacceptable for customer-facing)</span></div>
+        <div class="kvr"><span class="kvk">Knowledge</span><span class="kvv">Azure AI Search (hybrid vector + BM25 on product and policy documents)</span></div>
+        <div class="kvr"><span class="kvk">Safety</span><span class="kvv">Azure AI Content Safety applied to all outputs</span></div>
+        <div class="kvr"><span class="kvk">Cost</span><span class="kvv">~£8,000/month (provisioned throughput at 200 PTU + Azure AI Search indexing)</span></div>
+      </div>
+    </div>
+    <div class="card b">
+      <div class="ch b">Internal Document Assistant</div>
+      <div class="kv">
+        <div class="kvr"><span class="kvk">Model</span><span class="kvv">GPT-4o (staff tool; quality over cost)</span></div>
+        <div class="kvr"><span class="kvk">Knowledge</span><span class="kvv">Azure AI Search with SharePoint connector (indexes internal documents, policies, procedures)</span></div>
+        <div class="kvr"><span class="kvk">Auth</span><span class="kvv">Azure AD SSO — staff authenticate once; no additional credentials</span></div>
+        <div class="kvr"><span class="kvk">Cost</span><span class="kvv">~£300/month (100M tokens/month at £3/M; no provisioned needed at this volume)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card b" style="margin-top:12px">
+    <div class="ch b">Credit Risk Narrative Generator</div>
+    <div class="kv">
+      <div class="kvr"><span class="kvk">Model</span><span class="kvv">GPT-4o (highest quality; legal review required before output is used)</span></div>
+      <div class="kvr"><span class="kvk">Data classification</span><span class="kvv">Most sensitive tier — requires DPA signed with Microsoft (already in EA)</span></div>
+      <div class="kvr"><span class="kvk">Output</span><span class="kvv">Structured narrative + supporting citations; not used autonomously — always reviewed by credit officer</span></div>
+      <div class="kvr"><span class="kvk">Audit trail</span><span class="kvv">All prompts and completions logged to Azure Monitor with 7-year retention (EBA record-keeping requirement)</span></div>
+      <div class="kvr"><span class="kvk">Cost</span><span class="kvv">~£160/month (40M tokens/month at £4/M blended)</span></div>
+    </div>
+  </div>
+
+  <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:14px">
+    <strong>Total platform cost: ~£8,500/month</strong> across three use cases. The bank's prior estimate for self-hosted GPU infrastructure to cover the same workloads: ~£45,000/month in capital + ops.
+  </div>
+</div>
+
+
+<!-- S6: Architecture Perspective — ROI Template -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">The ROI Template for AI Projects</div>
+<p style="margin-bottom:10px">Every AI project presented to finance requires a credible ROI model. Template:</p>
+
+<div class="code">Project: [Name]
+Use case: [Brief description]
+
+Baseline:
+  Current process cost: [£/month or hours/month × rate]
+  Current quality metric: [accuracy, cycle time, error rate]
+
+AI-enabled future state:
+  Projected process cost: [£/month]
+  Projected quality metric: [improvement % with basis]
+
+Implementation cost (one-time):
+  Development: [person-weeks × rate]
+  Integration: [infrastructure setup, data migration]
+  Training and change management: [hours × rate]
+  Total one-time: [£]
+
+Running cost (annual):
+  Cloud platform / API: [£/year]
+  Maintenance (model updates, prompt management, eval): [hours × rate/year]
+  Infrastructure: [£/year]
+  Total annual: [£]
+
+Annual benefit:
+  Cost saving: [£/year]
+  Quality improvement value: [£/year, show working]
+  Revenue impact (if applicable): [£/year, show working]
+
+Payback period: [months = one-time cost / (annual benefit - annual running cost) × 12]
+3-year NPV: [calculate at your organisation's discount rate]
+
+Assumptions: [list all assumptions explicitly]
+Measurement plan: [exactly what metrics, what baseline, who measures, what cadence]</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:12px">
+  <strong>&#128993; The most commonly missed line:</strong> <strong>Measurement plan.</strong> Without it, ROI claims are unverifiable and finance credibility is lost at the 12-month review.
+</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px">
+  <strong>Illustrative example</strong> (bank scenario from Section 5): Investment: £8,500/month managed AI services + £12,000 implementation. Efficiency gain: 3 FTE × £60,000 = £180,000/year. Quality improvement: 40% reduction in manual review errors = £45,000/year avoided cost. <strong>Payback period: ~2 months.</strong>
+</div>
+
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself (3–5 Questions)</div>
+
+<div class="card g">
+  <div class="ch g">Self-Assessment Questions</div>
+  <ol class="sl">
+    <li>
+      <strong>Your legal team requires that all AI processing of customer personal data occurs within the EU. Which cloud platform options satisfy this and what must be verified?</strong>
+      <p><em>All three major platforms have EU regions, but "EU region" is not sufficient on its own. Verify: (1) the specific AI service (not just the cloud platform) has EU-region endpoints; (2) the DPA is signed with the provider — the contractual basis under GDPR Article 28; (3) cross-region data transfer is explicitly disabled in your API configuration; (4) sub-processors: if the cloud provider uses sub-processors for the AI service, are those sub-processors also EU-compliant?; (5) logging and monitoring data also stays in the EU region. Azure OpenAI has the strongest story for European enterprises because the entire stack (compute, networking, logging, identity) stays within Azure's EU infrastructure under a Microsoft enterprise agreement.</em></p>
+    </li>
+    <li>
+      <strong>A developer proposes using AWS Bedrock's "Knowledge Bases" managed RAG service to avoid building a custom RAG pipeline. What are the advantages and trade-offs?</strong>
+      <p><em>Advantages: speed to deployment (hours vs weeks), maintenance reduction (no vector database to operate), native AWS integration, and iterative improvement without re-engineering. Trade-offs: (1) chunking control — managed services use opaque chunking strategies; custom content structure may require custom chunking for quality retrieval; (2) retrieval customisation — cannot implement advanced patterns like ColBERT, HyDE, or custom reranking without custom code; (3) vendor lock-in — migrating to a custom stack is significant re-engineering; (4) observability — limited per-request retrieval debugging when retrieval quality is poor on specific queries. Recommendation: use managed services for initial deployment and low-to-medium complexity use cases. Design the application layer to call the RAG endpoint via a clean interface abstraction so the underlying implementation can be swapped if needed.</em></p>
+    </li>
+    <li>
+      <strong>An architect says "standardise on GCP Vertex AI because it has the most comprehensive MLOps tooling." A developer counters "but we don't need MLOps — we're just calling LLM APIs." Who is right?</strong>
+      <p><em>Both are partially right. The developer is correct that for simple LLM API call patterns, traditional MLOps tooling (training pipelines, feature stores, model registries) is largely irrelevant. The architect is correct that as AI systems mature, MLOps-adjacent concerns become real: evaluation harnesses need to run on a schedule; model version tracking and regression testing apply to prompt + model version combinations; any fine-tuning planned makes a model registry and experiment tracking valuable. The resolution: evaluate on your actual requirements — which models do you need, what are your data residency requirements, what is your existing cloud commitment. MLOps tooling breadth is one factor, not the deciding one for LLM-API-first teams.</em></p>
+    </li>
+    <li>
+      <strong>Your organisation runs on AWS. A business unit wants to use Claude Opus for complex legal document analysis. How do you provide access and what governance controls do you implement?</strong>
+      <p><em>Access via AWS Bedrock — provides managed Claude access through IAM authentication, consolidated billing, and AWS-native logging. Steps: (1) enable Bedrock in the relevant AWS region (eu-west-1 or eu-central-1 for EU data residency); (2) create an IAM role with least-privilege Bedrock invoke permissions scoped to Claude Opus model IDs only; (3) configure VPC endpoints for Bedrock if the application runs in a private VPC; (4) enable CloudWatch logging for all Bedrock API calls. Governance controls: data classification check (legal documents likely contain sensitive information — confirm DPA covers this category and endpoint stays in required region); model version pinning (specify exact model version to prevent unexpected behaviour from provider-side updates); access logging (all invocations logged with the IAM principal for audit trail); cost controls (set AWS Budget alerts — Opus is expensive; a runaway loop would be costly); output governance (legal analysis is high-stakes — define the human review gate explicitly).</em></p>
+    </li>
+    <li>
+      <strong>What is "provisioned throughput" in Azure OpenAI or AWS Bedrock, and when should an architecture require it vs using shared capacity?</strong>
+      <p><em>Provisioned throughput (Azure: PTU — Provisioned Throughput Units; Bedrock: Provisioned Throughput) is a reserved compute allocation — you pay for dedicated capacity guaranteeing a specified number of tokens per minute, rather than sharing capacity with other customers. Shared capacity means your requests compete with all other customers' requests, causing during peak periods: rate limit errors (429s) requiring retry logic, latency spikes, and unpredictable performance. Provisioned throughput eliminates these. When to require it: (1) customer-facing applications with latency SLAs; (2) high-volume predictable workloads where provisioned is typically cheaper at that volume; (3) production applications where rate limit errors are unacceptable. When shared is fine: (1) internal tools, batch workloads, non-real-time use cases; (2) low-volume or bursty workloads where reserved capacity would be idle; (3) development and testing. Cost: provisioned throughput requires minimum commitments (typically monthly) regardless of actual usage — it's a fixed cost. Only makes sense when utilisation will be high enough to justify the reservation.</em></p>
+    </li>
+  </ol>
+</div>
+
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  <strong>&#128993; Optional depth —</strong> This section covers SageMaker Pipelines and HuggingFace Inference Endpoints at depth. It is safe to skip on a first pass and return here when evaluating specific platform capabilities.
+</div>
+
+<div class="sh2" style="margin-top:16px">8.1 SageMaker Pipelines: ML Orchestration on AWS</div>
+<p style="margin-bottom:10px">For organisations running traditional ML (not just LLM APIs), SageMaker Pipelines provides a managed DAG orchestrator for ML workflows:</p>
+
+<div class="code">SageMaker Pipeline components:
+  ├── Processing Step: data preprocessing (Spark or Python)
+  ├── Training Step: model training on managed compute
+  ├── Evaluation Step: automated metrics computation
+  ├── Condition Step: branch on evaluation results
+  ├── Register Step: push to Model Registry if quality passes
+  └── Deploy Step: update endpoint if approved</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  Each step runs in a managed container on transient compute — no persistent infrastructure required. The pipeline is versioned in SageMaker; execution history, logs, and artifacts are tracked automatically. For LLM workflows, SageMaker Pipelines can orchestrate: dataset preparation, fine-tuning jobs, evaluation harness execution, and model registration.
+</div>
+
+<div class="sh2" style="margin-top:16px">8.2 HuggingFace Ecosystem: The Model Library</div>
+<p style="margin-bottom:10px">HuggingFace is the de facto library and hosting platform for open-weight models:</p>
+
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Core Components</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Model Hub:</strong> 500,000+ models available for download — base models, fine-tuned variants, embedding models, classification models</li>
+      <li><strong>Datasets:</strong> 100,000+ curated datasets for training and evaluation</li>
+      <li><strong>Transformers library:</strong> the standard Python library for loading and running models</li>
+      <li><strong>PEFT library:</strong> standard implementation of LoRA, QLoRA, and other parameter-efficient fine-tuning methods</li>
+      <li><strong>Evaluate library:</strong> standardised evaluation metrics</li>
+      <li><strong>Inference Endpoints:</strong> managed GPU hosting for your chosen HuggingFace model — no self-managed GPU required, pay-per-second</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">Architect Perspective</div>
+    <p>HuggingFace is the source for most open-weight models regardless of which cloud you ultimately host them on. When evaluating an open-weight model for fine-tuning or self-hosting, the model card on HuggingFace is the authoritative documentation for:</p>
+    <ul class="dl" style="margin-bottom:0">
+      <li>Base model and training data</li>
+      <li>Evaluation scores</li>
+      <li>Intended use and limitations</li>
+      <li>Licence terms</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Cloud platform selection is primarily driven by existing cloud commitment and data residency requirements — not AI capability differences.</strong> Azure OpenAI for Microsoft shops with EU requirements, AWS Bedrock for AWS-first organisations, GCP Vertex for Google-heavy environments. The capability differences between platforms narrow quarterly; vendor integration and compliance are more durable differentiators.</li>
+  <li><strong>"EU region" is necessary but not sufficient for GDPR compliance — verify the DPA, the specific AI service's region availability, and that cross-region data transfer is disabled.</strong> A well-intentioned EU region selection can be undermined by default cross-region logging, sub-processor chains that include US entities, or an unsigned DPA.</li>
+  <li><strong>Managed RAG services (Bedrock Knowledge Bases, Azure AI Search integration) are the right starting point, not a long-term compromise — but design clean interfaces so you can migrate.</strong> Speed to deployment and reduced ops burden justify managed services. Design the application layer with an abstraction over the RAG endpoint, so the underlying implementation can be swapped without rewriting the application.</li>
+  <li><strong>Provisioned throughput is mandatory for customer-facing AI applications, optional for internal tools.</strong> Shared capacity rate limits and latency spikes are acceptable for internal tools where occasional delays are tolerable. They are not acceptable for customer-facing applications where P95 latency is part of the SLA. Provision capacity before launch, not after the first customer complaint.</li>
+  <li><strong>AI technical debt accumulates faster than traditional software debt — schedule quarterly AI system reviews.</strong> Model deprecation, prompt drift, stale knowledge bases, and unevaluated governance controls compound silently. A quarterly review covering model version currency, evaluation harness completeness, knowledge base freshness, and cost optimisation opportunities keeps the system from degrading invisibly.</li>
+</ul>

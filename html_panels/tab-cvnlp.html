@@ -1,0 +1,369 @@
+<!-- ============================================================
+     Computer Vision and NLP for Architects — AI Gita Panel
+     ============================================================ -->
+
+<div class="sh">Computer Vision &amp; NLP for Architects</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- ── S1: What Is It ── -->
+<div class="sh2">What Is It (Plain English)</div>
+
+<div class="ibox">
+  Computer vision (CV) and natural language processing (NLP) are the two oldest and most mature branches of AI applied to unstructured data. CV processes images and video; NLP processes text and language. As an architect working with LLMs today, you already work in the NLP tradition — the transformer architecture that powers GPT-4 and Claude originated in NLP. Understanding both domains together lets you see where the LLMs you already know come from, what they share with image models, and where the two are merging.
+</div>
+
+<div class="ibox">
+  Both CV and NLP models are built on neural networks — the same foundation as the LLMs you already know. The difference is in what they process (images or word sequences) and the architectural adaptations that make each effective for its domain.
+</div>
+
+<div class="ibox">
+  The connection is closer than you might think:
+  <ul class="dl">
+    <li><strong>CNN ↔ Text Embedding:</strong> A convolutional neural network that classifies product images does the visual equivalent of what an embedding model does for text — compressing raw input into a dense representation that captures semantically meaningful features.</li>
+    <li><strong>Object Detection ↔ NER:</strong> Finding and labelling every product in a shelf photo is the visual equivalent of named entity recognition in text — finding and labelling every entity (person, organisation, date) in a customer message.</li>
+    <li><strong>Transfer Learning:</strong> Taking a model trained on a massive general dataset and adapting it to your specific task with a small fine-tuning dataset works the same way whether you are working with images or text.</li>
+    <li><strong>Vision-Language Models:</strong> GPT-4V, Gemini, and PaliGemma now process images and text together in a single model, collapsing the boundary between CV and NLP for many enterprise use cases.</li>
+  </ul>
+</div>
+
+<!-- ── S2: Why Should I Care ── -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>Many enterprise AI opportunities involve visual data: product catalogues, invoice processing, quality control, retail shelf monitoring, identity verification. When a use case involves images or documents, you need to know whether the task calls for:</p>
+    <ul class="dl">
+      <li><strong>Classification model:</strong> Put this image in a category</li>
+      <li><strong>Detection model:</strong> Find and locate all instances of X in this image</li>
+      <li><strong>Embedding model:</strong> Represent this image so it can be searched</li>
+      <li><strong>Vision-language model:</strong> Read this document and extract structured data</li>
+    </ul>
+    <p>Getting this wrong is expensive. A classification model cannot detect multiple items in an image. A detection model overkills a simple categorisation task. A VLM provides the richest capability but is the most expensive to run and hardest to explain.</p>
+    <p>For text tasks, architects increasingly face a choice between a large general-purpose LLM and a task-specific smaller NLP model. Understanding the underlying NLP task structure tells you when a specialised model is better: cheaper, faster, more predictable, and often more accurate on a narrow task.</p>
+  </div>
+
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>The practical consequence of vision and language AI converging is that automation tasks previously requiring separate systems — one for document ingestion, one for field extraction, one for classification, one for routing — can increasingly be handled by a single vision-language model. This changes the integration architecture, the cost model, and the governance requirements.</p>
+    <p><strong>Governance:</strong> NLP models (classification, NER) are more explainable and auditable than large generative models. A BERT-based sentiment classifier's predictions can be attributed to specific input tokens. An LLM's sentiment assessment cannot be traced to a specific weight or layer in a meaningful way for audit purposes. In regulated industries, task-specific NLP models may be preferred precisely because their behaviour is more constrained and auditable.</p>
+    <p><strong>CV data:</strong> Image-based AI systems processing customer data (faces, identity documents, body images) attract specific regulatory attention in the EU and elsewhere. The architecture must include data minimisation, retention controls, and bias testing as explicit requirements — not afterthoughts.</p>
+  </div>
+</div>
+
+<!-- ── S3: Think About It Like This ── -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox">
+  Imagine hiring a brilliant all-rounder who has never encountered your industry versus hiring a team of deep specialists.<br><br>
+  <strong>The all-rounder</strong> (an LLM or large VLM) has read or seen almost everything. They understand context, nuance, ambiguity. They can handle tasks they have never seen before. But they are expensive, slower than specialists, and their reasoning process is opaque — you cannot easily verify why they gave a particular answer.<br><br>
+  <strong>The specialist team</strong> (task-specific NLP or CV models) is deeply trained on one type of task. Your invoice extraction specialist can process 10,000 invoices a minute, never makes a random error about field format, and you can test exactly what it knows and does not know. But ask it to handle a task outside its training and it fails immediately.<br><br>
+  <strong>Transfer learning</strong> is what makes hiring the all-rounder practical: you hire them for their general knowledge and then spend a few weeks training them in your industry's specifics. This is fine-tuning — taking a model with enormous general capabilities and adapting it to your specific task with a small amount of task-specific training.<br><br>
+  In CV: ImageNet pre-training gives a model that understands shapes, textures, and objects. Fine-tuning on your 10,000 product images adapts it to your catalogue. In NLP: BERT pre-training gives a model that understands language structure and word relationships. Fine-tuning on your 5,000 labelled reviews adapts it to sentiment classification. <em>Same principle. Different inputs. Identical architectural pattern.</em>
+</div>
+
+<!-- ── S4: Step-by-Step Walkthrough ── -->
+<div class="sh">Step-by-Step Walkthrough</div>
+
+<div class="sh2">4.1 Computer Vision: Task Types and When Each Applies</div>
+
+<div class="alayer al1">
+  <div class="ln">Image Classification</div>
+  Assign a single label to an entire image. Input: image. Output: one category label (optionally with confidence score).<br>
+  <strong>Use cases:</strong> product category classification, quality control pass/fail, document type classification.<br>
+  <strong>Architecture:</strong> CNN or Vision Transformer (ViT). At deployment: image in, category out. Latency typically milliseconds on GPU.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Object Detection</div>
+  Find and localise all instances of one or more object classes within an image. Output: bounding boxes, each labelled with a class and confidence score — answers both "what?" and "where?"<br>
+  <strong>Use cases:</strong> retail shelf monitoring, quality inspection, document layout parsing, vehicle detection.<br>
+  <strong>Architecture:</strong> YOLO family (real-time, single forward pass). Faster R-CNN and variants for higher accuracy when latency is less critical.
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Image Segmentation</div>
+  Predict a class label for every pixel. More precise than detection — tells you exactly which pixels belong to each object, not just the bounding box region.<br>
+  <strong>Use cases:</strong> medical imaging, autonomous vehicle perception, quality inspection where exact defect area matters.<br>
+  <strong>Architecture:</strong> U-Net (medical imaging), Mask R-CNN, Segment Anything Model (SAM from Meta).
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Image Embedding / Visual Search</div>
+  Convert an image into a dense vector that captures semantic content, enabling similarity search over a catalogue.<br>
+  <strong>Use cases:</strong> "find similar products," duplicate product detection, visual quality comparison against a reference standard.<br>
+  <strong>Architecture:</strong> CNN or ViT encoder trained with contrastive learning (CLIP, SigLIP). The model embeds similar images close together — exactly analogous to how text embedding models are trained.
+</div>
+
+<div class="sh2">4.2 The CNN and ViT Architectures — Intuition Level</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Before you read Sections 4.2 and 4.3 — a 30-second primer:</strong> A neural network is a chain of mathematical transformations. Each "layer" applies a transformation to the data it receives, learning the right transformation during training. "Weights" are the numbers that define those transformations. "Forward pass" means running data through all the layers from input to output. You do not need to know the math — just that these terms refer to the internal mechanics of how the model processes information.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">CNNs (Convolutional Neural Networks)</div>
+  The dominant CV architecture for over a decade. Key insight: process images using local filters that slide across the image, detecting local features (edges, textures, corners) at different scales. Early layers detect low-level features; deeper layers combine these into higher-level concepts (shapes, objects, scenes).<br><br>
+  Why local filters work: an edge detector that works in the top-left corner works equally well in the bottom-right corner. Parameters are shared across the entire image — making CNNs parameter-efficient. Pooling layers progressively reduce spatial resolution while increasing the receptive field.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Vision Transformers (ViT)</div>
+  Apply the transformer architecture directly to images. The image is divided into fixed-size patches (e.g. 16×16 pixels). Each patch is linearly projected into an embedding vector. These patch embeddings are then processed by transformer self-attention layers — each patch can attend to every other patch, capturing long-range spatial dependencies that CNNs struggle with.<br><br>
+  ViTs need more training data than CNNs. Pre-trained on massive datasets (ImageNet-21K, JFT-300M), ViTs match or exceed CNN performance. For architects: CNNs are faster and more data-efficient for small datasets; ViTs are more flexible, better for high-resolution inputs, and architecturally compatible with transformer-based LLMs — making them the natural backbone for vision-language models.
+</div>
+
+<div class="sh2">4.3 NLP: Task Types and When Each Applies</div>
+
+<div class="alayer al1">
+  <div class="ln">Text Classification</div>
+  Assign a label to an entire text input. Binary, multiclass, or multi-label.<br>
+  <strong>Use cases:</strong> customer review sentiment, email routing by topic, support ticket urgency scoring, contract clause categorisation, content moderation.<br>
+  <strong>Architecture:</strong> Fine-tuned BERT-class model (BERT, RoBERTa, DistilBERT). For very long documents: hierarchical approach or long-context model.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Named Entity Recognition (NER)</div>
+  Identify and classify named entities within text — people, organisations, dates, monetary amounts, product names, locations.<br>
+  <strong>Use cases:</strong> extracting supplier names and invoice dates, identifying parties in contract review, extracting patient information from clinical notes, populating structured databases from unstructured reports.<br>
+  <strong>Architecture:</strong> Fine-tuned BERT-class model with a token classification head. Each token labelled as B-entity, I-entity, or O-outside.
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Information Extraction</div>
+  Extracting structured information from unstructured text — filling a template or database record from a free-text document.<br>
+  <strong>Use cases:</strong> extracting order details from email confirmations, populating product attributes from catalogue descriptions, reading semi-structured documents (invoices, purchase orders, shipping manifests).<br>
+  <strong>Architecture:</strong> Increasingly handled by instruction-tuned LLMs or VLMs for complex documents. For simpler, well-defined tasks: NER + regex post-processing is faster, cheaper, and more reliable.
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Semantic Search / Embeddings</div>
+  Convert text into dense vectors that capture meaning, enabling search by semantic similarity rather than keyword matching.<br>
+  <strong>Use cases:</strong> product search, enterprise knowledge base search, finding similar support tickets, contract clause retrieval.<br>
+  <strong>Architecture:</strong> BERT-class encoder trained with contrastive objectives (Sentence-BERT, E5, text-embedding-ada-002). The model learns to embed sentences with similar meaning close together.
+</div>
+
+<div class="alayer al5">
+  <div class="ln">Question Answering and Extraction</div>
+  Find the answer to a question in a provided passage of text.<br>
+  <strong>Use cases:</strong> internal knowledge base Q&amp;A, reading comprehension over policy documents, structured extraction from specific document types.<br>
+  <strong>Architecture:</strong> This is the native capability of instruction-tuned LLMs in a RAG pattern. For narrow, predictable extraction tasks, fine-tuned BERT with an extractive QA head is faster and cheaper.
+</div>
+
+<div class="sh2">4.4 Tokenisation: How Text Becomes Numbers</div>
+
+<div class="ibox">
+  Before any NLP model can process text, it must be converted into numbers. Tokenisation splits text into units (tokens) and maps each to a number.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">Byte-Pair Encoding (BPE)</div>
+  The most common tokenisation algorithm in modern LLMs (GPT-2/3/4, RoBERTa, and most transformers). Starts with individual characters and iteratively merges the most frequent character pairs into a single token, until a target vocabulary size is reached.<br><br>
+  Result: common words are single tokens ("the," "and," "product"). Common subword units are also tokens ("##ing," "##ness"). Rare words are split into subword tokens ("unstructured" → "un," "structured"). Any character sequence can be tokenised, even words not in the training vocabulary.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Why Architects Care: Cost and Context</div>
+  Tokenisation determines context window consumption. A 10-page PDF may consume 2,000–5,000 tokens. At $0.01 per 1K tokens, processing 100,000 such documents per month has a direct cost implication that flows from tokenisation choices.<br><br>
+  <strong>Multilingual efficiency risk:</strong> Non-Latin scripts (Chinese, Arabic, Korean) are often tokenised less efficiently in English-optimised tokenisers — more tokens per word. Processing multilingual content costs more and consumes more context window than equivalent English content.<br><br>
+  <strong>Alternatives:</strong> WordPiece (BERT) and SentencePiece (T5, LLaMA) have similar properties. The specific algorithm matters less than understanding that tokenisation efficiency varies by language, domain, and vocabulary.
+</div>
+
+<div class="sh2">4.5 Transfer Learning: The Shared Principle Across CV and NLP</div>
+
+<div class="ibox">
+  Transfer learning is the practice of starting from a model pre-trained on a large general dataset and adapting it to a specific task with a smaller, task-specific dataset. The reason it works in both domains: deep models learn hierarchical representations, and the lower-level representations (edges and textures in CV; syntax and word relationships in NLP) transfer across tasks better than the higher-level ones.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">Step 1 — Start with a pre-trained model</div>
+  ResNet-50 trained on ImageNet for CV; BERT trained on Wikipedia for NLP.
+</div>
+<div class="alayer al2">
+  <div class="ln">Step 2 — Remove or modify the final task-specific layers</div>
+  The classification head for CV; the masked language modelling head for NLP.
+</div>
+<div class="alayer al3">
+  <div class="ln">Step 3 — Add new task-specific layers</div>
+  A new classification head for your product categories; a new token classification head for your NER labels.
+</div>
+<div class="alayer al4">
+  <div class="ln">Step 4 — Fine-tune</div>
+  Train the combined model on your labelled dataset with a small learning rate to avoid "forgetting" the pre-trained representations.
+</div>
+
+<div class="ibox">
+  <strong>Full fine-tuning vs feature extraction:</strong> Full fine-tuning updates all weights including the backbone. Feature extraction freezes the backbone and only trains the new task head — better when your dataset is very small.<br><br>
+  <strong>PEFT (Parameter-Efficient Fine-Tuning):</strong> For very large models, methods like LoRA, adapters, and prefix tuning update only a small number of additional parameters while keeping the original model frozen — reducing trainable parameters by 100–1000× while achieving most of the performance of full fine-tuning.
+</div>
+
+<div class="sh2">4.6 CV vs NLP Task Mapping</div>
+
+<table class="t">
+  <tr><th>CV Task</th><th>NLP Equivalent</th><th>What it does</th></tr>
+  <tr><td>Image Classification</td><td>Text Classification</td><td>Assigns a single label to an entire input</td></tr>
+  <tr><td>Object Detection</td><td>Named Entity Recognition</td><td>Finds and labels multiple instances of specific types within an input</td></tr>
+  <tr><td>Image Segmentation</td><td>Semantic Role Labelling / Span Extraction</td><td>Labels every element of the input with its role or type</td></tr>
+  <tr><td>Image Embedding / Visual Search</td><td>Semantic Text Embedding / Semantic Search</td><td>Converts input into a dense vector for similarity comparison</td></tr>
+  <tr><td>Image Captioning</td><td>Text Summarisation</td><td>Generates text describing the content of an input</td></tr>
+  <tr><td>Image-to-Image Translation</td><td>Text-to-Text Generation / Translation</td><td>Converts one form of input to another</td></tr>
+  <tr><td>Visual Question Answering</td><td>Open-Domain Question Answering</td><td>Answers natural language questions about an input</td></tr>
+</table>
+
+<!-- ── S5: Enterprise Example ── -->
+<div class="sh">Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Three connected retail &amp; logistics examples</div>
+
+  <div class="sh2">Example A: Visual Product Catalogue Search (CV + Embedding)</div>
+  <p><strong>Scenario:</strong> A global fashion retailer wants customers to photograph a product they see on the street and find similar items in the catalogue.</p>
+  <p><strong>Architecture:</strong> Each product image is pre-computed into a 768-dimensional embedding using a fine-tuned CLIP-based model. CLIP is trained to embed images and text into a shared embedding space — the text "red running shoe" and an image of one will have similar embeddings. Catalogue embeddings are stored in a vector database (Weaviate).</p>
+  <p>At query time: user uploads a photo → CLIP image encoder → approximate nearest-neighbour search retrieves 50 similar items → re-ranking applies business filters → top 10 results returned.</p>
+  <p><strong>Key decision:</strong> Separate offline embedding of catalogue items means search at query time is just a vector lookup — millisecond latency at scale. The expensive encoder runs only when new items are added to the catalogue, not at query time.</p>
+
+  <div class="sh2">Example B: Automated Invoice Field Extraction (VLM as NLP Task)</div>
+  <p><strong>Scenario:</strong> A logistics company receives 40,000 supplier invoices/month in diverse formats (PDF, scanned paper, structured Excel, email body text). Manual extraction takes 3.5 FTE.</p>
+  <p><strong>Architecture:</strong> For structured PDFs (60% of volume): traditional NLP pipeline (text extraction + NER + regex) handles extraction at 98%+ accuracy. For scanned and non-standard documents (40%): a vision-language model (GPT-4V or equivalent) handles full extraction in a single step. The document image is passed directly with a structured extraction prompt returning JSON.</p>
+  <p><strong>Why this is an NLP task:</strong> Even though the input is a document image, the task is information extraction — filling a structured schema from unstructured input. The vision component is the mechanism; the task is NLP.</p>
+  <p><strong>Governance note:</strong> Invoice data contains supplier payment information — errors have direct financial consequences. Human review of low-confidence extractions is a mandatory guardrail in the architecture.</p>
+
+  <div class="sh2">Example C: Customer Review Sentiment Pipeline (NLP Classification)</div>
+  <p><strong>Scenario:</strong> A retail group receives 85,000 product reviews/month across 12 platforms in 6 languages. Team needs: sentiment (positive/neutral/negative), product aspect discussed, and urgency detection.</p>
+  <p><strong>Why not an LLM:</strong> At €0.01/1K tokens, processing 85,000 reviews at ~200 words each costs ~€3,400/month. LLM classification responses are also less consistent — the same review submitted twice may receive different aspect labels.</p>
+  <p><strong>Architecture:</strong> Three separate fine-tuned models on a shared multilingual backbone (XLM-RoBERTa):</p>
+  <ul class="dl">
+    <li><strong>Sentiment classifier:</strong> 3-class, fine-tuned on 25,000 labelled reviews</li>
+    <li><strong>Aspect classifier:</strong> Multi-label, fine-tuned on 15,000 reviews</li>
+    <li><strong>Urgency classifier:</strong> Binary, fine-tuned on 3,000 reviews — runs real-time on submission to trigger alerts</li>
+  </ul>
+  <p><strong>Cost:</strong> ~€120/month on GPU cloud. One-tenth the LLM cost, with more consistent and auditable outputs.</p>
+</div>
+
+<!-- ── S6: Architecture Perspective ── -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="kv">
+  <div class="kvr">
+    <span class="kvk">VLM vs specialist model decision</span>
+    <span class="kvv">Use VLMs for complex, ambiguous, or low-volume tasks where flexibility matters. Use task-specific fine-tuned models for high-volume, well-defined tasks where cost and consistency matter. Fine-tuned specialists are 5–20× cheaper per inference.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Embedding models need domain fine-tuning</span>
+    <span class="kvv">A general CLIP model produces reasonable results, but for domain-specific visual search (product matching, defect detection, medical imaging), fine-tuning on domain-specific data significantly improves embedding quality.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Tokenisation = cost architecture</span>
+    <span class="kvv">Token counts drive context window consumption and inference cost. For high-volume NLP pipelines: optimise prompt length aggressively, batch requests where latency allows, and consider whether shorter prompts can achieve the same task quality at lower cost.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">LoRA is standard for large model fine-tuning</span>
+    <span class="kvv">Full fine-tuning of a 7B+ model requires significant GPU memory. LoRA reduces trainable parameters by 100–1000× while achieving most of the performance of full fine-tuning. Makes fine-tuning large models feasible on commodity GPU hardware for on-premise deployments.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Multilingual NLP — backbone choice matters</span>
+    <span class="kvv">English-optimised tokenisers and embedding models perform significantly worse on non-Latin scripts and lower-resource languages. For a multinational enterprise: specify multilingual-first models (XLM-RoBERTa, mBERT, mT5, multilingual-e5) rather than English-primary models.</span>
+  </div>
+</div>
+
+<!-- ── S7: Check Yourself ── -->
+<div class="sh">Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">Five Architect-Level Questions</div>
+
+  <ol class="sl">
+    <li>
+      <strong>Visual search vs auto-categorisation:</strong> A product manager asks for a "product image search" feature (customers upload a photo to find similar items) and an "auto-categorise supplier images" feature. Are these the same AI problem?<br>
+      <em>Expected:</em> No. The search feature is a visual embedding + nearest-neighbour search task — no fixed labels, output is "similar to this image." The categorisation feature is image classification — output is a discrete taxonomy label. They may share the same backbone architecture but have different task heads and different serving patterns. Building one does not give you the other.
+    </li>
+    <li>
+      <strong>Hybrid invoice extraction:</strong> You need to extract structured data from 10,000 invoices/day — scanned PDFs ranging from simple single-page formats to complex multi-page custom layouts. Should you use a VLM for all of them, or a hybrid approach?<br>
+      <em>Expected:</em> Hybrid. Segment the population by complexity. Use cheaper, faster specialist extraction for standard formats (60–70% of volume). Reserve the VLM for complex/non-standard invoices where layout understanding is required. Reduces VLM costs by 60–70% while maintaining overall extraction quality. The "standard vs complex" classification can itself be automated.
+    </li>
+    <li>
+      <strong>BERT for German technical text:</strong> An engineer proposes using general-purpose BERT (trained on English Wikipedia) to extract product attributes from German supplier descriptions containing technical textile terminology. What risks does this carry?<br>
+      <em>Expected:</em> Two significant risks. (1) English-trained BERT has substantially weaker German language understanding. (2) General Wikipedia contains almost no textile/fashion vocabulary — technical terms like "merino superwash" or "DWR coating" will be tokenised into subword fragments the model has rarely seen. Remedy: XLM-RoBERTa backbone (strong multilingual) fine-tuned on labelled German product descriptions.
+    </li>
+    <li>
+      <strong>GPT-4 vs fine-tuned multilingual model for 85K reviews/month:</strong> A colleague suggests GPT-4 for all customer reviews "because it understands context better." You propose a fine-tuned multilingual model. What is your quantitative and qualitative argument?<br>
+      <em>Expected:</em> Quantitative: 85,000 reviews × 150 tokens ≈ 12.75M tokens/month. At GPT-4 pricing: €400–600/month. Fine-tuned multilingual model on GPU inference: €80–150/month — 4–5× cheaper. Qualitative: for a well-defined classification task, a fine-tuned model is more consistent (same review always gets same label), more auditable (token attribution via SHAP/integrated gradients), and scalable without per-token cost increases. GPT-4 wins when the task is ambiguous, open-ended, or requires world knowledge a small model lacks.
+    </li>
+    <li>
+      <strong>ViT vs CNN — spatial processing differences:</strong> Explain how the ViT architecture applies transformer attention to images, and how it processes spatial information differently from a CNN.<br>
+      <em>Expected:</em> ViT divides an image into fixed-size patches (16×16 px), linearly projects each into an embedding, adds learnable position embeddings, then applies multi-head self-attention across all patches — each patch can attend to every other patch from the first layer. A CNN uses local convolutional filters whose receptive field grows only as you go deeper; the top-left and bottom-right corners cannot communicate until the filter has been applied many times. Practical implication: ViTs are better at tasks requiring global spatial context; CNNs are more data-efficient and faster on small inputs.
+    </li>
+  </ol>
+</div>
+
+<!-- ── S8: Advanced Deep Dive ── -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers contrastive learning theory, production CV engineering patterns, and LLM-era NLP guidance in depth. Section 8.3 (LLM-era NLP) is the most immediately applicable for architects. Safe to skip on a first pass — read only 8.3 if time is limited.</div>
+
+<div class="sh2">8.1 Contrastive Learning: The Bridge Between CV and NLP Embeddings</div>
+
+<div class="card b">
+  <div class="ch b">The Core Idea</div>
+  <p>Contrastive learning is the training paradigm underpinning both modern image embedding models (CLIP, SigLIP) and modern text embedding models (Sentence-BERT, E5, text-embedding-ada-002).</p>
+  <p><strong>In CLIP:</strong> 400 million image-text pairs from the internet. Image encoder + text encoder trained simultaneously. The objective: the embedding of an image should be close to the embedding of its corresponding caption, and far from all other captions in the batch. Result: a shared embedding space where images and text about the same thing are close together — enabling zero-shot image classification and visual search.</p>
+  <p><strong>In Sentence-BERT:</strong> Similar principle but for text-text pairs. Sentence pairs with semantic similarity labels. The model learns to embed sentences with similar meaning close together.</p>
+  <p><strong>Why contrastive learning generalised:</strong> It does not require careful label engineering. Labels come for free from the natural pairing of data (image + its caption, two sentences from the same document, two augmentations of the same image) — allowing training on internet-scale data with minimal supervision.</p>
+</div>
+
+<div class="sh2">8.2 Production CV Patterns</div>
+
+<div class="card t">
+  <div class="ch t">Four Patterns in Enterprise CV Deployments</div>
+  <ul class="dl">
+    <li><strong>Sliding window inference for large images:</strong> For detecting small objects in high-resolution images (defects in manufactured components, small text in scanned documents), slide a window across the image, run detection on each window, then combine results with non-maximum suppression (NMS) to remove duplicate detections.</li>
+    <li><strong>Test-time augmentation (TTA):</strong> Run inference on multiple augmented versions of the same image (flipped, slightly rotated, colour-adjusted) and average the predictions. Reduces variance in edge cases. Used for high-stakes classification where accuracy matters more than throughput.</li>
+    <li><strong>Model ensembling:</strong> Run multiple models on the same image and combine predictions. Three models voting on a classification decision is more robust than any single model. Not appropriate for real-time applications where latency is critical.</li>
+    <li><strong>Edge vs cloud inference:</strong> For real-time video processing (retail theft detection, manufacturing line inspection), cloud inference introduces unacceptable latency. Quantised models (INT8 or INT4) running on edge hardware (NVIDIA Jetson, Apple Neural Engine, Google Edge TPU) are the appropriate architecture. Trade-off: smaller models, lower accuracy, lower latency, no cloud cost, no cloud data egress.</li>
+  </ul>
+</div>
+
+<div class="sh2">8.3 NLP in the LLM Era: When to Use What</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Use a General LLM when...</div>
+    <ul class="dl">
+      <li><strong>Ambiguous or open-ended task:</strong> summarisation, generation, complex reasoning</li>
+      <li><strong>Multi-task scenarios:</strong> you need to handle multiple tasks with a single model</li>
+      <li><strong>Sparse labelled data:</strong> LLMs can do zero-shot and few-shot classification</li>
+      <li><strong>World knowledge required:</strong> the task needs knowledge beyond what a small model contains</li>
+      <li><strong>Low volume:</strong> per-token pricing is not prohibitive</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Use a Fine-Tuned Specialist when...</div>
+    <ul class="dl">
+      <li><strong>Well-defined task:</strong> classification, NER, structured extraction with a fixed output schema</li>
+      <li><strong>High volume:</strong> cost per inference matters</li>
+      <li><strong>Consistency required:</strong> same input must always produce same output</li>
+      <li><strong>Latency critical:</strong> sub-100ms inference in a synchronous user-facing pipeline</li>
+      <li><strong>Specialised domain vocabulary:</strong> poorly represented in general LLM training</li>
+      <li><strong>Auditability required:</strong> regulated industries where token attribution is necessary</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ibox">
+  <strong>The hybrid pattern — LLM as labeller:</strong> Use an LLM to generate labelled training data for a specialist model. Label 100 examples manually, use the LLM to generate or augment to 10,000 examples (with human review of a sample for quality), train the specialist model on the augmented data. This "LLM as labeller" pattern dramatically reduces the cost of building task-specific models for new domains.
+</div>
+
+<!-- ── S9: Key Takeaways ── -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Shared architectural principles:</strong> CV and NLP share the same fundamental patterns — CNNs for images are the visual equivalent of embedding models for text, object detection is the visual equivalent of NER, and transfer learning via fine-tuning works identically in both domains because deep models learn transferable hierarchical representations.</li>
+  <li><strong>Pre-train → fine-tune is the dominant production pattern:</strong> Start with a general pre-trained backbone, add a task-specific head, fine-tune on domain-labelled data — whether you are classifying product images, extracting invoice fields, or detecting customer sentiment.</li>
+  <li><strong>Tokenisation is a cost and context architecture concern:</strong> Different tokenisers produce different token counts for the same input. Multilingual and domain-specific text is often tokenised less efficiently. The choice of embedding model and tokeniser directly determines context window consumption and API cost at scale.</li>
+  <li><strong>VLMs collapse the CV/NLP boundary for complex tasks — but specialists win on volume:</strong> GPT-4V and equivalents handle complex document understanding tasks. But for high-volume, well-defined tasks like invoice extraction or sentiment classification, fine-tuned specialists are 5–10× cheaper per inference and produce more consistent, auditable outputs.</li>
+  <li><strong>LLM as labeller makes specialists accessible without large existing datasets:</strong> Use an LLM to bootstrap label generation, review a sample for quality, and train a faster, cheaper, more consistent specialist model on the result — capturing the best of both worlds.</li>
+</ul>

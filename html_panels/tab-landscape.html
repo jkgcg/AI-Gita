@@ -1,0 +1,451 @@
+<!-- ============================================================
+     TAB: AI Landscape
+     Source: AI_Gita_Transformed_AILandscape.md
+     ============================================================ -->
+
+<!-- S1: What Is It (Plain English) -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<div class="ibox">
+  The AI landscape is the map of what exists, what each thing does, which organisations build which parts, and how they fit together into a working system. As of 2026, the landscape has three distinct layers:
+  <ul class="dl" style="margin-top:10px;margin-bottom:0">
+    <li><strong>Layer 1 — Foundation (the models):</strong> Large language models, multimodal models, embedding models, image generation models. These are the capability engines. Providers: Anthropic (Claude), OpenAI (GPT-4o, o3), Google (Gemini), Meta (Llama), Mistral, Cohere, and dozens of others.</li>
+    <li><strong>Layer 2 — Infrastructure (the plumbing):</strong> Cloud ML platforms (AWS Bedrock, Azure OpenAI, GCP Vertex), vector databases (Pinecone, Weaviate, pgvector), observability tools (LangFuse, Helicone), MLOps platforms (MLflow, W&amp;B), serving frameworks (vLLM, SGLang).</li>
+    <li><strong>Layer 3 — Applications (the products):</strong> Enterprise copilots (Microsoft Copilot, Salesforce Einstein), developer tools (GitHub Copilot, Cursor), custom enterprise applications built by your organisation.</li>
+  </ul>
+  <p style="margin-top:10px;margin-bottom:0"><strong>Why this matters for architects:</strong> When someone asks "should we use AI for X?", the answer is never just "use an LLM." It's a decision about which capability from Layer 1, hosted on which infrastructure from Layer 2, built into which application pattern from Layer 3.</p>
+</div>
+
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>The AI landscape changes every 3–6 months. A model that was state-of-the-art in early 2024 may now be outperformed by open-weight alternatives at 1/10th the cost. Capabilities that required custom ML engineering in 2023 are now available as API calls.</p>
+    <p>This rate of change creates two risks:</p>
+    <ul class="dl">
+      <li><strong>Technology lock-in:</strong> building on a specific model or vendor without understanding the landscape makes migration harder</li>
+      <li><strong>False limitation:</strong> assuming AI cannot do something because a previous attempt failed, when the current generation of models handles it reliably</li>
+    </ul>
+    <p style="margin-bottom:0">Architects who track the landscape make better build-vs-buy decisions, select the right tool for each use case, and avoid both over-engineering and premature optimisation.</p>
+  </div>
+
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>The AI landscape creates new vendor categories that don't map cleanly to existing procurement processes:</p>
+    <ul class="dl">
+      <li><strong>LLM API providers</strong> (Anthropic, OpenAI): subscription or pay-per-token; subject to model deprecation cycles; require data processing agreements</li>
+      <li><strong>Cloud AI platforms</strong> (AWS Bedrock, Azure OpenAI, GCP Vertex): enterprise agreements, SLAs, data residency — familiar procurement but new capabilities</li>
+      <li><strong>Open-weight models</strong> (Meta Llama, Mistral): free to use but require self-hosting infrastructure and operational overhead</li>
+      <li><strong>AI-native SaaS</strong> (Salesforce Einstein, ServiceNow Now Assist): AI bundled into existing SaaS — fastest to deploy, least flexible</li>
+    </ul>
+    <p style="margin-bottom:0">Enterprise architecture governance needs a framework for evaluating these categories — not just evaluating individual products.</p>
+  </div>
+</div>
+
+
+<!-- S3: Think About It Like This (Analogy) -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox">
+  <strong>The Utilities Analogy</strong> — The AI landscape today is similar to the utilities landscape of the early 20th century: a fast-moving, partially mature infrastructure that every organisation needs but few fully understand.
+  <ul class="dl" style="margin-top:10px;margin-bottom:0">
+    <li><strong>Foundation models (Layer 1) are like electricity generation.</strong> Different generators (coal, hydro, nuclear — or Anthropic, OpenAI, Google) produce essentially the same output. The quality and cost differ; the interface is standardised (plug / API). You don't need to know how the power plant works to use electricity.</li>
+    <li><strong>Infrastructure (Layer 2) is like the electrical grid and distribution system.</strong> The transformer substations, switching infrastructure, and distribution network (cloud platforms, serving infrastructure, databases) make the raw power useful. Some organisations build their own substations (self-hosted); most use the grid (cloud services).</li>
+    <li><strong>Applications (Layer 3) are like the appliances and industrial equipment.</strong> A factory (enterprise application) plugged into the grid has very different requirements from a household (consumer app). The applications determine value; the infrastructure determines reliability and cost.</li>
+    <li><strong>Open-weight vs closed-model</strong> is like the debate between municipal power and private utilities: open-weight models are free to use but require you to build and maintain your own distribution infrastructure; closed APIs are pay-per-use with the infrastructure maintained by the provider.</li>
+    <li><strong>The landscape changes fast</strong> — like the transition from gas lighting to electric lighting in the 1890s. Organisations that mapped the technology clearly and made deliberate infrastructure choices scaled well.</li>
+  </ul>
+</div>
+
+
+<!-- S4: Step-by-Step Walkthrough — Core Concepts -->
+<div class="sh">Step-by-Step Walkthrough — Core Concepts</div>
+
+<div class="sh2">4.1 The 2026 AI Capability Map</div>
+<p style="margin-bottom:10px">Not all AI problems are LLM problems. Match problem type to the right technology:</p>
+
+<div class="alayer al1">
+  <div class="ln">Text</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li><strong>Summarisation, Q&amp;A, classification, extraction, translation, writing:</strong> LLMs (GPT-4o, Claude, Gemini, Llama)</li>
+    <li><strong>Semantic similarity, search, clustering, deduplication:</strong> Embedding models (text-embedding-3-large, BGE, E5)</li>
+  </ul>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Structured Data</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li><strong>Tabular prediction (churn, fraud, demand):</strong> Traditional ML (XGBoost, Random Forest, LightGBM) — often outperforms LLMs on tabular tasks</li>
+    <li><strong>Time series forecasting:</strong> Specialised models (TFT, N-BEATS) or LLMs (for narrative context + quantitative)</li>
+    <li><strong>Recommendation:</strong> Two-tower models, matrix factorisation, deep learning RecSys</li>
+  </ul>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Image &amp; Video</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li><strong>Image generation:</strong> Diffusion models (Stable Diffusion, DALL-E, Flux)</li>
+    <li><strong>Image classification, object detection:</strong> Vision models (ViT, ResNet, YOLOv8)</li>
+    <li><strong>Document/image understanding (OCR + comprehension):</strong> Vision-language models (GPT-4V, Claude Vision, Gemini Vision)</li>
+  </ul>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Audio</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li><strong>Speech-to-text:</strong> Whisper (OpenAI), Deepgram, AssemblyAI</li>
+    <li><strong>Text-to-speech:</strong> ElevenLabs, OpenAI TTS, AWS Polly</li>
+    <li><strong>Music/audio generation:</strong> Suno, AudioCraft (niche, emerging)</li>
+  </ul>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">Code</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li><strong>Code generation, completion, review:</strong> LLMs (Claude Sonnet, GPT-4o, DeepSeek-Coder, CodeLlama)</li>
+    <li><strong>Code execution, testing:</strong> Requires a separate execution sandbox</li>
+  </ul>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>Architect's decision rule:</strong> always ask "is this an LLM problem?" before defaulting to one. For structured/tabular problems with clear labels and clean data, classical ML frequently outperforms LLMs at lower cost. LLMs excel at unstructured text, multi-step reasoning, and problems where the solution is hard to specify algorithmically.
+</div>
+
+<div class="sh2" style="margin-top:20px">4.2 Role Taxonomy: Who Does What</div>
+<p style="margin-bottom:10px">Understanding AI roles is essential for architects building AI teams and assessing partner capabilities.</p>
+
+<table class="t">
+  <tr><th>Role</th><th>Primary Responsibility</th><th>Key Skills</th><th>Where They Sit</th></tr>
+  <tr><td><strong>ML Engineer</strong></td><td>Builds and trains models; implements ML pipelines</td><td>PyTorch/TF, distributed training, MLOps</td><td>AI/ML team</td></tr>
+  <tr><td><strong>AI/LLM Engineer</strong></td><td>Builds LLM-powered applications; prompt engineering, RAG, agents</td><td>LLM APIs, RAG, LangChain/LlamaIndex, evaluation</td><td>Product/AI team</td></tr>
+  <tr><td><strong>Data Scientist</strong></td><td>Statistical analysis, experiment design, business insight</td><td>Statistics, Python, SQL, A/B testing</td><td>Data/analytics team</td></tr>
+  <tr><td><strong>MLOps Engineer</strong></td><td>Deploys and operates ML systems; CI/CD for models</td><td>Kubernetes, monitoring, feature stores, drift detection</td><td>Platform/infra team</td></tr>
+  <tr><td><strong>AI Architect</strong></td><td>Designs AI system architecture; governance; platform standards</td><td>System design, security, governance frameworks</td><td>Architecture team</td></tr>
+  <tr><td><strong>Solution Architect (with AI)</strong></td><td>Designs enterprise AI solutions; vendor selection; integration</td><td>Business requirements, API integration, AI capability map</td><td>Client-facing / internal</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>Key distinction for solution architects:</strong> you don't need to be able to do the ML Engineer's job. You need to understand what each role produces and what hand-offs between roles look like. The most common gap in enterprise AI projects is the absence of an AI Architect who bridges technical capability and enterprise constraints.
+</div>
+
+<div class="sh2" style="margin-top:20px">4.3 Open-weight vs Closed Models: The Enterprise Decision</div>
+<p style="margin-bottom:10px">This is one of the most consequential architectural decisions in any AI programme — it's a governance, cost, and capability choice.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Closed/Proprietary Models (GPT-4o, Claude, Gemini)</div>
+    <p style="margin-bottom:6px">Accessed via API; weights are not publicly available.</p>
+    <div class="kv">
+      <div class="kvr"><span class="kvk">Quality</span><span class="kvv">Highest available; regularly updated</span></div>
+      <div class="kvr"><span class="kvk">Context window</span><span class="kvv">128K–1M tokens</span></div>
+      <div class="kvr"><span class="kvk">Cost</span><span class="kvv">Pay-per-token; 2026 range £0.0003–0.015/K tokens</span></div>
+      <div class="kvr"><span class="kvk">Data privacy</span><span class="kvv">Prompts leave your network; DPA required</span></div>
+      <div class="kvr"><span class="kvk">Operational overhead</span><span class="kvv">Zero — provider manages infrastructure</span></div>
+      <div class="kvr"><span class="kvk">Customisation</span><span class="kvv">Limited to prompting, system prompts, fine-tuning via API</span></div>
+      <div class="kvr"><span class="kvk">Availability</span><span class="kvv">Provider SLA; typically 99.9%+</span></div>
+      <div class="kvr"><span class="kvk">Vendor risk</span><span class="kvv">Subject to pricing changes, deprecation cycles</span></div>
+    </div>
+  </div>
+
+  <div class="card ai">
+    <div class="ch ai">Open-weight Models (Llama-3, Mistral, Qwen, DeepSeek)</div>
+    <p style="margin-bottom:6px">Weights are publicly available; you host and operate them.</p>
+    <div class="kv">
+      <div class="kvr"><span class="kvk">Quality</span><span class="kvv">Strong at 7B–70B; competitive for many tasks at fine-tuned scale</span></div>
+      <div class="kvr"><span class="kvk">Context window</span><span class="kvv">Typically 8K–128K depending on model</span></div>
+      <div class="kvr"><span class="kvk">Cost</span><span class="kvv">GPU compute cost only; no per-token charge</span></div>
+      <div class="kvr"><span class="kvk">Data privacy</span><span class="kvv">Data stays on your infrastructure — full control</span></div>
+      <div class="kvr"><span class="kvk">Operational overhead</span><span class="kvv">High — you run the GPU fleet, upgrades, monitoring</span></div>
+      <div class="kvr"><span class="kvk">Customisation</span><span class="kvv">Full — can fine-tune, modify, distil</span></div>
+      <div class="kvr"><span class="kvk">Availability</span><span class="kvv">Dependent on your infrastructure</span></div>
+      <div class="kvr"><span class="kvk">Vendor risk</span><span class="kvv">No vendor lock-in; model is yours</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="sh2" style="margin-top:16px">Enterprise Decision Matrix</div>
+<table class="t">
+  <tr><th>Signal</th><th>Closed API</th><th>Open-weight</th></tr>
+  <tr><td>Need latest frontier reasoning capability</td><td>&#10003;</td><td>&#10007;</td></tr>
+  <tr><td>Data cannot leave your network (legal/regulated)</td><td>&#10007;</td><td>&#10003;</td></tr>
+  <tr><td>Volume &gt; 1M requests/day (cost break-even)</td><td>&#10007;</td><td>&#10003;</td></tr>
+  <tr><td>Need to fine-tune for specific domain</td><td>Partial (API fine-tuning)</td><td>&#10003; Full control</td></tr>
+  <tr><td>Team has GPU ops capability</td><td>—</td><td>&#10003; Required</td></tr>
+  <tr><td>Fast time-to-production</td><td>&#10003;</td><td>&#10007;</td></tr>
+  <tr><td>Startup / no ops team</td><td>&#10003;</td><td>&#10007;</td></tr>
+  <tr><td>Regulatory: model lineage + audit required</td><td>Partial</td><td>&#10003; Full</td></tr>
+  <tr><td>Multimodal (image + text)</td><td>&#10003;</td><td>Growing (LLaVA, Idefics)</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:12px">
+  <strong>Hybrid pattern (most mature enterprises):</strong> use closed APIs for frontier capability and low-volume high-stakes tasks (legal analysis, complex reasoning); use open-weight for high-volume, cost-sensitive, or data-sensitive workloads (customer service at scale, internal knowledge management).
+</div>
+
+<div class="sh2" style="margin-top:20px">4.4 The 2026 Tech Stack Map</div>
+<p style="margin-bottom:8px">Focus on <strong>category literacy, not tool mastery</strong>. Know what each layer does and which tools dominate it. A production AI system in 2026 pulls from each of these layers:</p>
+
+<div class="code">User Interface / Application
+  (web app, chatbot, API, internal tool)
+        │
+        ▼
+Orchestration / Application Layer
+  LangChain · LlamaIndex · LangGraph · custom
+        │
+        ▼
+LLM / Model Layer
+  Closed: Anthropic Claude · OpenAI GPT-4o · Google Gemini
+  Open:   Llama-3 · Mistral · Qwen · DeepSeek
+  Serving: vLLM · SGLang · TGI
+        │
+        ▼
+Knowledge / Data Layer
+  Vector DB: Pinecone · Weaviate · pgvector · Qdrant · Chroma
+  Document store: S3 · Azure Blob · GCS
+  Feature store: Tecton · Feast · Vertex Feature Store
+        │
+        ▼
+Cloud Platform Layer
+  AWS Bedrock · Azure OpenAI · GCP Vertex AI
+  Self-managed Kubernetes (for open-weight serving)
+        │
+        ▼
+MLOps / Observability Layer
+  Experiment tracking: MLflow · W&B
+  LLM observability: LangFuse · Helicone · Arize
+  Model registry: MLflow · SageMaker Model Registry
+  CI/CD: GitHub Actions · Tekton
+        │
+        ▼
+Data Layer
+  Warehouses: Snowflake · BigQuery · Redshift
+  Lakes: Delta Lake · Iceberg · Hudi
+  Real-time: Kafka · Kinesis</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>Most commonly encountered in enterprise:</strong> OpenAI/Anthropic/Google APIs (foundation layer), LangChain/LangGraph (orchestration), Pinecone/Weaviate/pgvector (vector store), vLLM (self-hosted serving), MLflow/Weights &amp; Biases (experiment tracking).<br><br>
+  <strong>The architect's role:</strong> know the category each tool fits; have evaluated at least one tool per critical category for your organisation's requirements; define the interfaces between layers as clean contracts rather than implementation details.
+</div>
+
+<div class="sh2" style="margin-top:20px">4.5 The Build vs Prompt vs Fine-tune vs Train Decision</div>
+<p style="margin-bottom:10px">Every AI feature starts with this decision:</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Build (from scratch)</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Use when:</strong> unique data, unique task, existing models don't come close</li>
+      <li><strong>Cost:</strong> high (engineering months, training costs)</li>
+      <li><strong>Fit for:</strong> core product differentiators where AI capability is the business</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">Prompt (use a general model via API)</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Use when:</strong> the task is within the general model's capability and no domain-specific data is available</li>
+      <li><strong>Cost:</strong> lowest initial; API costs scale with usage</li>
+      <li><strong>Fit for:</strong> most enterprise AI use cases — don't underestimate what good prompting achieves</li>
+    </ul>
+  </div>
+  <div class="card a">
+    <div class="ch a">Fine-tune (adapt a base model)</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Use when:</strong> prompting achieves 80% quality; you need 95%+; you have 500+ labelled examples; cost or latency at scale demands a smaller model</li>
+      <li><strong>Cost:</strong> medium one-time; lower running costs than frontier API</li>
+      <li><strong>Fit for:</strong> high-volume, well-scoped tasks with stable requirements</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Train from scratch / pre-train</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li><strong>Use when:</strong> unique data modality, competitive differentiation in model capability itself</li>
+      <li><strong>Cost:</strong> very high (millions in compute + ML engineering)</li>
+      <li><strong>Fit for:</strong> research organisations, AI-native companies, large-scale commodity tasks</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2" style="margin-top:16px">Decision Heuristic</div>
+<div class="code">1. Can a general-purpose LLM + good prompt solve this?
+   → YES: use it; don't build what you can prompt
+
+2. Are prompting limitations due to knowledge (missing facts) or behaviour (wrong format/style)?
+   → Knowledge: add RAG
+   → Behaviour: consider fine-tuning
+
+3. Is fine-tuning justified by: volume economics, data sensitivity, or quality gap?
+   → All three: fine-tune
+   → None: stay on API
+
+4. Is this task unique to you and core to your competitive advantage?
+   → YES: invest in training
+   → NO: use existing models</div>
+
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Scenario: AI Platform Strategy for a Financial Services Group</div>
+  <p>A financial services group (retail banking, insurance, wealth management) is building their enterprise AI strategy. The architecture team must define which AI capabilities to buy, build, or host on which infrastructure.</p>
+
+  <div class="sh2" style="margin-top:12px">Use Case Assessment</div>
+  <table class="t">
+    <tr><th>Use Case</th><th>Problem Type</th><th>Right AI Modality</th><th>Open vs Closed</th><th>Rationale</th></tr>
+    <tr><td>Customer service chatbot (2M interactions/month)</td><td>Text generation + knowledge retrieval</td><td>LLM + RAG</td><td>Closed API (Azure OpenAI EU)</td><td>PII stays in EU; frontier quality needed for customer trust; volume justifies dedicated Azure endpoint</td></tr>
+    <tr><td>Loan application extraction (50K/month, PDF + scans)</td><td>Document understanding</td><td>Multimodal LLM</td><td>Closed API (Azure OpenAI Vision)</td><td>Handwritten + printed + varied formats; needs OCR + comprehension; data stays in EU</td></tr>
+    <tr><td>Internal knowledge assistant (8,000 employees)</td><td>Text generation + RAG</td><td>LLM + RAG</td><td>Closed API or open-weight</td><td>Internal docs are non-PII; Azure OpenAI for speed to deploy; evaluate open-weight at 6 months</td></tr>
+    <tr><td>Fraud detection enhancement (10M transactions/day)</td><td>Tabular prediction</td><td>Classical ML (XGBoost)</td><td>N/A — not an LLM problem</td><td>Structured numerical features; XGBoost outperforms LLMs on tabular; LLM only for narrative signal</td></tr>
+    <tr><td>Regulatory compliance review (500 documents/month)</td><td>Long-form legal reasoning</td><td>Frontier LLM</td><td>Closed API (Claude Opus)</td><td>Highest-stakes task; complex legal reasoning; low volume (£120/month); EU residency required</td></tr>
+    <tr><td>Product recommendations (500K active users)</td><td>Collaborative filtering + context</td><td>Hybrid: RecSys + LLM</td><td>Classical RecSys for retrieval; LLM for personalised messaging</td><td>Recommendation is a collaborative filtering problem; LLM adds personalised explanation layer</td></tr>
+  </table>
+
+  <div class="sh2" style="margin-top:14px">Key Decisions</div>
+  <ul class="dl">
+    <li><strong>Not everything is an LLM problem.</strong> Fraud detection stays XGBoost. Product recommendations use classical RecSys for the retrieval layer. Forcing LLMs onto tabular/collaborative filtering problems decreases accuracy and increases cost.</li>
+    <li><strong>Data residency drives infrastructure.</strong> All PII-touching use cases use Azure OpenAI EU endpoints. If volume grows to justify self-hosting, evaluate open-weight on EU-hosted GPU clusters.</li>
+    <li><strong>Frontier model only where justified.</strong> Claude Opus is reserved for regulatory compliance (500 documents/month, £120/month). Everything else uses Sonnet or GPT-4o-mini tiers.</li>
+    <li><strong>Phased open-weight evaluation.</strong> Internal knowledge assistant starts on Azure OpenAI for speed. 6-month review: if volume exceeds break-even (~100K queries/day), evaluate self-hosted Llama-3 70B with QLoRA fine-tuning.</li>
+  </ul>
+
+  <div class="sh2" style="margin-top:14px">Governance Outcome</div>
+  <ul class="dl" style="margin-bottom:0">
+    <li><strong>Approved model catalogue:</strong> 3 providers (Anthropic via API, Azure OpenAI, self-hosted via Bedrock Custom Model Import for approved open-weight)</li>
+    <li><strong>Data classification matrix:</strong> Tier 1 (internal, non-PII) → any approved provider; Tier 2 (customer PII) → EU-hosted only; Tier 3 (regulated data) → self-hosted or Azure OpenAI EU with BAA</li>
+    <li><strong>Review cadence:</strong> landscape review every 6 months — model deprecations, new capabilities, open-weight quality improvements</li>
+  </ul>
+</div>
+
+
+<!-- S6: Communicating AI Architecture Decisions -->
+<div class="sh">Communicating AI Architecture Decisions</div>
+
+<div class="sh2">Assessing Partner AI Capability Maturity</div>
+<p style="margin-bottom:10px">When evaluating partners and vendors, their AI capability level directly affects delivery risk.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Immature AI Capability (Higher Risk)</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li>"AI-powered" claims without specifics about which models, which evaluation, which governance</li>
+      <li>Demos that work on curated examples but no production deployment evidence</li>
+      <li>No mention of hallucination mitigation, output validation, or human review processes</li>
+      <li>Prompt engineering is their full AI capability — no evaluation harness, no versioning</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">Mature AI Capability (Lower Risk)</div>
+    <ul class="dl" style="margin-bottom:0">
+      <li>Specific model choices with documented rationale</li>
+      <li>Evaluation frameworks (automated metrics + human eval)</li>
+      <li>Production deployments with availability SLAs</li>
+      <li>Governance processes: data handling, model versioning, incident response</li>
+      <li>Clear articulation of what AI does and doesn't handle (human-in-the-loop design)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2" style="margin-top:16px">How to Communicate AI Architecture Decisions to Stakeholders</div>
+<p style="margin-bottom:10px">When presenting AI architecture decisions to senior stakeholders, effective communication focuses on:</p>
+
+<div class="kv">
+  <div class="kvr"><span class="kvk">Decision clarity</span><span class="kvv">"Why this model, not that one?" — explain the trade-off, not just state the choice</span></div>
+  <div class="kvr"><span class="kvk">Cost fluency</span><span class="kvv">"What does this cost at scale?" — concrete numbers, not "it depends"</span></div>
+  <div class="kvr"><span class="kvk">Failure mode awareness</span><span class="kvv">"What happens when the model is wrong?" — do you have a mitigation, not just optimism</span></div>
+  <div class="kvr"><span class="kvk">Governance literacy</span><span class="kvv">"How does this handle customer PII?" — not "we'll figure it out"</span></div>
+  <div class="kvr"><span class="kvk">Landscape awareness</span><span class="kvv">"Is there a better/cheaper alternative?" — have you looked at the full landscape, not just the first API you tried</span></div>
+</div>
+
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself (3–5 Questions)</div>
+
+<div class="card g">
+  <div class="ch g">Self-Assessment Questions</div>
+  <ol class="sl">
+    <li>
+      <strong>A product manager says "we should add AI to our supply chain forecasting tool — can we use ChatGPT?" How do you respond?</strong>
+      <p><em>Start with the problem, not the tool. Supply chain forecasting is typically a structured/tabular prediction problem. Classical ML models (XGBoost, LightGBM, TFT for time series) typically outperform LLMs on accuracy at lower cost. An LLM is appropriate for: narrative signal extraction from supplier communications, exception report generation, Q&amp;A over supply chain documentation. The answer: "AI could help, but ChatGPT is likely not the right tool for the forecasting itself — let me map out which specific problems need which AI capability." This demonstrates landscape awareness rather than defaulting to "LLM = AI."</em></p>
+    </li>
+    <li>
+      <strong>Your organisation is choosing between OpenAI API vs deploying open-weight Llama-3 70B for a customer service chatbot (estimated 200K interactions/day). Walk through the decision.</strong>
+      <p><em>At 200K interactions/day, estimate costs: 200K × (avg 800 input + 250 output tokens) = 160M input + 50M output tokens/day. API cost (GPT-4o-mini): ~£54/day = £1,620/month. Open-weight (2× A100 80GB): ~£8,040/month including GPU + 0.5 FTE MLOps. At 200K/day, API is cheaper. Break-even is closer to 500K–700K/day. Also consider: data residency (does PII need EU jurisdiction via API?), quality (test on your specific use case), and ops capability. Decision: at 200K/day use the API unless data residency prevents it. Reassess at 12 months with actual volume data.</em></p>
+    </li>
+    <li>
+      <strong>Explain the difference between an MLOps Engineer, an ML Engineer, and an AI/LLM Engineer. Which role is most critical first?</strong>
+      <p><em>ML Engineer trains and builds models (output: trained model artifacts). AI/LLM Engineer builds applications using pre-trained models via prompt engineering, RAG, agent workflows (output: AI-powered features). MLOps Engineer deploys and operates ML/AI systems at scale (output: reliable, observable AI systems in production). For most enterprises starting with AI: an AI/LLM Engineer is the highest-leverage first hire — they can deliver business value immediately using API-based models without GPU infrastructure. MLOps becomes critical when you move from one AI application to a portfolio. ML Engineers become essential when off-the-shelf models can't meet your requirements.</em></p>
+    </li>
+    <li>
+      <strong>A colleague argues "we should standardise on one AI provider to reduce complexity." What are the trade-offs and your recommendation?</strong>
+      <p><em>Merits: simpler procurement, developer experience, governance, and potential volume discounts. Limits: different providers have different strengths; single-provider creates concentration risk; the landscape moves too fast for permanent standardisation. Recommendation: standardise the interface (an internal API gateway that abstracts the provider), not the provider itself. Define approved provider categories (EU-hosted for PII, frontier API for high-stakes reasoning, efficient API for high-volume) and let use-case requirements determine which applies. Review the approved list every 6 months.</em></p>
+    </li>
+    <li>
+      <strong>What distinguishes an architect who is "AI-fluent" from one who is merely "AI-aware"?</strong>
+      <p><em>AI-aware: can describe what AI can do in general terms; knows the major providers; has used an LLM API. AI-fluent: (1) matches problem type to the right AI modality — knows when not to use an LLM; (2) sizes cost and latency before building; (3) understands failure modes and designs mitigations; (4) knows LLM boundaries (complex multi-hop reasoning, arithmetic, strict factual recall); (5) reads the landscape — tracks capability improvements; (6) designs for governance from day one. Test: put an unfamiliar problem in front of them. AI-fluent says "this part is classical ML, this part is RAG, this part needs a multimodal model — here's what each costs and where the risks are."</em></p>
+    </li>
+  </ol>
+</div>
+
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  <strong>&#128993; Optional depth —</strong> This section covers frontier model evaluation methodology and AI safety/ethics at depth. Safe to skip on a first pass and return here later.
+</div>
+
+<div class="sh2" style="margin-top:16px">8.1 The 2026 Frontier Model Lineup</div>
+<p style="margin-bottom:10px">Use this evaluation framework rather than memorising specific specs (which will be outdated within months):</p>
+
+<table class="t">
+  <tr><th>Dimension</th><th>Why It Matters</th><th>How to Evaluate</th></tr>
+  <tr><td><strong>Reasoning benchmark (MMLU, GPQA)</strong></td><td>Proxy for complex task performance</td><td>Check provider leaderboard + independent LMSYS</td></tr>
+  <tr><td><strong>Context window</strong></td><td>Maximum document/conversation length</td><td>Check official spec</td></tr>
+  <tr><td><strong>Speed (tokens/sec)</strong></td><td>Interactive UX feasibility</td><td>Benchmark on your hardware/API</td></tr>
+  <tr><td><strong>Cost (input/output per M tokens)</strong></td><td>Operating cost at scale</td><td>Check provider pricing page</td></tr>
+  <tr><td><strong>Multimodal support</strong></td><td>Image/document intake</td><td>Try with your document types</td></tr>
+  <tr><td><strong>Tool use / function calling</strong></td><td>Agent workflow capability</td><td>Test with your tool schemas</td></tr>
+  <tr><td><strong>Data residency</strong></td><td>Compliance</td><td>Check provider's available regions</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  The <strong>LMSYS Chatbot Arena</strong> (lmarena.ai) provides human preference rankings across models — useful for benchmarking "which model do humans prefer" for your task type. Always supplement with task-specific evaluation.
+</div>
+
+<div class="sh2" style="margin-top:16px">8.2 AI Safety and Ethics in the Landscape</div>
+
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Constitutional AI (Anthropic)</div>
+    <p style="margin-bottom:0">Claude models are trained with a values framework that prioritises helpfulness, harmlessness, and honesty. The model is explicitly trained to refuse harmful requests and to be transparent about its limitations.</p>
+  </div>
+  <div class="card b">
+    <div class="ch b">RLHF Alignment (OpenAI, others)</div>
+    <p style="margin-bottom:0">Models trained with reinforcement learning from human feedback (RLHF) to align with human preferences. More responsive to user instructions, including potentially harmful ones if instructions are phrased carefully.</p>
+  </div>
+</div>
+
+<div class="card t" style="margin-top:12px">
+  <div class="ch t">Open-weight Safety Considerations</div>
+  <p>Safety alignment quality varies significantly across open-weight models. A model with no RLHF and no safety training will follow almost any instruction. Deploying open-weight models in customer-facing contexts requires your own safety layer (input/output moderation).</p>
+  <p style="margin-bottom:0"><strong>Enterprise guidance:</strong> closed API models typically have stronger built-in safety alignment; open-weight models give more control but more responsibility. Neither eliminates the need for your own content moderation layer for customer-facing applications.</p>
+</div>
+
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>The AI landscape has three layers: foundation models, infrastructure, and applications — architects need fluency across all three, not just the API layer.</strong> Understanding which cloud platform, which vector database, and which serving framework connects to which use case requirement is the architecture competency.</li>
+  <li><strong>Not every AI problem is an LLM problem.</strong> Structured tabular prediction, time series forecasting, and collaborative filtering are often better solved by classical ML at lower cost with higher accuracy. Defaulting to LLM for every AI use case is a sign of tool-first thinking rather than problem-first thinking.</li>
+  <li><strong>Open-weight vs closed-API is a governance, cost, and operations decision, not a quality decision.</strong> Closed APIs provide frontier quality with zero ops overhead; open-weight provides data control and cost efficiency at scale with significant ops investment. Most mature enterprises use a hybrid approach by workload type and data sensitivity.</li>
+  <li><strong>The 2026 landscape changes every 3–6 months — build on interfaces, not on specific models.</strong> Architecture decisions that lock tightly to a specific model require expensive rework when models are updated or deprecated. Abstract the model behind an interface; pin versions explicitly; treat model changes as deployment events.</li>
+  <li><strong>AI fluency for architects means matching problem type to AI modality, sizing cost before building, and designing for failure modes.</strong> Can you tell the difference between a RAG problem and a fine-tuning problem, estimate token costs before writing code, and explain what happens when the model is wrong? These three skills cover 80% of what architects need.</li>
+</ul>

@@ -1,0 +1,735 @@
+<!-- Prerequisites -->
+<div class="prereq-bar">
+  <span class="prereq-label">Prerequisites:</span>
+  <span class="prereq-item">None — this module pairs with LLMs &amp; Foundation Models for deeper text generation detail</span>
+</div>
+
+<!-- Intro summary -->
+<div class="ibox">
+  <strong>Generative AI</strong> is AI that produces new content — text, images, audio, video, code, structured data — rather than classifying or predicting from existing content. It is not one technology but a family of architectures, each optimised for a different output modality: LLMs for text, diffusion models for images, multimodal models for combined inputs, and embedding models for semantic understanding. The decisive architectural question is not how to build these models — they are accessible as APIs — but how to integrate them safely and cost-effectively into enterprise systems.
+</div>
+
+<!-- Stop / keep going signal -->
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — you're done at a conceptual level.<br>
+  <strong>&#128993; Keep going for the full architect-level detail.</strong>
+</div>
+
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think about the difference between a <strong>judge</strong> and an <strong>artist</strong>. A judge looks at something and renders a verdict — "this email is spam", "this image contains a person", "this review is negative". That is discriminative AI: it classifies. An artist is given a brief and creates something new — "write me a product description", "generate an image of a modern kitchen", "summarise this contract". That is generative AI: it produces. The practical difference is that generative AI outputs are open-ended, variable in length, and must be reviewed — the model is creating, not just categorising.
+</div>
+
+<div class="ibox">
+  <strong>Generative AI</strong> is AI that produces new content — text, images, audio, video, code, structured data — rather than classifying or predicting from existing content.<br><br>
+  The distinction matters architecturally:
+</div>
+
+<table class="t">
+  <tr><th>Discriminative AI (older pattern)</th><th>Generative AI (current wave)</th></tr>
+  <tr><td>Input: content → Output: label or score</td><td>Input: prompt/context → Output: new content</td></tr>
+  <tr><td>"Is this email spam?"</td><td>"Write a reply to this email"</td></tr>
+  <tr><td>"Which product category does this belong to?"</td><td>"Write a product description for this SKU"</td></tr>
+  <tr><td>"What is the sentiment of this review?"</td><td>"Summarise these 500 reviews into themes"</td></tr>
+  <tr><td>Trained to classify</td><td>Trained to generate</td></tr>
+</table>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Generative AI and discriminative AI are competitors — one will replace the other." In practice they are complementary. A real enterprise pipeline often uses both: a discriminative classifier routes an incoming document to the right workflow, then a generative model extracts or summarises the content. Think of them as different tools in the same toolbox, not rival technologies.</div>
+
+<div class="sh2">The Generative AI Modality Family</div>
+
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Large Language Models (LLMs)</div>
+    Generate text, code, structured data (JSON/XML), conversations. The most broadly applicable generative AI capability for enterprise use cases.
+  </div>
+  <div class="card b">
+    <div class="ch b">Diffusion Models</div>
+    Generate images, video, audio from text descriptions. Trained by learning to reverse a noise-adding process.
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card g">
+    <div class="ch g">Multimodal Models</div>
+    Accept and produce combinations of text, image, audio, video. As of 2026, the major frontier LLMs (GPT-4o, Claude 3.x, Gemini) are multimodal by default.
+  </div>
+  <div class="card t">
+    <div class="ch t">Embedding Models</div>
+    Generate vector representations of content — not visible output, but enable semantic search and similarity. Every RAG system is built on embeddings.
+  </div>
+</div>
+
+<div class="ibox">For architects, the key shift is that generative AI capabilities are now <strong>accessible as APIs</strong> — you do not need to train or host these models to use them. The architectural question is how to integrate them, not how to build them.</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    Generative AI has unlocked enterprise use cases that previously required large specialised teams or were simply not feasible:
+    <ul class="dl">
+      <li><strong>Content at scale:</strong> generating product descriptions, personalised emails, knowledge base articles, report summaries — content that previously required human writers for every item</li>
+      <li><strong>Document understanding:</strong> extracting structured information from unstructured documents (contracts, invoices, technical specs, forms) with accuracy that approaches human-level for many document types</li>
+      <li><strong>Code assistance:</strong> generating boilerplate, explaining legacy code, writing tests, translating between languages — reducing developer time on mechanical tasks</li>
+      <li><strong>Multimodal intake:</strong> processing images, screenshots, scanned documents, diagrams alongside text — enabling use cases like automated invoice processing or visual product inspection</li>
+    </ul>
+    <p>What's changed is not that these problems are new. It's that the cost and complexity of solving them has dropped by orders of magnitude. A use case that would have required 6 months of ML engineering in 2021 can now be prototyped in a week via API.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    Generative AI introduces new integration patterns and new risk categories:
+    <div class="sh2">New Integration Patterns</div>
+    <ul class="dl">
+      <li>Synchronous API calls to generative models (similar to calling a third-party service, but with much higher latency and variable output size)</li>
+      <li>Streaming responses (models generate token-by-token; streaming is often required for interactive UX)</li>
+      <li>Multimodal inputs (sending images, documents, audio alongside text)</li>
+      <li>Agentic patterns (where the AI model takes sequences of actions — calling tools, making decisions, looping — rather than just answering a single question)</li>
+    </ul>
+    <div class="sh2">New Risk Categories</div>
+    <ul class="dl">
+      <li><strong>Output non-determinism:</strong> the same input can produce different outputs — downstream systems cannot assume reproducibility</li>
+      <li><strong>Hallucination:</strong> generated content can be fluent, confident, and wrong — requires verification layers</li>
+      <li><strong>Content moderation:</strong> generated content requires output filtering (toxicity, PII, competitive sensitivity)</li>
+      <li><strong>Intellectual property:</strong> generated images and text may resemble training data — IP risk for customer-facing content</li>
+      <li><strong>Cost variability:</strong> output length is model-determined, not fixed — a single API call can cost £0.001 or £0.50 depending on what the model generates</li>
+    </ul>
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — When NOT to Use Generative AI:</strong> For all its power, generative AI is the wrong tool in several important scenarios. <strong>Accuracy-critical decisions</strong> — such as financial calculations, medical diagnoses, or legal determinations — need deterministic, auditable logic, not a probabilistic model that can hallucinate. <strong>Legally-binding content</strong> — contracts, compliance filings, regulatory submissions — must have a traceable human author and cannot be delegated to a model that may silently err. <strong>Real-time factual lookups</strong> — stock prices, live inventory, current regulations — require integration with live data sources, not a model trained on a snapshot of the past. The architecture test: if being wrong has serious legal, financial, or safety consequences and the output cannot be reliably verified, add a human-in-the-loop or use a different approach entirely.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Generative AI is general-purpose — it can replace any knowledge-worker task." In reality, generative AI is excellent at tasks where "good enough" is acceptable (drafting, summarising, translating) but unreliable for tasks requiring guaranteed accuracy (financial reporting, medical advice, legal contracts). The governance question for architects is: what is the cost of an error, and is there a verification layer that catches it before it causes harm?</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>The Creative Professional Agency Analogy</strong><br><br>
+  Imagine you have access to an agency staffed with an unlimited number of skilled creative professionals — writers, designers, audio engineers, video editors — all available instantly, at any time, for any request.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Text Generation (LLMs)</div>
+    Like having a skilled writer who has read everything. You brief them: "Write a product description for this kitchen knife set, in our brand voice, under 150 words." They draft immediately. They can write in any style, format, or language. They occasionally get facts wrong (hallucination) — a human editor should review important content.
+  </div>
+  <div class="card b">
+    <div class="ch b">Image Generation (Diffusion Models)</div>
+    Like having a graphic designer who has studied millions of images. You describe what you want: "A professional photograph of a modern kitchen with warm lighting and a knife set on a marble countertop." They produce it in seconds. They're creative, fast, and surprisingly competent — but sometimes misread instructions (six-fingered hands, misspelled text, impossible geometry).
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Multimodal Models</div>
+    Like a professional who can work across modalities — you hand them a scanned contract and ask them to extract the payment terms as a structured table. They read the document (even handwritten or poorly scanned), understand it, and produce structured output.
+  </div>
+  <div class="card b">
+    <div class="ch b">Embedding Models</div>
+    Like a research librarian with perfect recall of every document in the library, who can tell you: "Here are the five most relevant documents to your question" — not by keyword but by meaning. They don't produce visible output; they produce semantic coordinates used to organise and retrieve information.
+  </div>
+</div>
+
+<div class="ibox">The limits are real: every creative professional makes mistakes. Generative AI makes different mistakes than humans do (hallucination, prompt injection, nonsensical output on edge cases). The question for architects is: <strong>where in your workflow do you need a human in the loop to catch the mistakes?</strong></div>
+
+<!-- S4: Step-by-Step -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 The GenAI Modality Decision Framework</div>
+
+<div class="ibox">The first question is always: which generative AI modality does this use case require?</div>
+
+<div class="code-label">Decision Framework</div>
+<div class="code">What does the system need to PRODUCE?
+
+Text / code / structured data
+    → LLM (GPT-4o, Claude, Gemini, Llama-3)
+    → See: the LLMs &amp; Foundation Models module for model selection, sampling parameters, and the 2026 model landscape
+
+Images
+    → Diffusion model API (DALL-E 3, Stable Diffusion, Midjourney, Flux)
+    → Choose based on: quality/cost, commercial licensing, style consistency
+
+Audio
+    → TTS (text-to-speech): ElevenLabs, OpenAI TTS, AWS Polly
+    → Speech-to-text (STT): Whisper, Deepgram, AssemblyAI
+    → Music/sound: Suno, Udio, AudioCraft (niche, emerging)
+
+Video
+    → Text-to-video: Sora (OpenAI), Runway, Kling (2025-2026 maturing)
+    → Still early-stage for enterprise production use
+
+Semantic vectors (not visible output)
+    → Embedding model: text-embedding-3-large (OpenAI), BGE, E5, Cohere Embed
+    → For: vector search, semantic similarity, RAG retrieval, clustering
+
+Combined input + output (multimodal)
+    → Vision-language models: GPT-4V, Claude with vision, Gemini Vision
+    → For: document understanding, image analysis, visual Q&amp;A</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Foundation Models and Build vs Buy:</strong> A "foundation model" is a large AI model trained at enormous scale (billions of parameters, trillions of tokens of data, months of GPU compute costing tens of millions of pounds) that serves as a base for many downstream tasks. The reason the term matters architecturally is the build-vs-buy decision. No enterprise has the budget, data, or ML talent to train a foundation model from scratch. The decision is: which foundation model provider do you contract with (OpenAI, Anthropic, Google, Amazon, Meta)? What are the data-handling terms? What is the lock-in risk? Foundation models are the new enterprise middleware — you do not build them any more than you build an operating system, but you must choose, integrate, govern, and eventually migrate them.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Secondary decision: API vs self-hosted?</strong><br>
+  For most enterprise teams starting with generative AI: <strong>API-first.</strong> The infrastructure cost, ops burden, and capability gap between API models and self-hosted alternatives is large. Exceptions: strict data residency, extremely high volume economics, or specialised fine-tuning requirements. See the AI Infrastructure module (which covers GPU costs, quantisation, and serving decisions) for the break-even analysis.
+</div>
+
+<div class="sh2">4.2 Text Generation (LLMs): The Dominant Modality</div>
+
+<div class="ibox">LLMs are the most broadly applicable generative AI capability for enterprise use cases. Key characteristics covered in depth in the LLMs &amp; Foundation Models module — brief summary here:</div>
+
+<div class="kv">
+  <div class="kvr"><span class="kvk">How they work</span><span class="kvv">Predict the most likely next token, repeatedly, until done</span></div>
+  <div class="kvr"><span class="kvk">Controlled by</span><span class="kvv">Temperature (creativity vs consistency), max tokens (output length), stop sequences</span></div>
+  <div class="kvr"><span class="kvk">Integrated via</span><span class="kvv">Chat completions API (most common), function calling for structured output, streaming for interactive UX</span></div>
+  <div class="kvr"><span class="kvk">Enterprise sweet spots</span><span class="kvv">Customer service automation, internal knowledge assistants, document processing, code assistance, content generation pipelines</span></div>
+</div>
+
+<div class="sh2">The Chat Completions API Pattern</div>
+
+<div class="code-label">JSON</div>
+<div class="code">POST /v1/chat/completions
+{
+  "model": "claude-sonnet-4-6",
+  "messages": [
+    {"role": "system", "content": "You are a supply chain analyst..."},
+    {"role": "user", "content": "Summarise this purchase order: [PO text]"}
+  ],
+  "temperature": 0.2,
+  "max_tokens": 500
+}</div>
+
+<div class="ibox">This pattern — system prompt defining role/scope, user message with task — covers 80% of enterprise LLM integration patterns.</div>
+
+<div class="sh2">4.3 Image Generation: Diffusion Models</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — What Diffusion Models Do:</strong> Imagine you take a sharp photograph and then slowly add TV static (random noise) to it, one layer at a time, until it looks like pure white noise and you can no longer see the original image at all. A diffusion model is trained on millions of examples of this process — it learns to <em>reverse</em> it: starting from pure noise, it removes a little noise at each step, guided by a text description of what the image should be. After 20 to 50 such steps, a coherent image emerges. Think of it as a photograph developing in reverse: chaos gradually resolving into a clear picture. As an architect, what matters is: input is a text prompt, output is one or more image files, integration is a REST API, and each image generation takes 1–10 seconds depending on quality settings.
+</div>
+
+<div class="ibox">
+  <strong>What diffusion models do:</strong> Diffusion models learn to generate images by being trained on the reverse of a noise-adding process. During training: take a real image, progressively add random noise until it's pure noise, teach the model to reverse each step. During generation: start from pure noise, iteratively denoise guided by a text prompt, until a coherent image emerges.<br><br>
+  <strong>What architects need to understand:</strong> Input is a text prompt (and optionally a reference image, style guidance, negative prompts). Output is one or more images at a specified resolution. Integration is a REST API, identical pattern to LLM APIs.
+</div>
+
+<div class="sh2">The 2026 Image Generation API Landscape</div>
+
+<table class="t">
+  <tr><th>Provider</th><th>Quality</th><th>Pricing</th><th>Licensing</th><th>Best for</th></tr>
+  <tr><td><strong>OpenAI DALL-E 3</strong></td><td>High, consistent</td><td>£0.04–0.08/image</td><td>Commercial use allowed</td><td>General enterprise, prototyping</td></tr>
+  <tr><td><strong>Stability AI (SDXL, SD3)</strong></td><td>High</td><td>£0.003–0.013/image</td><td>Commercial (check terms)</td><td>Cost-sensitive, high volume</td></tr>
+  <tr><td><strong>Flux (Black Forest Labs)</strong></td><td>Very high</td><td>Varies by host</td><td>Commercial available</td><td>Highest quality requirements</td></tr>
+  <tr><td><strong>Midjourney API</strong></td><td>Excellent artistic</td><td>Subscription-based</td><td>Commercial (Pro plan)</td><td>Creative/marketing</td></tr>
+  <tr><td><strong>Google Imagen</strong></td><td>High</td><td>Per-image + compute</td><td>Commercial</td><td>GCP-native stacks</td></tr>
+</table>
+
+<div class="sh2">Prompt Engineering for Image Generation</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Positive Prompts — Specificity Matters</div>
+    <div class="code-label">Example</div>
+    <div class="code">Weak:   "A product photo of headphones"
+
+Strong: "Professional product photography of matte
+         black wireless over-ear headphones on a
+         white background, studio lighting, soft
+         shadows, 4K, commercial quality"</div>
+  </div>
+  <div class="card b">
+    <div class="ch b">Negative Prompts — What Not to Include</div>
+    <div class="code-label">Example</div>
+    <div class="code">Negative: "blurry, distorted, extra limbs,
+            watermark, text overlay, low quality,
+            jpeg artifacts"</div>
+  </div>
+</div>
+
+<div class="sh2">Key Limitations for Enterprise Use</div>
+
+<div class="g2">
+  <div class="card a">
+    <div class="ch a">Text in Images</div>
+    Diffusion models are notoriously poor at generating legible text. For images requiring accurate text (product labels, signage), use image generation + text overlay compositing.
+  </div>
+  <div class="card a">
+    <div class="ch a">Consistency Across Generations</div>
+    Generating the same character, product, or face consistently across multiple images requires additional techniques (ControlNet, IP-Adapter, or fine-tuning). Raw text-to-image will vary significantly between generations.
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card a">
+    <div class="ch a">IP and Legal Review</div>
+    Images generated from APIs trained on licensed content carry legal uncertainty in some jurisdictions. Check with legal before using generated images in commercial content.
+  </div>
+  <div class="card a">
+    <div class="ch a">Content Moderation</div>
+    Most API providers have content moderation — prompts producing NSFW content, specific real people's faces, or trademarked characters are rejected. Plan for this in your error handling.
+  </div>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "AI image generation is free from copyright concerns because the AI created it." This is currently legally contested. Several lawsuits are active in the US and EU over whether training on copyrighted images without licence constitutes infringement, and whether AI-generated images can be copyrighted at all. As an architect, the governance responsibility is clear: obtain legal sign-off before using AI-generated images in commercial customer-facing content, and choose providers who offer commercial-use indemnity (some do, some do not). The cost of ignoring this is not theoretical — it is reputational and legal exposure.</div>
+
+<div class="sh2">Image Generation Integration Pattern</div>
+
+<div class="code-label">Python</div>
+<div class="code">import requests
+
+def generate_product_image(product_description: str) -> bytes:
+    response = requests.post(
+        "https://api.openai.com/v1/images/generations",
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        json={
+            "model": "dall-e-3",
+            "prompt": f"Professional product photography: {product_description}. "
+                      "White background, studio lighting, commercial quality.",
+            "size": "1024x1024",
+            "quality": "standard",
+            "n": 1
+        }
+    )
+    image_url = response.json()["data"][0]["url"]
+    return requests.get(image_url).content</div>
+
+<div class="sh2">4.4 Multimodal Models: Seeing and Reading</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — What Multimodal Means:</strong> Older AI systems were modal silos: a text model handled text, an image classifier handled images, a speech system handled audio. Connecting them required a pipeline: OCR service → text extraction → LLM. A multimodal model is a single model that understands multiple input types natively — you send it a photograph of an invoice and plain-text instructions in the same API call, and it processes both together without a hand-off pipeline. The architectural significance: many document processing workflows that previously required three or four separate services (OCR, NLP extraction, classification, validation) can now be a single API call. Fewer moving parts, less latency, lower integration cost. The trade-off: you are now dependent on one provider for a wider capability surface.
+</div>
+
+<div class="ibox">Multimodal models accept both text and images (and increasingly audio and video) as input, and produce text output. As of 2026, the major frontier LLMs (GPT-4o, Claude 3.x, Gemini) are multimodal by default.</div>
+
+<table class="t">
+  <tr><th>Use case</th><th>How multimodal enables it</th></tr>
+  <tr><td>Invoice / PO processing</td><td>Send scanned document image; model extracts structured fields</td></tr>
+  <tr><td>Technical diagram analysis</td><td>Send architecture diagrams; model explains or answers questions</td></tr>
+  <tr><td>Quality inspection</td><td>Send product images; model identifies defects against criteria</td></tr>
+  <tr><td>Accessibility</td><td>Describe images for screen readers; auto-generate alt text</td></tr>
+  <tr><td>Form processing</td><td>Extract data from handwritten or printed forms</td></tr>
+  <tr><td>Visual search</td><td>"Find me products that look like this" (with embedding models)</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Key architectural shift:</strong> Documents that previously required OCR pipelines + custom extraction logic can now be processed end-to-end through a multimodal API call. The model handles OCR, layout understanding, and extraction in a single step.
+</div>
+
+<div class="code-label">Python</div>
+<div class="code">import anthropic, base64
+
+def extract_invoice_fields(image_bytes: bytes) -> dict:
+    client = anthropic.Anthropic()
+    image_b64 = base64.b64encode(image_bytes).decode()
+
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=1000,
+        messages=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {"type": "base64", "media_type": "image/jpeg",
+                               "data": image_b64}
+                },
+                {
+                    "type": "text",
+                    "text": "Extract invoice fields as JSON: invoice_number, "
+                            "vendor_name, total_amount, due_date, line_items[]"
+                }
+            ]
+        }]
+    )
+    return json.loads(response.content[0].text)</div>
+
+<div class="sh2">Multimodal Limitations</div>
+<ul class="dl">
+  <li><strong>Image resolution:</strong> most APIs accept images up to ~20MB; very high-res images are typically downsampled</li>
+  <li><strong>Multi-page documents:</strong> each page must be sent as a separate image, or use a PDF-capable API endpoint</li>
+  <li><strong>Handwriting accuracy:</strong> handwritten text is harder than printed; accuracy varies by model and handwriting quality</li>
+  <li><strong>Complex tables:</strong> multi-column layouts and merged cells are challenging; validate extraction for complex structures</li>
+</ul>
+
+<div class="sh2">4.5 Embedding Models: Semantic Understanding Without Visible Output</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — What a Latent Space Is:</strong> Imagine plotting every word in your company's product catalogue on a map — not alphabetically, but by meaning. "Running shoes", "jogging trainers", and "trail sneakers" would cluster together near each other. "Formal dress shoes" would be nearby but a bit further away. "Kitchen knives" would be on the other side of the map. This map is what an embedding model creates — it is called a "latent space". Every piece of text gets assigned coordinates (a vector of numbers) in this space, and texts that mean similar things get coordinates that are geometrically close. Semantic search works by converting your query into coordinates and then finding the items on the map that are closest. The word "latent" simply means "hidden" — it is the hidden meaning-space underlying the surface text. Architects do not need to understand the mathematics, but they must understand: the latent space is model-specific. Coordinates from one model are not compatible with another. If you switch embedding models, you must regenerate all coordinates.
+</div>
+
+<div class="ibox">Embedding models convert text (or images) into a fixed-size vector of numbers — a point in high-dimensional space where semantically similar content is geometrically close.</div>
+
+<div class="g2">
+  <div class="card t">
+    <div class="ch t">What Embeddings Enable</div>
+    <ul class="dl">
+      <li><strong>Semantic search:</strong> find documents by meaning, not keyword. "delivery delay" finds results about "shipment late" even without exact keyword overlap</li>
+      <li><strong>Recommendation:</strong> find products, articles, or items similar to a given example</li>
+      <li><strong>Clustering:</strong> group documents by topic without predefined categories</li>
+      <li><strong>RAG retrieval:</strong> the backbone of vector search in RAG systems</li>
+      <li><strong>Deduplication:</strong> detect near-duplicate records across large datasets</li>
+    </ul>
+  </div>
+  <div class="card t">
+    <div class="ch t">Integration Pattern</div>
+    <div class="code-label">Python</div>
+    <div class="code">def embed_text(text: str) -> list[float]:
+    response = openai_client.embeddings.create(
+        model="text-embedding-3-large",
+        input=text
+    )
+    return response.data[0].embedding
+    # returns list of 3072 floats</div>
+    <p>Output is a vector (array of floats) stored in a vector database and queried via similarity search. <strong>They don't generate visible content.</strong></p>
+  </div>
+</div>
+
+<table class="t">
+  <tr><th>Model</th><th>Dimensions</th><th>Context</th><th>Cost</th><th>Best for</th></tr>
+  <tr><td>text-embedding-3-large (OpenAI)</td><td>3072</td><td>8191 tokens</td><td>£0.13/M tokens</td><td>General purpose, high quality</td></tr>
+  <tr><td>text-embedding-3-small (OpenAI)</td><td>1536</td><td>8191 tokens</td><td>£0.02/M tokens</td><td>Cost-sensitive, high volume</td></tr>
+  <tr><td>BGE-M3 (BAAI, open-weight)</td><td>1024</td><td>8192 tokens</td><td>Self-hosted</td><td>Multi-language, self-hosted RAG</td></tr>
+  <tr><td>Cohere Embed v3</td><td>1024</td><td>512 tokens</td><td>£0.10/M tokens</td><td>Enterprise, multi-language</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  <strong>&#128993; Critical constraint:</strong> Once you embed your corpus with a specific model, you must use the same model to embed queries. Switching embedding models requires re-embedding your entire corpus. <strong>Choose and pin your embedding model early in the project.</strong>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Embedding models are a type of generative AI — they generate vectors." Embedding models are not generative in the meaningful sense: they do not produce new content, they transform existing content into a different representation. They are trained with a different objective (contrastive learning: similar texts should produce close vectors) than generative models (predict the next token). The practical consequence: you cannot use an LLM as a drop-in replacement for an embedding model. They serve different purposes and are used together, not interchangeably.</div>
+
+<div class="sh2">4.6 The Content Moderation Layer: Non-Negotiable</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Content Moderation and Copyright as Governance Responsibility:</strong> When a human employee writes a product description that contains a false claim, your company is responsible. The same applies when an AI writes it. Generative AI does not transfer legal or reputational liability to the model provider — your company is the publisher of the output. This means content moderation is an <em>architect's responsibility</em>, not a vendor feature you can rely on. Moderation must be designed in at system design time: what categories of output are prohibited (PII, competitor names, unverifiable claims, regulatory red-flag language)? Where in the pipeline does moderation happen? Who reviews edge cases? What is the escalation path when the moderation layer flags a violation? Treating moderation as a "nice to have" or a phase-2 feature is how companies end up with a chatbot that gives medical advice or an image generator that produces brand-embarrassing content in production.
+</div>
+
+<div class="ibox">For any customer-facing application that generates content, a content moderation layer is architecturally mandatory — not optional.</div>
+
+<div class="alayer al1">
+  <div class="ln">User Request</div>
+  Arrives at the system boundary
+</div>
+<div class="alayer al2">
+  <div class="ln">Input Moderation</div>
+  Hate speech, PII, competitor names, off-topic requests
+</div>
+<div class="alayer al3">
+  <div class="ln">Generative Model</div>
+  LLM / image model / multimodal
+</div>
+<div class="alayer al4">
+  <div class="ln">Output Moderation</div>
+  Toxicity, PII in output, factual grounding check
+</div>
+<div class="alayer al5">
+  <div class="ln">User Receives Content</div>
+  Safe, filtered, brand-compliant content
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Moderation Options</div>
+    <ul class="dl">
+      <li><strong>Provider-built:</strong> OpenAI Moderation API (text), AWS Rekognition (image), Azure Content Safety</li>
+      <li><strong>LLM-as-judge:</strong> use a separate LLM call to evaluate output against criteria ("does this response contain PII? yes/no")</li>
+      <li><strong>Custom classifiers:</strong> fine-tuned models for domain-specific prohibited content</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">Enterprise Moderation Checklist</div>
+    <ul class="dl">
+      <li>Personal data / PII in output (especially for customer service)</li>
+      <li>Competitor mentions (varies by use case)</li>
+      <li>Factual claims that cannot be verified (knowledge-sensitive domains)</li>
+      <li>Tone / brand voice violations</li>
+      <li>Content that could trigger regulatory scrutiny (financial advice, medical claims, legal advice)</li>
+      <li>Prompt injection attempts in user inputs</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Scenario: Retail Product Content Generation Pipeline</div>
+  <p>A retail group sells 80,000 active SKUs. Current process: copywriters at 1.5 hrs/product = 120,000 hours for the current catalogue; product photography at £80–200/product; translation into 6 languages at £0.12/word × avg 150 words × 80K SKUs × 6 languages = £8.6M.</p>
+
+  <div class="sh2">Architecture Decision: Which Generative AI Modalities?</div>
+
+  <table class="t">
+    <tr><th>Content type</th><th>Current process</th><th>GenAI solution</th><th>Modality</th></tr>
+    <tr><td>Product descriptions (English)</td><td>Human copywriters</td><td>LLM generation from spec sheet</td><td>Text (LLM)</td></tr>
+    <tr><td>Product descriptions (5 other languages)</td><td>Translation agency</td><td>LLM translation with brand voice</td><td>Text (LLM)</td></tr>
+    <tr><td>Lifestyle imagery (new products)</td><td>Photography studio</td><td>Image generation from text prompt</td><td>Image (diffusion)</td></tr>
+    <tr><td>White-background product images</td><td>Photography studio</td><td>Existing photo + background removal</td><td>Image processing + LLM</td></tr>
+    <tr><td>Product spec extraction from supplier docs</td><td>Manual data entry</td><td>Multimodal extraction from PDFs/images</td><td>Multimodal</td></tr>
+    <tr><td>Semantic product search</td><td>Keyword-only search</td><td>Embedding + vector search</td><td>Embeddings</td></tr>
+  </table>
+
+  <div class="sh2">Implemented Pipeline</div>
+  <div class="alayer al1">
+    <div class="ln">Step 1</div>
+    Supplier sends product spec sheet (PDF or structured data)
+  </div>
+  <div class="alayer al2">
+    <div class="ln">Step 2 — Multimodal Extraction (Claude Vision)</div>
+    Produces structured product attributes (JSON) with confidence scores per field
+  </div>
+  <div class="alayer al3">
+    <div class="ln">Step 3 — Human Review Gate</div>
+    For low-confidence fields (&lt;0.85 confidence)
+  </div>
+  <div class="alayer al4">
+    <div class="ln">Step 4 — LLM Description Generation (Claude Haiku, batch)</div>
+    Brand-voice description template with structured attributes; 6 language variants in parallel
+  </div>
+  <div class="alayer al5">
+    <div class="ln">Step 5 — Image Generation (DALL-E 3, for products without photography)</div>
+    3 variants generated; merchandising team selects one
+  </div>
+  <div class="alayer al6">
+    <div class="ln">Step 6 — Content Moderation</div>
+    OpenAI Moderation + custom LLM-as-judge: factual claims check, brand voice check, prohibited claims check
+  </div>
+  <div class="alayer al1">
+    <div class="ln">Step 7 — Embedding Generation (text-embedding-3-large)</div>
+    Description + attributes → vector stored in product search index
+  </div>
+  <div class="alayer al2">
+    <div class="ln">Step 8 — Human Sign-Off Queue</div>
+    Sample-based, 5% review rate post-launch
+  </div>
+
+  <div class="sh2">Results After 6-Month Rollout</div>
+  <table class="t">
+    <tr><th>Metric</th><th>Before</th><th>After</th><th>Change</th></tr>
+    <tr><td>Time to publish new product</td><td>3–4 weeks</td><td>2–3 days</td><td>85% faster</td></tr>
+    <tr><td>Description production cost</td><td>£18/product (copywriter)</td><td>£0.04/product (LLM)</td><td>99.8% reduction</td></tr>
+    <tr><td>Language localisation cost</td><td>£0.12/word × 6 languages</td><td>£0.006/word equivalent</td><td>95% reduction</td></tr>
+    <tr><td>Image production cost (no-photo products)</td><td>£120–200/product</td><td>£0.06/product</td><td>99.7% reduction</td></tr>
+    <tr><td>Search relevance (A/B test)</td><td>Baseline</td><td>+31% click-through</td><td>Embedding search</td></tr>
+    <tr><td>Human error in spec extraction</td><td>4.2% error rate (manual)</td><td>1.8% error rate (multimodal + review)</td><td>57% reduction</td></tr>
+  </table>
+
+  <div class="sh2">Lessons Learned (What They Got Wrong First)</div>
+  <ul class="dl">
+    <li><strong>Skipped content moderation on launch:</strong> first 500 descriptions had 2% with claims like "best in market" and "clinically proven" — not factual, potential regulatory issue. Moderation layer added week 2.</li>
+    <li><strong>Image generation for complex products:</strong> generated images of products with logos/text were unusable (distorted text). Switched to human photography for branded products; image gen reserved for unbranded lifestyle imagery.</li>
+    <li><strong>Translation without brand voice examples:</strong> first translations were accurate but felt machine-translated. Added 10 examples of correct brand voice per language to the prompt. Quality improved significantly.</li>
+    <li><strong>Over-automated human review:</strong> removed the 5% review gate in week 3 to reduce bottleneck. Quality degraded noticeably in specialist categories (outdoor equipment — technical accuracy issues). Review gate reinstated.</li>
+  </ul>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">The Generative AI Integration Stack</div>
+
+<div class="ibox">When adding generative AI to an enterprise system, the full integration stack has more layers than most teams initially plan for:</div>
+
+<div class="alayer al1">
+  <div class="ln">Application Layer</div>
+  UI, user input, output display / rendering
+</div>
+<div class="alayer al2">
+  <div class="ln">Orchestration Layer</div>
+  LangChain, custom code, workflow engine. Routing: which model for which request type? Context assembly: system prompt + retrieved context + user input.
+</div>
+<div class="alayer al3">
+  <div class="ln">Generative AI API Layer</div>
+  LLM / image gen / multimodal / embedding APIs. Model version pinning, retry logic, timeout handling.
+</div>
+<div class="alayer al4">
+  <div class="ln">Safety &amp; Moderation Layer</div>
+  Input filtering, output filtering, PII detection. Most teams underinvest here relative to the API layer.
+</div>
+<div class="alayer al5">
+  <div class="ln">Observability Layer</div>
+  Prompt logging, cost tracking, latency monitoring, quality metrics. Most teams underinvest here too.
+</div>
+<div class="alayer al6">
+  <div class="ln">Knowledge Layer (if applicable)</div>
+  Vector database, document store, embedding index.
+</div>
+
+<div class="sh2">Key Architectural Properties of Generative AI Systems</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Non-Determinism Must Be Designed For</div>
+    Generative AI is inherently probabilistic. The same prompt produces different outputs on different calls. Systems must handle this: validate output structure (don't assume format), build idempotent downstream processing, and design UX that accommodates variation.
+  </div>
+  <div class="card b">
+    <div class="ch b">Streaming Changes UX Architecture</div>
+    For interactive text generation (chatbots, copilots), streaming is almost always required for good UX — waiting 10 seconds for a full response is poor UX; seeing the response build in real-time is acceptable. Streaming requires server-sent events or WebSocket infrastructure, not a simple REST request/response pattern.
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Async Over Sync for Batch Generation</div>
+    For non-interactive use cases (batch content generation, document processing), asynchronous processing (job queue + worker + result store) is more resilient than synchronous API calls. Individual calls may time out; a queue-based architecture retries transparently.
+  </div>
+  <div class="card b">
+    <div class="ch b">Cost Is Variable and Must Be Budgeted Dynamically</div>
+    Unlike traditional compute where cost = requests × fixed_cost, generative AI cost = input_tokens × input_price + output_tokens × output_price. Output token count is model-determined and variable. Implement per-request cost tracking, per-user/per-workflow budgets, and alerts for unexpected cost spikes.
+  </div>
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">5 Questions to Test Your Understanding</div>
+  <ol class="sl">
+    <li>
+      <strong>A product manager wants to build a feature that generates personalised marketing emails for 2 million customers. The emails should mention recent purchase history and current promotions. Which generative AI modalities are involved, and what are the key architectural concerns an architect must address before this goes live?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Modality: text generation (LLM) for email body; possibly image generation if the email includes product imagery. Key architectural concerns: (1) <strong>Scale</strong> — 2M emails is a batch job, not interactive; async processing via job queue is essential. Synchronous API calls at this volume will fail or be prohibitively expensive in latency. (2) <strong>Personalisation data injection</strong> — purchase history and promotions must be injected into the prompt as context; the context window limits how much history can be included per call. You need a context assembly layer that selects the most relevant purchase data per customer. (3) <strong>Cost</strong> — at Claude Haiku pricing (~£0.25/M input, £1.25/M output): 2M × 500 input + 300 output tokens ≈ £1,000 per batch run. Budget accordingly and set per-run cost alerts. (4) <strong>Content moderation</strong> — output must be screened for PII leakage, off-brand claims, and unsubscribe compliance before sending. (5) <strong>Consistency</strong> — low temperature (0.1–0.3) and strictly specified output format required across 2M emails. (6) <strong>Data privacy and GDPR</strong> — customer purchase history is PII; ensure data residency and processing agreements are in place before sending to an external API.<br>
+        <strong>Simple explanation:</strong> Use an LLM via a job queue for scale, inject purchase data into each prompt, keep temperature low for consistency, and run moderation before sending — never skip the data privacy check when personal data goes to an external model.<br>
+        <strong>Architecture takeaway:</strong> Batch generative AI at scale requires an async job queue, a context assembly layer, cost budgets, a moderation gate, and legal sign-off on data flows — treating it as a simple API call is how production failures and compliance incidents happen.
+      </div>
+    </li>
+    <li>
+      <strong>Your team wants to use a diffusion model API to generate product images for a new clothing line. A developer proposes using the same prompt template for all 500 products: "A photo of [product_name] on a white background." What are the quality and consistency risks, and how would you improve the approach as an architect?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Risks: (1) <strong>Inconsistent style</strong> — the same short prompt produces different lighting, angle, and composition each time. A product catalogue needs visual consistency; raw text-to-image will vary significantly between generations. (2) <strong>Clothing-specific failure modes</strong> — fabric texture, colour accuracy, and fit details are difficult to control via text alone. Generated image may not match the actual product. (3) <strong>Text rendering</strong> — brand names, care labels, and size indicators will be garbled or unreadable. (4) <strong>The template is drastically under-specified.</strong> Improvements as an architect: (a) Enrich the prompt with style-locking parameters: "Professional e-commerce product photography, front-facing, white background, soft studio lighting, shadows at base, no models, [specific fabric] fabric, accurate [colour] colour, 4K commercial quality." (b) Add a negative prompt list: "blurry, distorted, text overlay, mannequin, low quality, extra limbs." (c) Generate 3–5 variants per product; have merchandising team select the best. (d) Establish a reference image style (5–10 "gold standard" photos) and use style consistency techniques (CLIP-guided generation, IP-Adapter) to anchor all generations to that style. (e) Budget for human QA — a 5% defect rate at 500 images means 25 images needing replacement. (f) Obtain legal sign-off on commercial use of generated images before any go live.<br>
+        <strong>Simple explanation:</strong> The prompt is too vague — specificity drives quality and consistency; always enrich prompts with camera, lighting, background, and style details, generate multiple variants, and have a human review gate before publishing.<br>
+        <strong>Architecture takeaway:</strong> Prompt quality is a design artifact, not a one-liner — treat image generation prompt templates as engineering deliverables with review cycles, and always build a human selection step for customer-facing visual content.
+      </div>
+    </li>
+    <li>
+      <strong>Describe the architectural difference between an embedding model and a text generation LLM. A colleague says "just use GPT-4o to do semantic search — it understands language better than an embedding model." How do you respond?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> An embedding model converts text into a fixed-size dense vector (e.g., 3072 floats) — a coordinate in a semantic latent space where similar texts produce geometrically close vectors. It is trained with a contrastive objective (make similar texts produce close vectors) and produces the same deterministic output for the same input every time. It is optimised for representation, not generation. A text generation LLM (like GPT-4o) produces text token by token via autoregressive sampling — the output is text, not a fixed-size vector suitable for similarity comparison across millions of items. The colleague's suggestion fails for three reasons: (1) <strong>No comparable vector</strong> — GPT-4o does not produce a latent vector you can store and compare. (2) <strong>Cost at scale</strong> — comparing a query to 1M documents requires 1M LLM calls, which at GPT-4o pricing would cost thousands of pounds per search. (3) <strong>Speed</strong> — an LLM call takes 1–5 seconds; a vector similarity search over 1M items takes milliseconds. Embedding models and LLMs are complementary in RAG: embeddings retrieve the relevant passages in milliseconds, the LLM synthesises the answer from those passages.<br>
+        <strong>Simple explanation:</strong> Embedding models translate meaning into coordinates for fast comparison; LLMs generate text — they do different jobs and are used together, not interchangeably.<br>
+        <strong>Architecture takeaway:</strong> Any semantic search or RAG system requires an embedding model as the retrieval layer and an LLM as the synthesis layer — understanding this separation prevents expensive and slow architectures that misuse LLMs for retrieval.
+      </div>
+    </li>
+    <li>
+      <strong>A team has deployed a customer service chatbot using an LLM. Three months after launch, the legal team flags that some chatbot responses are making implied warranty claims that could create legal liability. How do you architect a fix — and what does this incident reveal about the original architecture?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Root cause: the system prompt likely does not prohibit warranty-like language, and no output moderation layer was implemented — a classic case of launching without a content moderation design. Fix at three layers: (1) <strong>System prompt hardening</strong> — add explicit instructions: "Never make guarantees about product outcomes. Use hedged language: 'may help', 'is designed to', 'many customers find'. Never use 'will', 'guaranteed', 'definitely' in relation to product outcomes." Include 3–5 examples of correct vs prohibited phrasings as few-shot guidance. (2) <strong>Output moderation layer</strong> — add a classifier that scans every response for prohibited claim patterns before delivery. Use a regex pre-filter for obvious cases ("guaranteed", "definitely solve") and an LLM-as-judge for nuanced implied claims. Block and regenerate (with lower temperature + stricter instructions) if a violation is detected. (3) <strong>Ongoing monitoring</strong> — set up a sample review process (e.g., 1% of conversations reviewed by legal/compliance weekly) to catch drift as the model updates or as users learn to probe its limits. What the incident reveals: content moderation for legal and compliance risks must be designed in at system design time, not retrofitted after an incident. The original architecture treated the system prompt as sufficient governance — it is not. The output moderation layer is a separate control that the system prompt cannot replace.<br>
+        <strong>Simple explanation:</strong> Tighten the system prompt to forbid warranty language, add an automated output scanner that catches violations before delivery, and put in place an ongoing sample review — the root cause was missing moderation, not a bad prompt.<br>
+        <strong>Architecture takeaway:</strong> For any customer-facing generative AI in a regulated or liability-sensitive domain, output moderation is a separate architectural layer — not a system prompt instruction — and must be present on day one, not added after an incident.
+      </div>
+    </li>
+    <li>
+      <strong>Your company is evaluating whether to build a product image generation pipeline (200 new products/month) or continue with photography. The CFO is excited about the 99% cost reduction headline. What information do you need to give a complete recommendation, and what factors favour each option?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Information needed before recommending: (1) <strong>Current photography cost per product</strong> (typically £80–300/product — this determines the actual saving). (2) <strong>Product type and accuracy bar</strong> — apparel, jewellery, and precision products require colour/texture accuracy that AI generation currently cannot guarantee; consumer goods and homeware are more forgiving. (3) <strong>Brand tier</strong> — luxury catalogue vs budget marketplace have very different quality standards. (4) <strong>Legal clearance</strong> from the legal team on commercial use of AI-generated images and IP indemnity terms from the provider. (5) <strong>Consistency requirement</strong> — hero imagery on a flagship site requires style consistency that raw text-to-image cannot deliver without additional tooling. Factors favouring image generation: (a) Cost — £0.04–0.08/image vs £80–300/photo means 99%+ saving at scale. (b) Speed — images available in seconds vs weeks. (c) Unlimited variations at no marginal cost (A/B testing, regional variants, seasonal updates). (d) Volume scaling — growing from 200 to 2,000 products/month costs almost nothing extra. Factors favouring photography: (a) Accuracy for complex products — photography captures the actual product, including materials, sheen, and proportions. (b) Customer trust in quality-sensitive categories. (c) Legal certainty — photographic content has clearer IP and commercial rights status. (d) Existing supplier relationships and quality benchmarks. Pragmatic recommendation: run a 50-product pilot with AI generation covering a representative cross-section of product types, have merchandising and legal review, measure return rate and complaint rate vs photography-sourced products. Most teams find AI generation works well for standard unbranded products and lifestyle background imagery, and poorly for hero imagery in quality-sensitive categories — a hybrid approach is usually the right architecture.<br>
+        <strong>Simple explanation:</strong> The 99% cost saving is real for commodity images but misleading for hero photography — run a pilot on representative product types, get legal sign-off, and plan for a hybrid rather than wholesale replacement.<br>
+        <strong>Architecture takeaway:</strong> Evaluate generative AI ROI claims against the specific product types and quality requirements of your context — headline numbers are real but not universal; a pilot-then-scale approach de-risks the investment decision.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers diffusion model mathematics, GAN internals, and flow matching. The mathematical notation is not required to use or architect generative AI systems. It is safe to skip on a first pass and return here later.</div>
+
+<div class="sh2">8.1 How Diffusion Models Work</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — The Intuition Behind Diffusion:</strong> Imagine destroying a photograph by adding tiny amounts of TV static to it, one layer at a time, 1000 times over, until it looks like pure random snow. A diffusion model is trained by watching millions of photographs go through this destruction process — and learning, at each step, how to reverse it. It learns: "given an image that is 40% destroyed, what does removing one layer of damage look like?" When you ask it to generate a new image, it starts from pure noise and applies this learned "damage reversal" process 1000 times, guided at each step by your text prompt. The result is a coherent image that was never a real photograph — it was synthesised entirely by the reversal process. The technical name for the noise-adding phase is the "forward process" and for the generation phase is the "reverse process". The model only ever learns the reverse process — the forward process is just a training tool.
+</div>
+
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Forward Process (Training Only)</div>
+    Take a real image x₀. At each step t, add a small amount of Gaussian noise. Repeat for T steps (typically 1000) until the image is indistinguishable from pure noise xᴛ. This is a fixed, non-learned process.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Reverse Process (What the Model Learns)</div>
+    Train a neural network (the "denoiser" — typically a U-Net or DiT architecture) to predict, given a noisy image xₜ and text prompt c, what noise was added at step t. The model learns noise-removal, not image-generation directly.
+  </div>
+</div>
+
+<div class="code-label">Objective Function</div>
+<div class="code">Objective: minimise ||ε - ε_θ(xₜ, t, c)||²
+
+Where:
+  ε      = actual noise added at step t
+  ε_θ    = model's prediction of that noise
+  xₜ     = noisy image at step t
+  t      = timestep
+  c      = text conditioning (CLIP-encoded prompt)</div>
+
+<div class="ibox">
+  <strong>Generation:</strong> start from pure Gaussian noise xᴛ. Iteratively apply the denoiser to predict and subtract the noise for T steps. At each step, the prediction is conditioned on the text prompt via cross-attention. After T steps: coherent image.<br><br>
+  <strong>Classifier-free guidance (CFG):</strong> at each denoising step, run the model twice — once conditioned on the prompt and once unconditioned. The actual noise removal uses:
+</div>
+
+<div class="code-label">CFG Formula</div>
+<div class="code">ε_guided = ε_θ(x,t,∅) + guidance_scale × (ε_θ(x,t,c) - ε_θ(x,t,∅))</div>
+
+<div class="ibox">Higher guidance scale → stronger prompt adherence → sometimes over-saturated or less natural results. Typical values: 5–12.</div>
+
+<div class="sh2">8.2 GANs vs Diffusion: Why Diffusion Won</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — What a GAN Is:</strong> A GAN (Generative Adversarial Network) is a two-player game. The first player is the <strong>forger</strong> (the generator): it starts from random noise and tries to produce an image that looks real. The second player is the <strong>detective</strong> (the discriminator): it sees a mix of real images and the forger's fakes, and tries to identify which is which. Both players improve through competition — the forger gets better at producing convincing fakes, the detective gets better at spotting them — until the forger is so good that the detective cannot tell the difference. The result is a generator that can produce highly realistic images. GANs were dominant from 2014 to around 2021, then diffusion models largely replaced them for image generation because they produce more diverse outputs, train more stably, and respond much better to text prompts. Understanding GANs matters because the forger/detective pattern appears in many other AI contexts (adversarial training, robustness testing, prompt red-teaming).
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">GANs (Generative Adversarial Networks) — 2014–2022</div>
+    Two competing networks:
+    <ul class="dl">
+      <li><strong>Generator:</strong> takes random noise, produces an image</li>
+      <li><strong>Discriminator:</strong> tries to distinguish generated from real images</li>
+      <li><strong>Training:</strong> the generator improves until the discriminator can't tell the difference</li>
+    </ul>
+    GANs remain relevant for: real-time applications (inference is single-pass), super-resolution, and domain-specific applications where small, fast models are needed.
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Why Diffusion Replaced GANs</div>
+    <ul class="dl">
+      <li><strong>Training stability:</strong> GAN training is notoriously unstable (mode collapse, vanishing gradients). Diffusion models train stably.</li>
+      <li><strong>Coverage:</strong> GANs tend to produce sharp but limited distribution coverage. Diffusion models produce more diverse outputs covering the full training data distribution.</li>
+      <li><strong>Text conditioning:</strong> cross-attention in the denoising network allows strong text-image alignment. GAN conditioning on text was harder to achieve at high quality.</li>
+      <li><strong>Scalability:</strong> diffusion models scale cleanly with more compute; GANs didn't scale as predictably.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2">8.3 VAEs: The Latent Space Architecture</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — What a VAE Is:</strong> A Variational Autoencoder (VAE) is an architecture that learns to compress data into a compact representation and then reconstruct it. Imagine a compression algorithm that does not just store the raw bytes of an image — it learns a semantic shorthand. "This image is roughly: outdoor scene + warm lighting + mountain + snow + 10% overcast." That shorthand is the "latent code" — a small vector that captures the essential meaning of the image. The "variational" part means the model adds controlled randomness to the latent code, so that sampling nearby points in the latent space produces variations on the same theme. Why does this matter architecturally? Modern diffusion models actually operate in the latent space of a VAE, not on raw pixel data — this is the "Latent Diffusion" approach (used by Stable Diffusion). The VAE compresses the image to latent space, the diffusion process runs in latent space (which is 8x smaller — much faster), and the VAE decoder reconstructs the final image. The latent space is also why nearby points produce similar outputs: "lion in a field" and "tiger in a field" are close in latent space; "lion in a field" and "underwater coral reef" are far apart.
+</div>
+
+<div class="sh2">8.4 Flow Matching: The Post-Diffusion Architecture</div>
+
+<div class="card t">
+  <div class="ch t">Flow Matching (Stable Diffusion 3, Flux)</div>
+  Flow matching is a conceptually simpler alternative that trains the model to predict a straight-line path from noise to data, rather than predicting noise at each step:
+  <div class="code-label">Conceptual Comparison</div>
+  <div class="code">Diffusion: learn to remove noise step-by-step (curved path)
+Flow:       learn to transport data along straight paths
+            from noise distribution to data distribution</div>
+  In practice: faster inference (fewer steps needed), better training convergence, and often higher image quality. Most frontier image generation models in 2025–2026 use flow matching rather than classical diffusion. The user-facing behaviour is identical — prompt in, image out.
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Generative AI is a family of modalities, not a single technology — match the modality to the output type.</strong> Text/code/structured data → LLMs. Images → diffusion models. Semantic search/retrieval → embedding models. Multimodal understanding → vision-language models. Choosing the wrong modality is an architecture mistake, not a tuning problem.</li>
+  <li><strong>The decisive question is always API vs self-hosted, and for most teams the answer is API-first.</strong> The capability gap between leading API models and self-hosted alternatives for image and multimodal use cases is large. Start with API; self-host only when volume economics justify it or data residency requires it.</li>
+  <li><strong>Content moderation is architecturally mandatory for customer-facing generative AI, not optional.</strong> Every customer-facing system that generates content needs input moderation (catch harmful prompts), output moderation (catch harmful/incorrect/legally risky outputs), and human review sampling. The common failure mode is launching without this layer and retrofitting after an incident.</li>
+  <li><strong>Diffusion models for images are powerful but have well-known failure modes that affect enterprise use.</strong> Text in images is garbled, brand/style consistency across generations is hard without additional techniques, and colour/proportion accuracy for products requires validation. AI-generated images work best as a supplement to photography (lifestyle imagery, background variants), not a wholesale replacement for hero product shots in quality-sensitive contexts.</li>
+  <li><strong>Embedding models are not generative — they are the infrastructure of semantic understanding.</strong> Every RAG system, semantic search capability, and similarity-based recommendation is built on embeddings. Pin your embedding model choice early: switching models requires re-embedding your entire corpus. The embedding model is infrastructure, not an interchangeable API call.</li>
+  <li><strong>Know when not to use generative AI.</strong> Accuracy-critical decisions, legally-binding content, and real-time factual queries need deterministic, auditable systems — not probabilistic models. The architect's governance test: if being wrong has serious legal, financial, or safety consequences and the output cannot be reliably verified by a downstream control, do not use generative AI without a mandatory human-in-the-loop gate.</li>
+</ul>

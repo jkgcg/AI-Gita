@@ -1,0 +1,569 @@
+<!-- ============================================================
+     People & Adoption — AI Gita Panel
+     Source: AI_Gita_Transformed_PeopleAdoption.md
+     ============================================================ -->
+
+<!-- S1 — What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+<div class="ibox">
+  AI adoption is the process of moving an organisation from "we're experimenting with AI" to "AI is embedded in how we operate and delivers measurable value."<br><br>
+  The technical side — choosing models, building pipelines, deploying infrastructure — is typically <strong>30–40% of the challenge</strong>. The remaining <strong>60–70% is people, process, and organisation:</strong>
+  <ul class="dl" style="margin-top:8px">
+    <li>Do people understand what AI can and cannot do?</li>
+    <li>Do they trust it enough to use it and flag issues honestly?</li>
+    <li>Are workflows redesigned around AI capabilities, or is AI bolted onto broken processes?</li>
+    <li>Is there leadership commitment to absorb the inevitable early failures?</li>
+    <li>Are the right skills in place — or actively being built?</li>
+  </ul>
+</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  <strong>This matters for architects specifically</strong> because architects are frequently asked to lead or co-lead AI adoption programmes — not just design the technical architecture. An architect who designs a perfect RAG system that nobody uses has not delivered value.
+</div>
+
+<div class="sh2">The Three Adoption Failure Modes Architects Need to Know</div>
+<div class="g2">
+  <div class="card a">
+    <div class="ch a">Technical Success, Adoption Failure</div>
+    The AI system works as designed but users don't trust it, don't use it, or use it incorrectly.<br><br>
+    <strong>Common cause:</strong> users were not involved in design; the system solves the problem the architect thought they had, not the one they actually have.
+  </div>
+  <div class="card a">
+    <div class="ch a">Pilot Success, Scale Failure</div>
+    A 12-week pilot with 20 enthusiastic users produces glowing results. The enterprise rollout to 2,000 sceptical users produces nothing.<br><br>
+    <strong>Common cause:</strong> the pilot cherry-picked enthusiastic adopters; the change management programme was not designed for the majority.
+  </div>
+</div>
+<div class="card a" style="margin-top:10px">
+  <div class="ch a">Adoption Without Governance</div>
+  Rapid ad-hoc AI tool adoption across teams, with no visibility into what's being used, what data is being shared, or what decisions are being made.<br><br>
+  <strong>Common cause:</strong> governance frameworks were built for the pilot but not for scale.
+</div>
+
+<!-- S2 — Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Solution Architects</div>
+    Every AI system you build has an adoption dimension. Questions to answer at design time:
+    <ul class="dl">
+      <li><strong>Who will use this system</strong> and how confident are they with AI tools?</li>
+      <li><strong>Error path:</strong> is there a clear path for users to report errors and have them corrected?</li>
+      <li><strong>Uncertainty communication:</strong> does the UI show sources and confidence, or present AI output as authoritative fact?</li>
+      <li><strong>Training:</strong> what do users need before they're effective with this tool?</li>
+      <li><strong>Measurement:</strong> how will you measure whether adoption is succeeding?</li>
+    </ul>
+    Architects who treat adoption as someone else's problem ship systems that get used 15% as much as projected — and get blamed for "the AI not working."
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Enterprise Architects</div>
+    AI adoption is an <strong>operating model change</strong>, not a technology deployment. Enterprise architecture implications:
+    <ul class="dl">
+      <li><strong>Workforce implications:</strong> some roles will be augmented; some workflows will change significantly; some roles may be reduced in scope — transitions require planning, not just access to a new tool</li>
+      <li><strong>Skills inventory:</strong> skills required to work effectively with AI (prompt design, output validation, knowing when to escalate) are not evenly distributed today — upskilling is a prerequisite, not an add-on</li>
+      <li><strong>Operating model</strong> (the combination of ownership, decision rights, processes, and capabilities that determine how AI delivers value day-to-day): who owns AI tools? Who approves new use cases? Who monitors for safety? Who resolves disputes about AI-generated decisions?</li>
+      <li><strong>ROI measurement:</strong> building measurement into the adoption programme from day one is the only way to answer finance and leadership credibly</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S3 — Analogy -->
+<div class="sh">Think About It Like This</div>
+<div class="ibox">
+  <strong>The Transition to Spreadsheets (1985–1995)</strong><br><br>
+  When Lotus 1-2-3 and then Excel arrived, organisations faced a strikingly similar adoption challenge to what AI presents today.<br><br>
+  <strong>The technology worked.</strong> Spreadsheets could do calculations in minutes that had taken accountants days. The productivity gain was real and measurable.<br><br>
+  <strong>But adoption was not automatic:</strong>
+  <ul class="dl">
+    <li>Experienced accountants resisted: "I've been doing this for 20 years. I don't trust a computer to get it right."</li>
+    <li>Early adopters made errors that were hard to detect (formula mistakes, wrong cell references) — reinforcing sceptics</li>
+    <li>Organisations that mandated immediate adoption without training saw errors multiply, not reduce</li>
+    <li>Some roles genuinely changed significantly</li>
+  </ul>
+  <strong>What successful adopters did differently:</strong>
+  <ul class="dl">
+    <li>Started with enthusiastic early adopters who demonstrated concrete wins</li>
+    <li>Invested in training before mandating use</li>
+    <li>Maintained parallel processes (manual checks alongside automated outputs) during transition</li>
+    <li>Built validation steps into the workflow to catch errors before they propagated</li>
+    <li>Had senior leadership visibly using the tools — not just mandating them for others</li>
+    <li>Set realistic timelines: 2–3 years for full adoption, not 3 months</li>
+  </ul>
+  <strong>The AI parallel is direct.</strong> AI tools today are roughly where spreadsheets were in 1987 — genuinely powerful, real productivity gains for early adopters, but requiring significant organisational change to realise value at scale.<br><br>
+  The one difference: AI adoption moves faster (capability improving monthly, not yearly) and error modes are different — spreadsheet errors were numerical; AI errors are semantic — harder to detect without domain knowledge.
+</div>
+
+<!-- S4 — Step-by-Step Walkthrough -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 The AI Adoption Maturity Model</div>
+<div class="alayer al1">
+  <div class="ln">Level 0</div>
+  <strong>Unaware / Resistant</strong> — AI is discussed but not used, or actively avoided. Signals: "we're not ready", "our data isn't clean enough", "it's a privacy risk."<br>
+  <strong>What's needed:</strong> executive sponsorship, a small visible win, education to separate AI myth from reality.<br>
+  <strong>Architect's role:</strong> identify the highest-value, lowest-risk use case and build a time-boxed proof of concept.
+</div>
+<div class="alayer al2">
+  <div class="ln">Level 1</div>
+  <strong>Experimenting</strong> — individuals or small teams using AI tools (ChatGPT, Copilot, Claude) in ad-hoc ways, not coordinated. Signals: scattered pilots, no shared learnings, no governance, growing shadow AI usage.<br>
+  <strong>What's needed:</strong> usage audit, lightweight governance framework, community of practice.<br>
+  <strong>Architect's role:</strong> document what's being used and for what; identify working patterns; build the governance scaffold.
+</div>
+<div class="alayer al3">
+  <div class="ln">Level 2</div>
+  <strong>Piloting</strong> — structured pilots with defined use cases, success metrics, and governance. Signals: 2–5 active pilots, exec sponsor, dedicated AI team or CoE forming.<br>
+  <strong>What's needed:</strong> rigorous pilot-to-production evaluation criteria, skills-building programme, responsible AI principles.<br>
+  <strong>Architect's role:</strong> design scalable reference architectures from pilot learnings; establish evaluation frameworks.
+</div>
+<div class="alayer al4">
+  <div class="ln">Level 3</div>
+  <strong>Scaling</strong> — AI embedded in 5+ core workflows, dedicated AI operating model, active measurement. Signals: AI CoE operational, approved model catalogue, AI literacy training in progress, ROI being measured.<br>
+  <strong>What's needed:</strong> platform standardisation, MLOps maturity, cost governance.<br>
+  <strong>Architect's role:</strong> define AI platform architecture; establish standards for model selection, cost tracking, and security.
+</div>
+<div class="alayer al5">
+  <div class="ln">Level 4</div>
+  <strong>Optimising</strong> — AI is a default consideration in process improvement discussions, not a special initiative. Signals: AI use cases in annual planning, finance tracks AI ROI, AI skills in job descriptions.<br>
+  <strong>What's needed:</strong> continuous improvement culture, AI risk management integrated into enterprise risk framework.<br>
+  <strong>Architect's role:</strong> ensure the AI platform evolves with the model landscape; governance keeps pace with new capabilities.
+</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:10px">
+  <strong>&#128993; The trap at each level:</strong> Level 1→2: jumping straight to large enterprise rollout without a structured pilot. Level 2→3: scaling before the governance framework is ready. Level 3→4: measuring activity (number of use cases) instead of outcomes (business value delivered).
+</div>
+
+<div class="sh2">4.2 Building the Business Case: ROI Framework</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">1. Efficiency Gains (most measurable)</div>
+    Time saved × fully-loaded cost per hour × volume
+    <div class="code">Example: AI-assisted document review
+  Before: 2 lawyers × 4 hours × £150/hr = £1,200/contract
+  After:  AI first pass (30 min) + 1 lawyer (1 hour) = £375/contract
+  Saving: £825/contract × 200 contracts/year = £165,000
+  AI cost: £3,000/year
+  ROI: 54× in year 1</div>
+  </div>
+  <div class="card b">
+    <div class="ch b">2. Quality Improvements (require measurement infrastructure)</div>
+    Defect rate reduction, rework reduction, customer complaint reduction
+    <div class="code">Example: AI-assisted order exception handling
+  Before: 8% of orders need manual handling
+  After:  4% of orders need manual handling
+  Volume: 500,000 orders/year × 4% reduction = 20,000 fewer exceptions
+  Each: 25 min × £30/hr = £12.50
+  Annual saving: 20,000 × £12.50 = £250,000</div>
+  </div>
+  <div class="card b">
+    <div class="ch b">3. Revenue Enablement (harder to attribute)</div>
+    Faster time-to-market, increased conversion, personalisation uplift
+    <div class="code">Example: AI-generated product content
+  Before: 6-week time-to-market (content bottleneck)
+  After:  3-day time-to-market with AI generation
+  Uplift: 5.5 weeks × £45,000/week revenue
+  Annual (4 launches): 4 × £247,500 = £990,000
+  (Use conservative estimates — attribution is shared)</div>
+  </div>
+  <div class="card b">
+    <div class="ch b">4. Risk Reduction (expected value of risk avoided)</div>
+    <div class="code">Example: AI-powered compliance monitoring
+  Before: manual spot-check covers 2% of transactions
+  After:  AI monitors 100% of transactions
+  Regulatory fine: £2M, probability 8%/year → 1%/year with AI
+  Expected value: (8% - 1%) × £2M = £140,000/year</div>
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>Business case template:</strong>
+  <div class="code">Use case: [name]
+Current state cost/time: [baseline with evidence]
+Future state cost/time: [projection with assumptions stated]
+Annual saving / revenue / risk reduction: [£ figure]
+AI implementation cost (one-time): [development + integration + training]
+AI running cost (annual): [API + infrastructure + maintenance]
+Payback period: [months]
+Assumptions: [list all assumptions explicitly]
+Measurement plan: [exactly how you will verify the ROI post-launch]</div>
+  <strong>Never present a business case without a measurement plan.</strong> "We'll assess impact after 6 months" is not a measurement plan. Specify: which metric, what baseline, who measures it, on what cadence.
+</div>
+
+<div class="sh2">4.3 Change Management: The Architect's Practical Framework</div>
+<div class="sh2">The Resistance Spectrum</div>
+<table class="t">
+  <tr><th>Concern</th><th>What people are actually thinking</th><th>How to address</th></tr>
+  <tr><td><strong>Job threat</strong></td><td>"This will replace me"</td><td>Be honest about role evolution; show augmentation examples; involve people in redesigning their own workflows</td></tr>
+  <tr><td><strong>Accuracy doubt</strong></td><td>"It makes mistakes; I'll be blamed"</td><td>Build in human review at appropriate checkpoints; measure AI accuracy publicly; make error reporting easy and blameless</td></tr>
+  <tr><td><strong>Skill gap</strong></td><td>"I don't know how to use this well"</td><td>Training before mandating; buddy systems; safe-to-fail practice environments</td></tr>
+  <tr><td><strong>Trust deficit</strong></td><td>"How do I know when to trust it?"</td><td>Design for explainability (show sources, confidence, alternatives); consistent calibration feedback</td></tr>
+  <tr><td><strong>Loss of control</strong></td><td>"I used to own this; now the machine does"</td><td>Involve users in design; maintain human authority over consequential decisions; make the AI a tool, not an authority</td></tr>
+</table>
+
+<div class="sh2">The Four Phases of Adoption Change Management</div>
+<div class="alayer al1">
+  <div class="ln">Phase 1</div>
+  <strong>Awareness (before launch)</strong> — Goal: "I understand what this is and why we're doing it."
+  <ul class="dl">
+    <li>Executive communications explaining business rationale — not just technology trend</li>
+    <li>Honest "what this will and won't change" communication — rumours fill information vacuums</li>
+    <li>Early access programme for interested volunteers before mandatory rollout</li>
+    <li>Showcase: 2–3 concrete examples from peer organisations, not abstract capability demos</li>
+  </ul>
+</div>
+<div class="alayer al2">
+  <div class="ln">Phase 2</div>
+  <strong>Building Capability (at and after launch)</strong> — Goal: "I know how to use this and feel confident doing so."
+  <ul class="dl">
+    <li>Role-specific training: not generic "here is what LLMs are" but "here is how you specifically will use this in your daily tasks"</li>
+    <li>Hands-on practice with real (non-production) scenarios</li>
+    <li>Quick reference guides for the 5 most common use cases</li>
+    <li>Designated champions in each team, trained first and supporting their peers</li>
+  </ul>
+</div>
+<div class="alayer al3">
+  <div class="ln">Phase 3</div>
+  <strong>Embedding (months 2–6)</strong> — Goal: "This is part of how I work, not a separate thing I do."
+  <ul class="dl">
+    <li>Manager reinforcement: managers visibly using AI tools and referencing AI outputs in team discussions</li>
+    <li>Process integration: AI steps built into standard processes, not optional additions</li>
+    <li>Feedback loops: regular (biweekly) sessions where users can report issues, confusions, and suggestions</li>
+    <li>Recognition: celebrate early wins; share stories of AI-enabled successes</li>
+  </ul>
+</div>
+<div class="alayer al4">
+  <div class="ln">Phase 4</div>
+  <strong>Sustaining (months 6+)</strong> — Goal: "We continuously improve how we use AI as the capability evolves."
+  <ul class="dl">
+    <li>Community of practice: a channel/forum where best practices, prompt templates, and use case ideas are shared</li>
+    <li>Regular review: quarterly review of which AI use cases are delivering value and which need redesign</li>
+    <li>Skills progression: advanced training tracks for power users; AI skills in career development frameworks</li>
+    <li>Governance refresh: as AI capabilities evolve, revisit responsible AI guidelines and approved use case catalogue</li>
+  </ul>
+</div>
+
+<div class="sh2">4.4 AI Literacy: Skills Matrix by Role</div>
+<div class="alayer al1">
+  <div class="ln">Tier 1</div>
+  <strong>AI-Aware — all employees</strong> (everyone who uses AI tools in any capacity). Delivery: 2-hour workshop + quick reference card. Required before first use.
+  <table class="t" style="margin-top:8px">
+    <tr><th>Skill</th><th>Description</th></tr>
+    <tr><td>What AI can and cannot do</td><td>Understand capabilities, hallucination risk, data privacy</td></tr>
+    <tr><td>Responsible use</td><td>What is and isn't appropriate to submit to an AI model</td></tr>
+    <tr><td>Output validation</td><td>How to check AI output quality; when to trust vs verify</td></tr>
+    <tr><td>Prompt basics</td><td>How to give clear instructions; how to iterate when results are wrong</td></tr>
+    <tr><td>Escalation</td><td>Who to contact when AI behaves unexpectedly or makes a serious error</td></tr>
+  </table>
+</div>
+<div class="alayer al2">
+  <div class="ln">Tier 2</div>
+  <strong>AI-Proficient — business users, product managers, team leads</strong> (people who design workflows involving AI or oversee AI-assisted work). Delivery: 1-day workshop + 4-week practice cohort with coaching.
+  <table class="t" style="margin-top:8px">
+    <tr><th>Skill</th><th>Description</th></tr>
+    <tr><td>Prompt engineering fundamentals</td><td>Role, task, format, examples; iterative refinement</td></tr>
+    <tr><td>Workflow redesign</td><td>How to identify AI-suitable tasks; how to redesign handoffs</td></tr>
+    <tr><td>Output quality assessment</td><td>Domain-specific evaluation; knowing when AI output is good enough</td></tr>
+    <tr><td>Use case identification</td><td>Spotting automation and augmentation opportunities</td></tr>
+    <tr><td>Basic evaluation design</td><td>How to A/B test AI vs non-AI workflows</td></tr>
+  </table>
+</div>
+<div class="alayer al3">
+  <div class="ln">Tier 3</div>
+  <strong>AI-Builder — technical leads, developers, architects</strong> (people who design, build, or procure AI systems). Delivery: this platform (AI Gita) + hands-on labs + design review with senior architects.
+  <table class="t" style="margin-top:8px">
+    <tr><th>Skill</th><th>Description</th></tr>
+    <tr><td>Model selection and evaluation</td><td>Capability tiers, cost modelling, benchmark interpretation</td></tr>
+    <tr><td>Prompt engineering advanced</td><td>Chain-of-thought, few-shot, structured output, system prompt design</td></tr>
+    <tr><td>RAG and knowledge integration</td><td>When and how to ground models in enterprise knowledge</td></tr>
+    <tr><td>AI system design patterns</td><td>Guardrails, evaluation, fallback, observability</td></tr>
+    <tr><td>Responsible AI technical implementation</td><td>Content moderation, fairness checks, audit logging</td></tr>
+  </table>
+</div>
+<div class="alayer al4">
+  <div class="ln">Tier 4</div>
+  <strong>AI-Expert — ML engineers, AI architects, data scientists</strong> (people who build and operate AI infrastructure). Covers all technical content in this platform plus external resources (papers, frameworks, benchmarks).
+</div>
+
+<div class="sh2">4.5 Pilot to Enterprise Rollout: The Evaluation Criteria</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  Most pilots succeed. Most enterprise rollouts underperform projections. The gap is not technology — it's that pilots are optimised for demonstration, not scale.
+</div>
+
+<div class="sh2">Pilot Design Mistakes That Cause Scale Failures</div>
+<table class="t">
+  <tr><th>Pilot design mistake</th><th>What happens at scale</th></tr>
+  <tr><td>Cherry-picked enthusiastic early adopters</td><td>Adoption stalls with mainstream users who have different concerns</td></tr>
+  <tr><td>Measured only usage (logins, sessions) not outcomes</td><td>Cannot prove value; budget cut at review</td></tr>
+  <tr><td>Skipped governance — "we'll add it later"</td><td>Shadow AI proliferates; security incident triggers programme halt</td></tr>
+  <tr><td>Used vendor demo environment, not production data</td><td>Real-world performance much lower than demo environment</td></tr>
+  <tr><td>No human-in-the-loop for edge cases</td><td>Errors compound; user trust collapses</td></tr>
+  <tr><td>8-week pilot with dedicated support team</td><td>Support team not available at scale; adoption drops</td></tr>
+</table>
+
+<div class="sh2">Pilot-to-Production Checklist</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Technical Readiness</div>
+    <ul class="dl">
+      <li>System tested with production-scale data volumes (not just demo data)</li>
+      <li>Latency and availability SLAs defined and tested under load</li>
+      <li>Fallback behaviour tested (what happens when AI is unavailable)</li>
+      <li>Observability in place (logs, metrics, error rates visible to ops team)</li>
+      <li>Security and data handling reviewed and signed off</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">Adoption Readiness</div>
+    <ul class="dl">
+      <li>Training programme designed for the full target audience (not just enthusiasts)</li>
+      <li>Champions identified and trained in every affected team</li>
+      <li>Escalation path clear (who users contact for problems)</li>
+      <li>Feedback mechanism live before launch (not after)</li>
+      <li>Manager briefing completed</li>
+    </ul>
+  </div>
+</div>
+<div class="card ai" style="margin-top:10px">
+  <div class="ch ai">Governance Readiness</div>
+  <ul class="dl">
+    <li>Responsible AI review completed for this use case</li>
+    <li>Data handling and privacy review completed</li>
+    <li>Approved use case documented in AI catalogue</li>
+    <li>Success metrics defined with measurement plan and baseline established</li>
+    <li>Review gate scheduled (e.g., 90-day review with defined go/no-go criteria)</li>
+  </ul>
+</div>
+
+<div class="sh2">Phased Rollout Model</div>
+<div class="alayer al1">
+  <div class="ln">Week 1–4</div>
+  <strong>Champions cohort</strong> (5–10 per team, self-selected) — identify real-world issues not caught in pilot
+</div>
+<div class="alayer al2">
+  <div class="ln">Week 5–8</div>
+  <strong>Early majority</strong> (30% of target users) — stress test support model; refine training based on feedback
+</div>
+<div class="alayer al3">
+  <div class="ln">Week 9–16</div>
+  <strong>Full rollout</strong> (remaining 70%) — mandatory onboarding; manager reinforcement active
+</div>
+<div class="alayer al4">
+  <div class="ln">Month 6</div>
+  <strong>First ROI review</strong> — compare against business case; adjust or expand
+</div>
+<div class="alayer al5">
+  <div class="ln">Month 12</div>
+  <strong>Programme review</strong> — which use cases delivered; what to expand; what to retire
+</div>
+
+<!-- S5 — Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">Scenario: AI Adoption at a European Retail Distribution Group</div>
+  8,000 employees, 12 countries. Three initial use cases: customer service (AI-assisted email triage and response drafting), supply chain (demand forecasting exception handling), internal knowledge (AI search across documentation and policy).<br><br>
+  <strong>Starting point:</strong> Level 1 — 340 employees using ChatGPT individually (discovered in a security audit). No governance, no visibility, some uploading of supplier contracts and customer data.
+</div>
+
+<div class="sh2">Three Programme Design Choices</div>
+<div class="alayer al1">
+  <div class="ln">Decision 1</div>
+  <strong>Address shadow AI before launching approved tools.</strong> Rather than ignoring the 340 users, they communicated clearly: "We know you're using AI. Here's how to do it safely while we build the proper platform." This built trust and reduced the adversarial dynamic.
+</div>
+<div class="alayer al2">
+  <div class="ln">Decision 2</div>
+  <strong>Start with the customer service use case despite it being the riskiest.</strong> It had the highest executive visibility, the largest potential saving (£2.1M/year), and the most engaged business sponsor. A smaller "safer" first use case would have produced less credibility for the programme.
+</div>
+<div class="alayer al3">
+  <div class="ln">Decision 3</div>
+  <strong>Design the human-in-the-loop before designing the AI.</strong> The customer service team's concern was: "If the AI drafts a bad response and I send it, who is responsible?" The programme answered this before building: agents review every draft before sending; a dedicated feedback button sends errors directly to the QA team; incorrect drafts used to improve the system within 48 hours. Trust was designed in, not assumed.
+</div>
+
+<div class="sh2">Rollout Timeline — Customer Service Use Case</div>
+<table class="t">
+  <tr><th>Phase</th><th>Period</th><th>Users</th><th>Key metric</th><th>Result</th></tr>
+  <tr><td>Champions cohort</td><td>Months 1–2</td><td>18 agents</td><td>Draft acceptance rate</td><td>52% of drafts used with minor edits</td></tr>
+  <tr><td>Early majority</td><td>Months 3–4</td><td>80 agents</td><td>Acceptance rate, handling time</td><td>61% acceptance; 22% handling time reduction</td></tr>
+  <tr><td>Full rollout</td><td>Months 5–6</td><td>340 agents</td><td>All metrics</td><td>58% acceptance; 19% handling time reduction</td></tr>
+  <tr><td>Stabilisation</td><td>Months 7–12</td><td>340 agents</td><td>Quality, CSAT</td><td>Handling time -19%; CSAT unchanged (critical)</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
+  <strong>The resistance pattern they encountered (Month 3):</strong> A senior team lead (15 years experience) publicly stated the AI "was making the team dumber — they're not learning how to handle complex cases anymore." This was a <em>legitimate</em> concern, not just resistance.<br><br>
+  <strong>Response:</strong> Added a "learning mode" flag — agents could tag cases they wanted to handle without AI assistance for skill development. Usage data showed experienced agents voluntarily handling ~30% of cases without AI, newer agents using AI for all cases. Team lead became an internal advocate after this change. The concern was valid; addressing it honestly was more effective than dismissing it.
+</div>
+
+<div class="sh2">18-Month Outcomes Across All Three Use Cases</div>
+<table class="t">
+  <tr><th>Use case</th><th>Target saving</th><th>Actual saving</th><th>Adoption rate</th><th>Primary learning</th></tr>
+  <tr><td>Customer service</td><td>£2.1M/year</td><td>£1.7M/year</td><td>81% active users</td><td>Handling time saving real; CSAT neutral (not improved)</td></tr>
+  <tr><td>Supply chain exceptions</td><td>£0.8M/year</td><td>£1.2M/year</td><td>94% active users</td><td>Exceeded target; supply chain team were most engaged adopters</td></tr>
+  <tr><td>Internal knowledge search</td><td>£0.4M/year</td><td>£0.1M/year</td><td>31% active users</td><td>Documentation quality too poor for RAG; use case paused</td></tr>
+</table>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:8px">
+  The internal knowledge failure was important: the AI system worked technically but the documentation corpus was inconsistent, poorly structured, and outdated. <strong>AI search amplified the documentation quality problem rather than hiding it.</strong> The remediation (documentation quality programme) is underway; knowledge search relaunched in month 24.
+</div>
+
+<div class="sh2">Programme Investment and ROI</div>
+<div class="kv">
+  <div class="kvr"><span class="kvk">Technology (APIs, infrastructure)</span><span class="kvv">£380,000</span></div>
+  <div class="kvr"><span class="kvk">Implementation (development, integration)</span><span class="kvv">£420,000</span></div>
+  <div class="kvr"><span class="kvk">Change management and training</span><span class="kvv">£180,000</span></div>
+  <div class="kvr"><span class="kvk">Total 18-month investment</span><span class="kvv">£980,000</span></div>
+  <div class="kvr"><span class="kvk">18-month saving</span><span class="kvv">£3.0M</span></div>
+  <div class="kvr"><span class="kvk">ROI</span><span class="kvv">3× in 18 months</span></div>
+</div>
+
+<!-- S6 — Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+<div class="sh2">The Operating Model for AI at Scale</div>
+<div class="ibox">
+  Technical architecture alone is not enough. The operating model — who owns what, how decisions are made, how quality is maintained — determines whether AI delivers sustained value.
+</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Centralised (AI Centre of Excellence)</div>
+    Single team owns all AI platforms, standards, and approvals.<br><br>
+    <strong>Pros:</strong> consistency, quality control, no duplication, clear accountability.<br>
+    <strong>Cons:</strong> bottleneck, distance from business needs, slow iteration.<br>
+    <strong>When:</strong> early adoption stages (Levels 1–2); organisations with high risk sensitivity.
+  </div>
+  <div class="card b">
+    <div class="ch b">Federated (Distributed AI with Central Standards)</div>
+    Each business unit has AI capability; central team sets standards, provides platforms, reviews high-risk use cases.<br><br>
+    <strong>Pros:</strong> scale, domain expertise, faster iteration.<br>
+    <strong>Cons:</strong> risk of divergence, duplication, inconsistent quality.<br>
+    <strong>When:</strong> maturing organisations (Levels 3–4); established governance frameworks.
+  </div>
+</div>
+<div class="card ai" style="margin-top:10px">
+  <div class="ch ai">Embedded (AI as Default Engineering Practice)</div>
+  AI capabilities are part of every product team; no separate AI team.<br><br>
+  <strong>Pros:</strong> fastest iteration, closest to business need.<br>
+  <strong>Cons:</strong> requires mature AI skills across all teams; governance is hardest to maintain.<br>
+  <strong>When:</strong> highest maturity organisations; AI is not a special topic, it's standard engineering.
+</div>
+<div class="ibox" style="border-left-color:#2563eb;margin-top:10px">
+  Most enterprise organisations at Levels 2–3 use the <strong>federated model</strong>. The Centre of Excellence provides: approved model/vendor catalogue, reference architectures and reusable components, security and compliance review, AI skills programme, and AI cost tracking and reporting to finance.
+</div>
+
+<div class="sh2">Measuring Adoption: The Right Metrics</div>
+<div class="sh2">Leading Indicators (predict future adoption success)</div>
+<table class="t">
+  <tr><th>Metric</th><th>What it measures</th><th>Target</th></tr>
+  <tr><td>Training completion rate</td><td>Skills readiness</td><td>&gt; 90% before full rollout</td></tr>
+  <tr><td>Champion engagement</td><td>Internal advocacy health</td><td>&gt; 80% of champions active monthly</td></tr>
+  <tr><td>Feedback submission rate</td><td>Users reporting issues (sign of engagement)</td><td>&gt; 5% of users/month</td></tr>
+  <tr><td>Time-to-first-use after onboarding</td><td>Friction in getting started</td><td>&lt; 3 days</td></tr>
+</table>
+
+<div class="sh2">Lagging Indicators (measure adoption outcomes)</div>
+<table class="t">
+  <tr><th>Metric</th><th>What it measures</th><th>How to collect</th></tr>
+  <tr><td>Monthly active users / total eligible users</td><td>Sustained adoption rate</td><td>System logs</td></tr>
+  <tr><td>AI-assisted vs total task volume</td><td>Actual usage depth</td><td>Workflow metrics</td></tr>
+  <tr><td>Output acceptance rate</td><td>Quality and trust</td><td>UI feedback button</td></tr>
+  <tr><td>Task completion time (AI vs baseline)</td><td>Efficiency gain</td><td>Before/after comparison</td></tr>
+  <tr><td>Quality metric (relevant to use case)</td><td>Value delivered</td><td>Domain-specific</td></tr>
+  <tr><td>User-reported satisfaction (pulse survey)</td><td>Sentiment</td><td>Monthly 3-question survey</td></tr>
+</table>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:8px">
+  <strong>&#128993; The vanity metric trap:</strong> "number of AI tools deployed" and "number of use cases in pilot" are activity metrics, not outcome metrics. Finance and leadership eventually see through them. Build your measurement programme around business outcome metrics from day one, even if they're harder to collect.
+</div>
+
+<!-- S7 — Check Yourself -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">5 Questions to Test Your Understanding</div>
+  <ol class="sl">
+    <li>A pilot of an AI-assisted invoice processing tool achieved 94% accuracy and saved 35% processing time across 20 users over 8 weeks. Leadership wants to roll it out to 400 users in the next month. What are your key concerns, and what would you recommend?</li>
+    <li>A business unit leader says: "Our team is worried about job losses — they think the AI will replace them. How should I communicate about this?" What advice would you give, and what communication mistakes should they avoid?</li>
+    <li>You've been asked to design the training programme for an AI adoption rollout affecting 1,200 employees across 4 departments. Budget is limited to 2 days of training per person maximum. How would you structure it?</li>
+    <li>An AI knowledge search system was deployed 6 months ago. Usage has dropped from 35% of eligible users in month 1 to 12% in month 6. What are the likely causes and how would you diagnose and address them?</li>
+    <li>How would you structure the ROI measurement for an AI system that assists supply chain planners in identifying demand forecast exceptions? The business case claims £800K annual saving.</li>
+  </ol>
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:12px">
+  <strong>Q1 Answer:</strong> Three key concerns: (1) Scale readiness — the 380 remaining users will include sceptics, less tech-comfortable users, and those with different workflows. Training designed for 20 enthusiasts will not work for 400. Recommend a phased 12–16 week rollout. (2) Infrastructure readiness — at 20× the volume, API rate limits, latency, and error handling need load testing before full rollout. (3) Accuracy at the tail — 6% error rate on invoices going into payment flows is material risk. Understand whether errors are random (benign) or concentrated in specific invoice types (systemic risk). Recommend mandatory human review for invoice values above a threshold for the first 90 days.
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+  <strong>Q2 Answer:</strong> Communication mistakes to avoid: (1) "AI won't replace anyone" — if workflows are changing, empty reassurance destroys trust when reality diverges. (2) "We'll figure it out as we go" — uncertainty without a plan is more frightening than difficult facts with a plan. (3) Communicating only at launch. What to do: be specific about what will change and what will not; be honest about what you don't know yet; focus on what people will gain; create a feedback channel. Honest, specific, early communication with a clear plan for support consistently outperforms optimistic reassurance in change management research.
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+  <strong>Q3 Answer:</strong> Structure by role tier, not flat "2 days for everyone": (1) All 1,200 employees: 2-hour AI Literacy module — mandatory prerequisite, self-paced online. (2) ~800 frontline users: 4-hour role-specific workshop — specific tasks, hands-on practice, facilitated in groups of 20. (3) ~300 supervisors and team leads: half-day manager enablement — how to support adoption, handle resistance conversations. (4) ~80 power users / champions: full-day advanced workshop — prompt engineering, workflow redesign, peer training. (5) ~20 technical/admin: technical training on the system. Total: ~7,600 person-hours, within the 8-hour-per-person budget, far more targeted than a uniform 2-day programme.
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+  <strong>Q4 Answer:</strong> A 65% usage drop after an initial peak is an adoption failure pattern — not a technology failure. Likely causes: (1) Output quality was never good enough — pull a sample of recent searches and evaluate; if the document corpus is poor quality, RAG amplifies this. Fix: documentation quality programme. (2) Tool doesn't fit the actual workflow — observe how users search today (don't ask — observe); if accessed via a separate URL, friction is too high. Fix: integrate where work already happens. (3) No visible improvement after feedback — check if feedback was used and if users saw changes. Fix: public changelog; close the feedback loop. (4) No manager reinforcement — if managers don't use it or reference it, teams won't either. Fix: manager engagement programme.
+</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+  <strong>Q5 Answer:</strong> Structure: (1) Baseline measurement (30 days before launch): measure current time per exception, current exception volume, and current error rate — or current forecast MAPE and its downstream cost. Never launch without a baseline. (2) Attribution design: document other variables that might affect the metric (new suppliers, seasonality, team changes) so you can credibly attribute changes to AI. (3) Measurement cadence: monthly for first 6 months; then quarterly. (4) Specific metrics: average time to resolve an exception, exception handling error rate, planner time on manual triage, forecast accuracy / inventory cost impact. (5) 90-day review gate: if trajectory is not consistent with the £800K projection, identify the gap — adoption, quality, or baseline error — and adjust before the 6-month executive review.
+</div>
+
+<!-- S8 — Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  <strong>&#128993; Optional depth —</strong> This section covers ADKAR and Kotter change management frameworks in detail. If you are not familiar with change management as a discipline, read the brief framing sentence before each framework description. Safe to skim on a first pass.
+</div>
+
+<div class="sh2">8.1 Why Change Programmes Fail: The Research View</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">ADKAR (Prosci) — Individual-Level Model</div>
+    Change succeeds when each person moves through five stages:
+    <ul class="dl">
+      <li><strong>Awareness:</strong> why is the change happening?</li>
+      <li><strong>Desire:</strong> do I want to support it?</li>
+      <li><strong>Knowledge:</strong> do I know how to change?</li>
+      <li><strong>Ability:</strong> can I actually do the new behaviour?</li>
+      <li><strong>Reinforcement:</strong> what keeps me using the new way?</li>
+    </ul>
+    Most AI programmes invest heavily in Knowledge (training) and underinvest in Desire (why should I bother?) and Reinforcement (what happens if I revert?). ADKAR explains why technically good training programmes don't drive sustained adoption: if Desire is missing, Knowledge is wasted.
+  </div>
+  <div class="card b">
+    <div class="ch b">Kotter's 8-Step Model — Organisation-Level Model</div>
+    <ol class="sl">
+      <li>Create a sense of urgency</li>
+      <li>Build a guiding coalition</li>
+      <li>Form a strategic vision</li>
+      <li>Enlist a volunteer army</li>
+      <li>Enable action by removing barriers</li>
+      <li>Generate short-term wins</li>
+      <li>Sustain acceleration</li>
+      <li>Institute change</li>
+    </ol>
+    For AI programmes, steps 5 and 6 are frequently underexecuted: Step 5 (remove barriers) — common barriers include IT approval delays, data access restrictions, and manager scepticism — none of which are training problems. Step 6 (short-term wins) — a 12-month programme with no visible wins in the first 90 days loses momentum; design for quick, visible wins in the first 60 days.
+  </div>
+</div>
+
+<div class="sh2">8.2 Responsible AI Training: What It Actually Covers</div>
+<div class="alayer al1">
+  <div class="ln">Area 1</div>
+  <strong>Data handling</strong> — what data can and cannot be submitted to an AI model. Most enterprise AI policies prohibit: personal data above a defined sensitivity level, commercially sensitive information (unreleased product details, financial projections), customer-identifiable data without explicit consent.
+</div>
+<div class="alayer al2">
+  <div class="ln">Area 2</div>
+  <strong>Output reliability</strong> — how to calibrate trust in AI output. Domain-specific: more reliable at summarisation than precise legal interpretation; more reliable at formatting than factual recall; more reliable for common questions than for edge cases.
+</div>
+<div class="alayer al3">
+  <div class="ln">Area 3</div>
+  <strong>Attribution and disclosure</strong> — when must AI-assisted content be disclosed? Many companies are developing policies: disclosed to customers? In internal reports? In published content? Employees need to know the policy for their context.
+</div>
+<div class="alayer al4">
+  <div class="ln">Area 4</div>
+  <strong>Decision authority</strong> — which decisions can AI assist with, which require human sign-off? A tiered framework (similar to the T0–T3 governance model in the Governance Deep Dive tab) defines escalation thresholds.
+</div>
+<div class="alayer al5">
+  <div class="ln">Area 5</div>
+  <strong>Incident reporting</strong> — how to report AI outputs that are harmful, incorrect, or unexpected. The feedback loop is how AI systems improve — employees who don't know how to report (or don't believe it matters) leave quality problems unresolved.
+</div>
+
+<!-- S9 — Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>AI adoption is 60–70% people and process, 30–40% technology — design accordingly.</strong> The most common cause of AI project failure is not technical. It's systems that work as designed but don't get used, don't get trusted, or don't have governance in place when something goes wrong. Architects must take ownership of the adoption dimension, not just the technical architecture.</li>
+  <li><strong>Know which maturity level your organisation is at and prescribe the right next step, not the ultimate destination.</strong> A Level 1 organisation (experimenting) trying to implement a Level 3 programme (enterprise platform, full governance) will fail. Match the intervention to the current state: at Level 1, a single visible win and a basic governance scaffold; at Level 2, rigorous pilot evaluation and skills building; at Level 3, platform standardisation and cost governance.</li>
+  <li><strong>Build the ROI measurement plan before building the system — not after.</strong> Baseline metrics must be captured before launch. ROI claims without baselines are unverifiable. Finance will eventually ask for evidence; designing measurement in from day one is the only way to provide it credibly. The measurement plan also sharpens thinking about which use cases are genuinely worth pursuing.</li>
+  <li><strong>Resistance to AI is usually legitimate — address the real concern, not the surface behaviour.</strong> "I don't trust it" means different things: accuracy doubt, job threat, skill gap, loss of control. Diagnose which concern is driving resistance in each stakeholder group and design a specific response. Generic reassurance ("AI is just a tool") doesn't resolve legitimate concerns about job evolution or accountability.</li>
+  <li><strong>Pilots succeed; scale is hard — design your pilot for the mainstream, not the enthusiasts.</strong> Successful pilots that fail to scale share a pattern: run with self-selected enthusiasts, measured activity not outcomes, skipped governance, and used dedicated support that isn't available at scale. Design pilots explicitly around the question: "will this work for the average user with normal support, not the early adopter with dedicated attention?"</li>
+</ul>

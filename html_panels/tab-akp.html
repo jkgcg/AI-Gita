@@ -1,0 +1,163 @@
+<!-- S1: What Is It -->
+<div class="sh">What Is an Agentic Platform?</div>
+<div class="ibox">A single LLM is like a very smart consultant who can only answer questions by talking — no phone, no laptop, no access to your systems, no memory of the last meeting. An <strong>AI agent</strong> gives that consultant a phone, a laptop, access to your systems, and a notebook. It can now look things up, run calculations, call APIs, read emails, write files, and remember what happened last week.<br><br>An <strong>Agentic Platform</strong> is the enterprise infrastructure that makes this safe, manageable, and scalable — providing a shared model gateway, a tool registry, a memory system, a governance layer, and an orchestration runtime.</div>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b"><div class="ch b">For Solution Architects</div>
+    <p>The moment AI takes <strong>actions</strong> (not just answers), the design questions change completely:</p>
+    <ul class="dl">
+      <li><strong>Authorization:</strong> which systems can the agent call, with what permissions, on behalf of whom?</li>
+      <li><strong>Blast radius:</strong> if the agent makes a mistake, what is the maximum damage? A hallucinated summary is recoverable; an erroneous order cancellation is not.</li>
+      <li><strong>Observability:</strong> how do you trace what an agent did and why — across 12 tool calls that happened in 8 seconds?</li>
+      <li><strong>Cost control:</strong> an agent that loops unexpectedly can make 500 LLM calls in a minute. Without budget caps, that is an unplanned bill.</li>
+    </ul>
+    <p>An agentic platform answers all of these with infrastructure rather than per-project point solutions.</p>
+  </div>
+  <div class="card ai"><div class="ch ai">For Enterprise Architects</div>
+    <p>Agentic systems are the first AI pattern that crosses your <strong>entire integration estate</strong>. A single agent may touch your CRM, OMS, ERP, knowledge base, email system, and analytics platform — all in one workflow.</p>
+    <p>The <strong>Agent Knowledge Platform (AKP)</strong> uses a 6-plane model to decompose this complexity into governable layers. Each plane maps to something you already have: identity, API gateway, message bus, data platform, knowledge store, and observability stack. The AKP organises how AI agents interact with them — it does not replace them.</p>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This — The Enterprise Help Desk</div>
+<div class="ibox">Imagine running a large enterprise help desk for a retail company. You have employees (agents) who handle customer issues:
+  <ul class="dl" style="margin-top:8px">
+    <li><strong>The phone switchboard (Model Gateway):</strong> Every incoming call goes through the switchboard. It routes calls to the right employee, logs the call, and enforces policies. No employee has a direct line that bypasses it.</li>
+    <li><strong>The tool cabinet (Tool Registry):</strong> Employees can look up orders, issue refunds, schedule callbacks, and escalate tickets. But not every employee can issue a refund — there is a permissions matrix. The cabinet is locked; employees sign out tools based on their role.</li>
+    <li><strong>The case notes system (Memory):</strong> When a customer calls back, the employee can pull up notes from the last call (episodic), search the knowledge base for known issues (semantic), and see what they have already tried this call (working).</li>
+    <li><strong>The supervisor layer (Governance):</strong> Refunds over £500 require sign-off before they go through. There is an audit log of every action taken.</li>
+    <li><strong>The call routing engine (Orchestration Runtime):</strong> Manages the queue, assigns calls, handles escalations, retries dropped calls, and ensures no single employee gets overwhelmed.</li>
+  </ul>
+  <strong>Key insight:</strong> you already know how to build this infrastructure. API gateways, identity systems, audit logs, RBAC, message queues — these are not new problems. The AKP applies your existing enterprise patterns to AI agents.
+</div>
+
+<!-- S4: Core Concepts — AKP Six-Plane Architecture -->
+<div class="sh">Step-by-Step — The AKP Six-Plane Architecture</div>
+
+<div class="ibox" style="border-left-color:#2563eb;margin-bottom:12px">
+  <strong>Start here:</strong> an Agent Core is a loop — Think (LLM call) → Decide (tool needed?) → Act (tool call) → Observe (add result to context) → Repeat. This is the <strong>ReAct pattern</strong> (Reasoning + Acting). Everything else is infrastructure to make this loop safe, governed, and observable at scale.
+</div>
+
+<div class="alayer al1"><div class="ln">Plane 1 — Surfaces</div>User-facing entry points: chat interfaces, API endpoints, embedded widgets, voice channels, CLI tools. Each surface authenticates the caller and translates the request into a standard agent invocation.</div>
+<div class="alayer al2"><div class="ln">Plane 2 — Agent Runtime</div>Execution environment for the Agent Core loop. Manages the lifecycle of agent tasks: spawning, scheduling, timeout handling, retries, and parallelism. Coordinates multiple concurrent agents (manager delegating to specialists).</div>
+<div class="alayer al3"><div class="ln">Plane 3 — Tool Plane</div>Managed registry of capabilities agents can invoke. Each tool entry specifies: what the tool does, what parameters it accepts, who is authorized to call it, rate limits, and how to handle errors. Includes REST API calls, database queries, code execution, browser automation, email/calendar integrations.</div>
+<div class="alayer al4"><div class="ln">Plane 4 — Knowledge Plane</div>Memory and retrieval layer: vector stores for semantic search, document stores for raw retrieval, graph databases for relationship-aware queries, caches for frequently accessed context. Allows agents to "know things" beyond training data and the current conversation.</div>
+<div class="alayer al5"><div class="ln">Plane 5 — Governance Plane</div>Policy enforcement, guardrails, audit logging, budget management, compliance controls. Every LLM call and every tool call passes through governance before execution: PII redaction, content filters, action whitelisting, budget caps, GDPR handling, EU AI Act transparency requirements.</div>
+<div class="alayer al6"><div class="ln">Plane 6 — Data Backbone</div>Underlying data infrastructure: message queues, event streams, data pipelines connecting the agent platform to your enterprise data systems. Ensures agents work from current, consistent data — not stale snapshots.</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example — Customer Return Resolution</div>
+<div class="card a"><div class="ch a">Scenario: Retail Company — Missing Item Refund</div>
+  <p><strong>Customer says:</strong> "I ordered 3 pairs of shoes last week, two arrived but one is missing from the box. I want a refund."</p>
+  <p><strong>Without an agentic platform:</strong> support agent manually logs into OMS, checks the manifest, cross-references the warehouse scan log, checks return policy, creates a refund ticket, emails the customer. 12–20 minutes of work.</p>
+  <p><strong>With an agentic platform — 6 tool calls, ~15 seconds, zero human involvement:</strong></p>
+  <div class="code">1. OMS.get_customer_orders(customer_id) → identifies the relevant order
+2. OMS.get_order_details(order_id) → 3-item order, all shipped as one parcel
+3. warehouse.get_scan_log(parcel_id) → weight discrepancy: 2.1 kg dispatched vs 3.2 kg expected
+4. policy_engine.get_return_policy(item_category="footwear") → eligible for refund without return
+5. OMS.create_refund(order_id, item_id, amount=79.99) → refund created
+6. comms.send_email(customer_id, template="missing_item_refund") → confirmation sent</div>
+  <p><strong>Governance controls in this flow:</strong> refunds over £200 require human approval; every tool call is in the audit log with LLM reasoning trace; customer PII is redacted in LLM calls (agent works with IDs); budget cap halts agent if it exceeds 20 LLM calls on a single ticket.</p>
+  <p><strong>What you design as an architect:</strong> the tool registry, the authorization matrix, the escalation thresholds, and the observability schema.</p>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">The Blast Radius Problem</div>
+<table class="t">
+  <tr><th>Tool</th><th>Reversible?</th><th>Scope</th><th>Design implication</th></tr>
+  <tr><td><code>search_knowledge_base()</code></td><td>Yes</td><td>Read-only</td><td>No special controls needed</td></tr>
+  <tr><td><code>get_order_status()</code></td><td>Yes</td><td>Read-only</td><td>No special controls needed</td></tr>
+  <tr><td><code>create_refund()</code></td><td>Partially</td><td>Financial action</td><td>Amount limit, audit log, human threshold</td></tr>
+  <tr><td><code>send_email()</code></td><td>No</td><td>External comms</td><td>Requires confirmation template, no bulk</td></tr>
+  <tr><td><code>cancel_order()</code></td><td>No (if shipped)</td><td>Supply chain</td><td>Requires explicit confirmation</td></tr>
+  <tr><td><code>delete_customer_data()</code></td><td>No</td><td>Irreversible</td><td>Human approval mandatory, regulatory log</td></tr>
+</table>
+
+<div class="sh2">Model Gateway vs Direct Call</div>
+<table class="t">
+  <tr><th></th><th>Direct Tool Call</th><th>MCP Gateway</th></tr>
+  <tr><td>Discovery</td><td>Hardcoded in agent</td><td>Dynamic — agent queries registry</td></tr>
+  <tr><td>Auth</td><td>Per-tool, per-agent</td><td>Centralized gateway enforces policy</td></tr>
+  <tr><td>Versioning</td><td>Manual updates per agent</td><td>Registry manages versions</td></tr>
+  <tr><td>Observability</td><td>Each tool logs separately</td><td>Gateway logs all tool traffic</td></tr>
+  <tr><td>Use case</td><td>Simple, one-off agents</td><td>Production, multi-team, enterprise</td></tr>
+</table>
+
+<div class="sh2">Multi-Agent Patterns</div>
+<div class="g2">
+  <div class="card b"><div class="ch b">Orchestrator + Specialist</div>A manager agent decomposes the task and delegates to specialist agents (one for OMS, one for logistics, one for comms). Each specialist has a narrower tool permission set, reducing blast radius.</div>
+  <div class="card ai"><div class="ch ai">Parallel Agents</div>Multiple agents work independently on sub-tasks simultaneously, then results are merged. A2A (Agent-to-Agent) protocol (Google, 2024) enables dynamic discovery and delegation — analogous to MCP for tools.</div>
+</div>
+
+<div class="sh2">AKP in Your Existing Enterprise Stack</div>
+<div class="kv">
+  <div class="kvr"><span class="kvk">API Gateway</span><span class="kvv">Model Gateway extends it</span></div>
+  <div class="kvr"><span class="kvk">Identity / IAM</span><span class="kvv">Agent Authorization integrates with it</span></div>
+  <div class="kvr"><span class="kvk">Message Bus</span><span class="kvv">Agent Runtime queue uses it</span></div>
+  <div class="kvr"><span class="kvk">Data Platform</span><span class="kvv">Knowledge Plane / Data Backbone feeds from it</span></div>
+  <div class="kvr"><span class="kvk">SIEM / Audit</span><span class="kvv">Governance Plane logs feed into it</span></div>
+  <div class="kvr"><span class="kvk">Observability</span><span class="kvv">OTel traces from every LLM + tool call extend it</span></div>
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself — 5 Questions</div>
+<div class="card g"><div class="ch g">Self-Assessment</div>
+  <p>Use these to verify you can reason through the architecture — not just recall definitions.</p>
+</div>
+<ol class="sl">
+  <li><strong>Your engineering team proposes giving a customer service agent direct database write access "because it's simpler."</strong> What is the architectural objection? <em>— Direct DB write bypasses authorization, audit, and governance controls the tool registry enforces. If the agent miscalculates a refund or receives malformed LLM output, it can corrupt records with no audit trail and no human intervention point.</em></li>
+  <li><strong>An agent designed for 1 LLM call per ticket makes 400 calls in a minute. What platform controls should prevent this?</strong> <em>— Per-agent budget caps in governance; loop detection in the runtime (same tool, same args repeatedly); task-level timeout; rate limits on the model gateway.</em></li>
+  <li><strong>What is MCP and why does it matter for enterprise architecture?</strong> <em>— MCP is an open standard interface for how agents discover and invoke tools. It enables a shared tool library: your OMS integration, logistics wrapper, and knowledge base search are built once, registered centrally, and available to all agents — rather than each team rebuilding the same integrations independently.</em></li>
+  <li><strong>Your legal team asks: "Can we trace why an agent made a wrong decision that led to an incorrect charge?"</strong> <em>— The audit log must capture: the full LLM input, the LLM reasoning output (the "thought" before the tool call), the specific tool call with parameters, the tool response, and the final decision output. OTel extended with GenAI semantic conventions is the current production standard.</em></li>
+  <li><strong>How does error handling differ between a traditional API integration and an agentic platform?</strong> <em>— In traditional integration, errors are explicit exceptions. In agent systems, the LLM may silently absorb a tool error, continue, and produce a confidently wrong answer. Operations teams must watch for behavioral anomalies (unexpected tool sequences, budget spikes, quality drops), not just error codes.</em></li>
+</ol>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section goes further for architects who want to understand the mechanisms in detail. Safe to skip on a first pass.</div>
+<div class="g2">
+  <div class="card ai"><div class="ch ai">Plane 7 — Evaluation Plane</div>Continuous evaluation infrastructure: LLM judges that assess quality of other LLM outputs, golden dataset tests run on every deployment, A/B frameworks for comparing agent versions. In production you cannot manually review every interaction — the evaluation plane automates quality assurance.</div>
+  <div class="card ai"><div class="ch ai">Plane 8 — Persona / Identity Plane</div>Agent identity management: each agent has a defined persona (name, tone, capability scope, escalation behavior), role-based access profile, and versioned configuration. Manages rollouts — routing 10% of traffic to a new agent version while the evaluation plane monitors quality.</div>
+</div>
+<div class="card b"><div class="ch b">Context Budget Management</div>
+  <p>As the agent loops, its context grows. A 128K window can fill up in a long workflow. When it fills, the agent must truncate (losing information) or summarize (lossy compression). Cost is proportional to context size.</p>
+  <ul class="dl">
+    <li><strong>Sliding window:</strong> keep the most recent N turns, drop older ones</li>
+    <li><strong>Summarization:</strong> call the LLM to compress history when context exceeds a threshold</li>
+    <li><strong>Structured working memory:</strong> store data as compact JSON objects rather than raw conversation text — much more token-efficient</li>
+    <li><strong>Episodic memory:</strong> after a task completes, extract key facts to durable memory and clear working context for the next task</li>
+  </ul>
+</div>
+<div class="card b"><div class="ch b">Prompt Drift Detection</div>
+  <p>In a long-running agentic deployment, the effective prompt changes over time because: few-shot examples become dated; tool descriptions reference APIs that have been updated; the system prompt was written for a model that the model gateway has since rotated away from.</p>
+  <p><strong>Detection pattern:</strong> periodically replay a golden set of test inputs and compare the agent's output to a reference baseline. If output drift exceeds a threshold, trigger a review. This is part of the evaluation plane.</p>
+</div>
+<div class="card b"><div class="ch b">IIB Adapter Pattern — Legacy Integration</div>
+  <p>When integrating with legacy enterprise systems (SAP, IBM MQ, COBOL mainframes) that lack modern REST APIs, use integration middleware as the translation boundary:</p>
+  <div class="code">Agent Tool Call (JSON/REST)
+        ↓
+Integration Middleware (MuleSoft / IIB / Azure Logic Apps)
+  → translates REST → SOAP / flat file / MQ message
+        ↓
+Legacy System (SAP, mainframe)</div>
+  <p>The tool registry wraps the middleware endpoint as if it were a native API. The agent has no knowledge of the underlying legacy protocol — it calls <code>get_inventory_levels()</code>, the middleware handles the rest.</p>
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>An agent is just an LLM with tools and a loop.</strong> The Agent Core is: think (LLM call) → act (tool call) → observe (add result to context) → repeat until done. Everything else is infrastructure to make this loop safe, governed, and observable at enterprise scale.</li>
+  <li><strong>The Model Gateway and Tool Registry are your primary governance controls.</strong> Every LLM call goes through the gateway (auth, cost tracking, routing, rate limiting). Every tool call goes through the registry (auth, blast radius controls, audit log). Without these, there is no consistent governance — each agent team manages its own.</li>
+  <li><strong>Agentic systems require a different audit model.</strong> Traditional audit captures <em>what</em> happened. Agentic audit must capture <em>why</em> — the LLM reasoning trace that preceded each action. OpenTelemetry extended to LLM spans is the current production standard.</li>
+  <li><strong>Blast radius management is the key design principle for tool authorization.</strong> Read-only tools need minimal controls. Tools that write to external systems, send communications, or make financial changes need: amount limits, human approval thresholds, loop detection, and irreversibility flags. Design the permission matrix before you design the agents.</li>
+  <li><strong>The AKP is not a new architecture — it is your existing enterprise stack extended for AI agents.</strong> Your API gateway, IAM, message bus, data platform, and observability stack are all reused. The AKP adds the AI-specific layer on top: model gateway, tool registry, knowledge plane, and governance controls that understand LLM-specific failure modes.</li>
+</ul>

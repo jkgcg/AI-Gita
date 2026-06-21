@@ -1,0 +1,475 @@
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+<div class="ibox">
+  <strong>AI system design</strong> is the discipline of architecting production AI systems — deciding how all the pieces fit together so the system is reliable, cost-effective, scalable, and governable.
+</div>
+<div class="ibox">
+  It's not the same as designing a traditional distributed system. Not because the principles are different, but because AI systems have properties that traditional systems don't:
+  <ul class="dl">
+    <li><strong>Non-deterministic outputs:</strong> the same request can return different responses. You can't cache them the same way. You can't unit-test them the same way. SLAs look different.</li>
+    <li><strong>Variable compute cost:</strong> processing a 50-token query is 20× cheaper than a 1,000-token query. Cost is runtime-determined, not fixed per request.</li>
+    <li><strong>Quality as a dimension:</strong> a web API either returns 200 or it doesn't. An LLM returns 200 whether the answer is correct or hallucinated. Quality is a first-class design concern.</li>
+    <li><strong>Model as a dependency:</strong> your system depends on a model that can change, degrade, or become unavailable. The model is an external dependency with its own versioning, pricing, and SLA — like a database, but less predictable.</li>
+    <li><strong>Context as state:</strong> LLMs are stateless by default, but the quality of their response depends entirely on what's in the context window. Managing context — what goes in, in what order, how much — is a core design concern.</li>
+  </ul>
+</div>
+<div class="ibox">
+  AI system design is the practice of making good decisions across all of these dimensions <strong>before a line of code is written</strong>. The decisions you make at design time — model choice, retrieval strategy, routing logic, caching approach, evaluation architecture — are expensive to reverse once the system is in production.
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>You are the person who gets asked: "Can we build this?" before anyone knows how. AI system design is how you answer that question with confidence — not by guessing, but by decomposing the problem into solvable pieces and identifying where the risks live.</p>
+    <ul class="dl">
+      <li><strong>Latency:</strong> the user expects a response in 2 seconds. A single GPT-4o call takes 1.5–4 seconds. How do you build a system that meets a 2-second P95 SLA?</li>
+      <li><strong>Cost:</strong> 50,000 users × 10 queries/day × £0.03/query = £15,000/day. Is that in budget? What does the cost model look like as you scale?</li>
+      <li><strong>Quality:</strong> how do you know if the system is working? What does "working" mean for an LLM that gives fluent wrong answers?</li>
+      <li><strong>Failure modes:</strong> what happens when the LLM API is down? When the vector store returns no results? When the agent loops? What are the fallbacks?</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>AI systems touch more of your enterprise stack than any other category of application — they read from your data platform, call your APIs, write to your CRM, and communicate with your customers. Three design decisions with enterprise-wide implications:</p>
+    <ul class="dl">
+      <li><strong>Multi-tenancy model:</strong> how do you serve multiple teams or customers from one AI system without data bleed, cost confusion, or one tenant's load degrading another's experience?</li>
+      <li><strong>Model routing strategy:</strong> which queries go to which model? A routing layer that sends complex queries to GPT-4o and simple queries to Claude Haiku can cut costs by 60–80% with no user-facing quality difference. But it needs to be designed in, not bolted on.</li>
+      <li><strong>Feedback loop architecture:</strong> how does what the system does in production inform how it improves? A system without a feedback loop is frozen at the quality it had at launch. This is a design concern, not an operational one.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This</div>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>The Contact Centre Architecture Analogy</strong><br><br>
+  Imagine you're designing a contact centre for a large retailer — not building it, but designing the architecture before anyone is hired or any software is procured.<br><br>
+  <ul class="dl">
+    <li><strong>Routing:</strong> does every call go to the same pool of agents, or do you route by query type? Returns to the returns team, VIP customers to dedicated agents? — <em>Model routing in AI systems</em></li>
+    <li><strong>Tiers:</strong> do you have a self-service IVR for simple questions, a first-line agent for standard queries, and escalation to a senior specialist for complex issues? — <em>Model tiering: fast/cheap for simple, powerful/expensive for complex</em></li>
+    <li><strong>Context passing:</strong> when a customer is transferred from IVR to agent to specialist, what information travels with them? Do they have to re-explain their issue each time? — <em>Context management and session memory</em></li>
+    <li><strong>Capacity and overflow:</strong> what happens at peak? Are there overflow rules? What's the maximum queue depth before "try again later"? — <em>Rate limiting, fallback routing, load shedding</em></li>
+    <li><strong>Quality assurance:</strong> how do you know if agents are giving good answers? You sample, score, and use the results to train. — <em>LLM evaluation and monitoring</em></li>
+    <li><strong>Cost model:</strong> IVR costs £0.02/minute. First-line agents £0.50/minute. Senior specialists £2.00/minute. The architecture that routes correctly saves enormous money at scale. — <em>LLM cost routing</em></li>
+  </ul>
+  Every one of these contact centre decisions has a direct AI system design parallel. The decisions you make before the system is built determine whether it's operationally manageable and financially viable at scale.
+</div>
+
+<!-- S4: Core Concepts -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 The 6-Layer Production LLM Architecture</div>
+<div class="alayer al1">
+  <div class="ln">Layer 1 — Client / Surface</div>
+  <strong>Components:</strong> Web, mobile, API, internal tools, voice<br>
+  <strong>Responsibilities:</strong> auth, rate limit per user, request validation, response formatting
+</div>
+<div class="alayer al2">
+  <div class="ln">Layer 2 — Orchestration</div>
+  <strong>Components:</strong> LangChain / LangGraph / custom agent framework<br>
+  <strong>Responsibilities:</strong> task decomposition, agent loop, tool dispatch, context assembly, retry logic
+</div>
+<div class="alayer al3">
+  <div class="ln">Layer 3 — Model Gateway</div>
+  <strong>Components:</strong> LiteLLM / custom proxy / cloud-native<br>
+  <strong>Responsibilities:</strong> model routing, fallback, rate limiting, cost tracking, auth to LLM APIs
+</div>
+<div class="alayer al4">
+  <div class="ln">Layer 4 — Knowledge / Retrieval</div>
+  <strong>Components:</strong> Vector DB + document store + cache<br>
+  <strong>Responsibilities:</strong> semantic search, chunk retrieval, knowledge freshness, retrieval quality
+</div>
+<div class="alayer al5">
+  <div class="ln">Layer 5 — Data &amp; Integration</div>
+  <strong>Components:</strong> Feature stores, APIs, databases, legacy connectors<br>
+  <strong>Responsibilities:</strong> structured data retrieval, tool execution, write-back to systems of record
+</div>
+<div class="alayer al6">
+  <div class="ln">Layer 6 — Observability &amp; Governance</div>
+  <strong>Components:</strong> OTel, cost tracking, eval pipeline, audit log<br>
+  <strong>Responsibilities:</strong> traces, metrics, LLM quality signals, compliance logging, budget alerts
+</div>
+<div class="ibox">
+  <strong>Key design decisions at each layer boundary:</strong>
+  <table class="t">
+    <tr><th>Boundary</th><th>Key design decision</th></tr>
+    <tr><td>Client → Orchestration</td><td>Authentication model, rate limit per user/tenant, request schema</td></tr>
+    <tr><td>Orchestration → Gateway</td><td>Which queries go to which model (routing policy)</td></tr>
+    <tr><td>Gateway → LLM APIs</td><td>Fallback order, budget caps, data residency constraints</td></tr>
+    <tr><td>Orchestration → Knowledge</td><td>Retrieval strategy (semantic, hybrid, keyword), chunk size, reranking</td></tr>
+    <tr><td>Orchestration → Data</td><td>Which tools can be called, with what auth, with what blast radius controls</td></tr>
+    <tr><td>All layers → Observability</td><td>What is logged, what is alerted on, what feeds the eval pipeline</td></tr>
+  </table>
+  <strong>The most common architectural mistake:</strong> collapsing layers 2 and 3 into a single application. This couples orchestration logic to model routing, making it impossible to change models, add fallbacks, or add a new model tier without rewriting application code.
+</div>
+
+<div class="sh2">4.2 Model Routing: Tiered Cost Architecture</div>
+<div class="alayer al1">
+  <div class="ln">Model tier structure</div>
+  <table class="t">
+    <tr><th>Tier</th><th>Model examples</th><th>Cost/1M tokens</th><th>Latency</th><th>Use for</th></tr>
+    <tr><td>Nano</td><td>GPT-4o-mini, Claude Haiku</td><td>£0.10–0.20</td><td>&lt; 1s</td><td>Classification, simple Q&amp;A, intent detection</td></tr>
+    <tr><td>Standard</td><td>GPT-4o, Claude Sonnet</td><td>£1.50–3.00</td><td>1–3s</td><td>Standard queries, summarisation, RAG responses</td></tr>
+    <tr><td>Premium</td><td>o3, Claude Opus</td><td>£10–20</td><td>3–15s</td><td>Complex reasoning, multi-step planning, code generation</td></tr>
+  </table>
+</div>
+<div class="alayer al2">
+  <div class="ln">Routing classifier design</div>
+  <div class="code-label">Query Routing Flow</div>
+  <div class="code">Incoming query
+    │
+    ▼
+Query classifier (fast, cheap — runs on nano model or rule-based)
+    │
+    ├── Simple factual → Nano tier
+    ├── Standard task → Standard tier
+    ├── Complex reasoning → Premium tier
+    └── Safety-sensitive → Standard tier + safety guardrail</div>
+  <p><strong>Cost impact example:</strong></p>
+  <ul class="dl">
+    <li><strong>Without routing:</strong> 100K queries/day × all GPT-4o → ~£300/day</li>
+    <li><strong>With routing:</strong> 60% nano + 35% standard + 5% premium → ~£90/day</li>
+    <li><strong>Saving:</strong> 70% cost reduction, no user-facing quality difference for correctly-routed queries</li>
+  </ul>
+  <p><strong>Design consideration:</strong> the routing classifier itself must be cheap and fast (&lt; 50ms, &lt; £0.001/call). A complex router that's almost as expensive as just using the premium model defeats the purpose.</p>
+</div>
+
+<div class="sh2">4.3 Latency Budget Design</div>
+<div class="alayer al3">
+  <div class="ln">Example: 3-second P95 SLA</div>
+  For any AI system with a user-facing SLA, design the <strong>latency budget</strong> before choosing components. Work backward from the SLA.
+  <div class="code-label">Latency Budget — Customer Service Assistant (3s P95)</div>
+  <div class="code">Total budget:                    3,000ms
+  ├── Client-side overhead:        100ms
+  ├── Network (round trips):       150ms
+  ├── Intent classification:        80ms  (nano model, cached)
+  ├── Knowledge retrieval:         200ms  (vector search)
+  ├── Context assembly:             50ms
+  ├── LLM call (standard model):  1,800ms  (P95 for GPT-4o)
+  ├── Response processing:          80ms
+  └── Budget remaining:            540ms  (buffer for spikes)</div>
+</div>
+<div class="alayer al4">
+  <div class="ln">Latency optimisation levers</div>
+  <table class="t">
+    <tr><th>Technique</th><th>Latency saving</th><th>Cost impact</th><th>Notes</th></tr>
+    <tr><td>Streaming responses</td><td>0ms actual, perceived improvement</td><td>None</td><td>User sees words appearing immediately</td></tr>
+    <tr><td>Prompt caching</td><td>200–400ms</td><td>Slight reduction</td><td>Works for static system prompt portions</td></tr>
+    <tr><td>Semantic caching</td><td>Eliminates LLM call entirely</td><td>Major reduction</td><td>For repeated similar queries</td></tr>
+    <tr><td>Smaller model routing</td><td>500–2000ms</td><td>Major reduction</td><td>Only for appropriate query types</td></tr>
+    <tr><td>Speculative decoding</td><td>20–40% faster generation</td><td>Slight increase</td><td>Model-side, not always available</td></tr>
+    <tr><td>Async tool calls</td><td>Parallel tool execution</td><td>None</td><td>When multiple tools can run simultaneously</td></tr>
+  </table>
+</div>
+
+<div class="sh2">4.4 Multi-Tenancy in LLM Systems</div>
+<div class="alayer al5">
+  <div class="ln">Four multi-tenancy concerns</div>
+  <ul class="dl">
+    <li><strong>Data isolation:</strong> Tenant A must not see Tenant B's data in retrieval, context, or logs. Options: index-per-tenant (strong isolation, higher cost) vs metadata filtering (cheaper, but a missing filter = data leak) vs hybrid (shared index for public knowledge, per-tenant for sensitive data).</li>
+    <li><strong>Cost isolation:</strong> tag every LLM call with tenant ID at the model gateway layer; track token usage per tenant, per model, per time period; set per-tenant budget caps and alert thresholds.</li>
+    <li><strong>Rate limiting:</strong> per-tenant rate limits at the client layer (requests/minute, tokens/minute); token bucket algorithm for smoothing burst patterns; priority queuing for premium tenants.</li>
+    <li><strong>Configuration isolation:</strong> different tenants may need different system prompts, different model tiers, different tool access. Tenant configuration stored in a registry, loaded at request time. Tool permissions defined per-tenant role, not globally.</li>
+  </ul>
+</div>
+
+<div class="sh2">4.5 Caching Strategy</div>
+<div class="alayer al6">
+  <div class="ln">Three caching levels</div>
+  <ul class="dl">
+    <li><strong>Level 1 — Exact match (response cache):</strong> cache the full LLM response for an exact input string. Hit rate: low. Best for FAQs, common greetings, boilerplate. Storage: Redis or Memcached.</li>
+    <li><strong>Level 2 — Semantic similarity (semantic cache):</strong> cache responses for semantically equivalent inputs. "What is your return policy?" and "How do I return a product?" → same cache entry. Hit rate: 5–15% in practice. Implementation: embed the query, check vector similarity against cached queries (threshold ~0.95).</li>
+    <li><strong>Level 3 — Prompt caching (provider-side):</strong> OpenAI, Anthropic, and Google cache the KV computation for the static portion of your prompt. If the first N tokens match a cached prefix, you pay only for the new tokens. Cost saving: 50–80% on cached tokens. Latency saving: 200–400ms. Requirement: static portion must come first.</li>
+  </ul>
+  <div class="code-label">Combined Caching Flow</div>
+  <div class="code">Request arrives
+    │
+    ▼
+Exact match cache check → hit: return cached response
+    │ miss
+    ▼
+Semantic cache check → hit: return semantically matched response
+    │ miss
+    ▼
+LLM call (with prompt cache prefix if applicable)
+    │
+    ▼
+Store in exact + semantic cache
+    │
+    ▼
+Return response</div>
+</div>
+
+<div class="sh2">4.6 Fallback and Resilience Patterns</div>
+<div class="alayer al1">
+  <div class="ln">Fallback patterns</div>
+  LLM APIs have uptime SLAs of 99.5–99.9% — meaning 4–44 hours of downtime per year. For business-critical systems, you need fallback architecture.
+  <ul class="dl">
+    <li><strong>Primary → Secondary model fallback:</strong> if GPT-4o returns a 503, retry on Claude Sonnet. Configure at the model gateway layer so the calling application is unaware.</li>
+    <li><strong>Graceful degradation:</strong> if the premium model is unavailable, fall back to a standard model with a simpler prompt. Quality degrades, but the system keeps running.</li>
+    <li><strong>Cached fallback:</strong> if all live models are unavailable, return a cached response for semantically similar queries. Acceptable for FAQ answering; not for real-time data queries.</li>
+    <li><strong>Circuit breaker:</strong> after N consecutive failures on a provider, open the circuit — stop sending requests and route all traffic to the fallback. After a timeout, probe the primary with one request; if it succeeds, close the circuit and resume normal routing.</li>
+    <li><strong>Graceful degradation to rule-based:</strong> for the most critical path (e.g., order status lookup), have a simple rule-based fallback that doesn't use an LLM at all. Less quality, but zero dependency on LLM availability.</li>
+  </ul>
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">Design a Legal Document Q&amp;A System</div>
+  <p>Your legal team handles 500 supplier contract reviews per month. Each review involves answering: "Does this contract include a limitation of liability clause? What is the notice period for termination? Does this align with our standard MSA?" Currently: a paralegal reads each contract manually — 4–6 hours per contract.</p>
+
+  <div class="sh2">Layer 1 — Client/Surface</div>
+  <ul class="dl">
+    <li><strong>Interface:</strong> internal web interface for paralegals to upload contracts and ask questions</li>
+    <li><strong>Auth:</strong> SSO via enterprise identity provider</li>
+    <li><strong>Rate limit:</strong> 50 queries per user per hour</li>
+    <li><strong>Validation:</strong> file type (PDF, DOCX), file size limit (50MB), virus scan before ingestion</li>
+  </ul>
+
+  <div class="sh2">Layer 2 — Orchestration</div>
+  <ul class="dl">
+    <li>Query type classifier: "Is this a factual lookup or a comparison (does this match our MSA)?"</li>
+    <li>Factual lookups → single RAG retrieval + generation</li>
+    <li>Comparison queries → retrieve from both the uploaded contract and the MSA template, then compare</li>
+    <li>Multi-step queries → agent loop with multiple retrieval steps</li>
+  </ul>
+
+  <div class="sh2">Layer 3 — Model Gateway</div>
+  <ul class="dl">
+    <li>Simple factual queries → Claude Sonnet (cost-effective, fast)</li>
+    <li>Complex comparison and multi-step → Claude Opus (better reasoning for legal nuance)</li>
+    <li>Routing classifier: keyword + query length heuristic (£0.001/query)</li>
+    <li>Fallback: if Claude unavailable → GPT-4o</li>
+  </ul>
+
+  <div class="sh2">Layer 4 — Knowledge/Retrieval</div>
+  <ul class="dl">
+    <li>Per-contract index: each uploaded contract chunked (512 tokens, 50-token overlap) into a per-matter vector store namespace</li>
+    <li>Shared index: MSA template and standard clause library for comparison queries</li>
+    <li>Hybrid retrieval: semantic + BM25 keyword search (legal language has precise terms that semantic search sometimes misses)</li>
+    <li>Reranking: cross-encoder reranker applied to top 20–50 candidates before sending to LLM</li>
+  </ul>
+
+  <div class="sh2">Layer 5 — Data/Integration</div>
+  <ul class="dl">
+    <li>Document storage: Azure Blob, organised by matter ID</li>
+    <li>Matter metadata: contract type, counterparty, date, assigned paralegal — from matter management system</li>
+    <li>Write-back: approved summaries and flagged clauses written back to matter record in document management system</li>
+  </ul>
+
+  <div class="sh2">Layer 6 — Observability/Governance</div>
+  <ul class="dl">
+    <li>Every query and response logged with: matter ID, query, retrieved chunks, model used, response, latency, cost</li>
+    <li>PII handling: counterparty names and financial terms redacted in the LLM call, re-injected into the response after generation</li>
+    <li>LLM judge: 10% of responses evaluated for accuracy and groundedness</li>
+    <li>Audit trail: every AI-assisted response marked as "AI-assisted" in the matter record, including which document chunks were retrieved</li>
+  </ul>
+
+  <div class="sh2">Latency budget and cost model</div>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Latency target</span><span class="kvv">&lt; 5 seconds for simple factual queries</span></div>
+    <div class="kvr"><span class="kvk">P95 breakdown</span><span class="kvv">200ms retrieval + 200ms reranking + 3,500ms LLM call + overhead = 4,200ms ✅</span></div>
+    <div class="kvr"><span class="kvk">Query volume</span><span class="kvv">500 contracts/month × 20 queries = 10,000 queries/month</span></div>
+    <div class="kvr"><span class="kvk">Query mix</span><span class="kvv">70% standard (Claude Sonnet, ~£0.04/query) + 30% complex (Claude Opus, ~£0.25/query)</span></div>
+    <div class="kvr"><span class="kvk">Monthly LLM cost</span><span class="kvv">(7,000 × £0.04) + (3,000 × £0.25) = £280 + £750 = £1,030/month</span></div>
+    <div class="kvr"><span class="kvk">Current paralegal cost</span><span class="kvv">500 contracts × 5 hours × £40/hour = £100,000/month</span></div>
+    <div class="kvr"><span class="kvk">ROI</span><span class="kvv">The system pays for itself if it reduces paralegal time by 1.5%</span></div>
+  </div>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">Decision Framework: Five Core Design Choices</div>
+<div class="ibox">Make these decisions explicitly, not by default.</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Decision 1 — RAG vs Long Context vs Fine-Tune</div>
+    <table class="t">
+      <tr><th>Signal</th><th>Choose</th></tr>
+      <tr><td>Knowledge changes frequently (products, policies, prices)</td><td>RAG</td></tr>
+      <tr><td>Documents fit in 128K context and volume is low</td><td>Long context</td></tr>
+      <tr><td>Domain language is highly specialised and consistent</td><td>Fine-tune</td></tr>
+      <tr><td>All three signals present</td><td>RAG + fine-tune</td></tr>
+    </table>
+  </div>
+  <div class="card b">
+    <div class="ch b">Decision 2 — Single model vs routed model tiers</div>
+    <table class="t">
+      <tr><th>Signal</th><th>Choose</th></tr>
+      <tr><td>Query complexity is uniform and volume is low</td><td>Single model</td></tr>
+      <tr><td>Clear complexity distribution (simple/medium/complex)</td><td>Tiered routing</td></tr>
+      <tr><td>Cost is a primary constraint</td><td>Tiered routing (saves 50–70%)</td></tr>
+      <tr><td>Latency is a primary constraint</td><td>Tiered routing (faster for simple queries)</td></tr>
+    </table>
+  </div>
+</div>
+<div class="g3">
+  <div class="card b">
+    <div class="ch b">Decision 3 — Sync vs Async</div>
+    <table class="t">
+      <tr><th>Signal</th><th>Choose</th></tr>
+      <tr><td>User expects immediate response</td><td>Synchronous</td></tr>
+      <tr><td>Task takes &gt; 10 seconds</td><td>Async + polling or webhook</td></tr>
+      <tr><td>Task involves human approval gates</td><td>Async (task queue + notification)</td></tr>
+    </table>
+  </div>
+  <div class="card b">
+    <div class="ch b">Decision 4 — Stateless vs Stateful</div>
+    <table class="t">
+      <tr><th>Signal</th><th>Choose</th></tr>
+      <tr><td>Single-turn queries, no context continuity needed</td><td>Stateless (simplest, most scalable)</td></tr>
+      <tr><td>Multi-turn conversations</td><td>Stateful with session memory</td></tr>
+      <tr><td>Long-running tasks spanning hours or days</td><td>Stateful with durable task queue</td></tr>
+    </table>
+  </div>
+  <div class="card b">
+    <div class="ch b">Decision 5 — Evaluation Strategy</div>
+    <table class="t">
+      <tr><th>Signal</th><th>Choose</th></tr>
+      <tr><td>Clear correct answers exist</td><td>Automated exact match</td></tr>
+      <tr><td>Quality is multidimensional</td><td>LLM judge</td></tr>
+      <tr><td>Regulatory or safety-critical decisions</td><td>Human eval + LLM judge</td></tr>
+      <tr><td>All production systems</td><td>LLM judge + periodic human review</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="sh2">Common AI System Design Patterns</div>
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Pattern A — RAG Q&amp;A System</div>
+    <div class="code-label">RAG Pattern</div>
+    <div class="code">Query → Retrieval → Context assembly → LLM → Response
+                    ↑
+          Vector DB + Document Store</div>
+    <p><strong>Use when:</strong> knowledge-intensive Q&amp;A, document search, policy lookup.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Pattern B — Agentic Workflow</div>
+    <div class="code-label">Agent Pattern</div>
+    <div class="code">Task → Orchestrator → [Plan → Tool calls → Observe] loop → Response
+                              ↑
+                         Tool Registry</div>
+    <p><strong>Use when:</strong> multi-step tasks, cross-system workflows, tasks that require decisions.</p>
+  </div>
+</div>
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Pattern C — Hybrid (Recommendation + LLM)</div>
+    <div class="code-label">Hybrid Pattern</div>
+    <div class="code">User context → Candidate retrieval (fast, collaborative/content-based)
+               → Re-ranking LLM (slow, personalised reasoning)
+               → Response with LLM-generated explanation</div>
+    <p><strong>Use when:</strong> high-volume retrieval where LLM reasoning is too expensive for all candidates but valuable for the final selection.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Pattern D — Batch Processing Pipeline</div>
+    <div class="code-label">Batch Pattern</div>
+    <div class="code">Document corpus → Chunking → Embedding → Index build
+                         ↑
+                Nightly scheduled job</div>
+    <p><strong>Use when:</strong> knowledge base construction, bulk document analysis, training data preparation.</p>
+  </div>
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">Test your understanding — 5 questions</div>
+  <ol class="sl">
+    <li><strong>Your team's design has orchestration logic, model routing, and LLM API calls all inside a single application service. What is the architectural risk, and how would you restructure it?</strong></li>
+    <li><strong>You're designing a multi-tenant AI knowledge assistant for 12 internal teams. Security requires Team A cannot see Team B's documents. What are two architectural approaches and their tradeoffs?</strong></li>
+    <li><strong>Walk through how you would design the latency budget for a customer-facing AI chat feature with a 2-second P95 SLA requirement.</strong></li>
+    <li><strong>A product manager asks why you're proposing a model routing layer when "we could just always use GPT-4o." Make the business case for tiered model routing.</strong></li>
+    <li><strong>A security review flags that supplier names, contract values, and counterparty addresses are being sent verbatim to a third-party LLM API. What architectural change addresses this?</strong></li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section goes further for architects who want to understand the mechanisms in detail. Safe to skip on a first pass.</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">8.1 The FRAME Design Framework</div>
+    <p>Use <strong>FRAME</strong> to ensure completeness when designing or presenting any AI system:</p>
+    <ul class="dl">
+      <li><strong>F — Functional requirements:</strong> who are the users, what tasks do they perform, what are the inputs and outputs, what is the volume and frequency?</li>
+      <li><strong>R — Reliability and scale:</strong> what are the SLAs? What is expected volume now and in 12 months? Peak-to-average ratios? What happens when a component fails?</li>
+      <li><strong>A — Architecture decisions:</strong> which of the five core design choices apply, and what did you choose and why?</li>
+      <li><strong>M — Monitoring and evaluation:</strong> how do you know the system is working? What quality signals do you track? What are the alert thresholds? How does the feedback loop work?</li>
+      <li><strong>E — Economics:</strong> what does this cost at current volume? At 10× volume? What are the cost drivers? What happens to unit economics as you scale?</li>
+    </ul>
+    <table class="t">
+      <tr><th>Component</th><th>Legal Q&amp;A Example</th></tr>
+      <tr><td>Functional</td><td>500 contracts/month, paralegals ask factual and comparison questions, 5-second SLA, internal only</td></tr>
+      <tr><td>Reliability</td><td>99.5% availability during business hours, fallback to Claude if primary unavailable</td></tr>
+      <tr><td>Architecture</td><td>RAG, tiered routing (standard for lookup, premium for comparison), synchronous, LLM judge eval</td></tr>
+      <tr><td>Monitoring</td><td>OTel traces, 10% LLM judge sampling, cost per matter, retrieval precision alerts</td></tr>
+      <tr><td>Economics</td><td>£1,030/month LLM cost vs £100K/month paralegal cost — 97% cost reduction</td></tr>
+    </table>
+  </div>
+  <div class="card b">
+    <div class="ch b">8.2 High-Volume Hybrid: Recommendation + LLM</div>
+    <p>A common enterprise pattern: high-volume retrieval where LLM reasoning adds value but is too expensive to run on all candidates.</p>
+    <p><strong>Stage 1 — Candidate retrieval (fast, cheap):</strong> collaborative filtering, semantic search, BM25 keyword — retrieves top-N candidates. Cost: &lt; £0.001/query, &lt; 50ms.</p>
+    <p><strong>Stage 2 — LLM re-ranking and explanation (applied to top N only):</strong> LLM takes the top 10–20 candidates and applies reasoning — personalisation, explanation generation, filter application. Cost: £0.02–0.10/query.</p>
+    <p><strong>Key design principle:</strong> never run the LLM on the full candidate space. Always use a cheap retrieval stage to filter to a manageable set first.</p>
+    <div class="code-label">Two-Stage Hybrid Pattern</div>
+    <div class="code">10M product catalogue
+    │
+    ▼
+Stage 1: Vector search + collaborative filter → top 20 candidates (&lt; 50ms, &lt; £0.001)
+    │
+    ▼
+Stage 2: LLM reranker on 20 candidates → top 5 with explanations (1,500ms, ~£0.05)
+    │
+    ▼
+Response to user: top 5 products with personalised explanations</div>
+  </div>
+</div>
+
+<div class="card b">
+  <div class="ch b">8.3 Cost Math: Unit Economics at Scale</div>
+  <p>Before any AI system design is approved, you need the unit economics model:</p>
+  <div class="code-label">Unit Economics Calculation</div>
+  <div class="code">Daily cost = (queries/day) × (avg tokens/query) × (cost per 1K tokens)
+
+Example: customer service assistant
+  - 50,000 queries/day
+  - Average: 800 input tokens + 200 output tokens = 1,000 tokens
+  - Model: Claude Sonnet at £1.50/1M input, £6.00/1M output
+  - Input cost: 50,000 × 800 / 1,000,000 × £1.50 = £60/day
+  - Output cost: 50,000 × 200 / 1,000,000 × £6.00 = £60/day
+  - Total: £120/day = £3,600/month = £43,800/year</div>
+  <p><strong>Cost levers to present in a design review:</strong></p>
+  <table class="t">
+    <tr><th>Lever</th><th>Typical saving</th><th>Tradeoff</th></tr>
+    <tr><td>Tiered routing (nano for 60%)</td><td>50–70%</td><td>Engineering complexity</td></tr>
+    <tr><td>Prompt caching</td><td>20–40%</td><td>Static prompt structure required</td></tr>
+    <tr><td>Semantic caching</td><td>10–15%</td><td>Cache infrastructure needed</td></tr>
+    <tr><td>Shorter system prompt</td><td>5–10%</td><td>May reduce quality</td></tr>
+    <tr><td>Output length limits</td><td>10–20%</td><td>May truncate useful responses</td></tr>
+    <tr><td>Chunking optimisation</td><td>15–30% (RAG)</td><td>Affects retrieval quality</td></tr>
+  </table>
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>AI system design is about making the hard decisions before code is written.</strong> Model choice, routing strategy, caching approach, fallback architecture, multi-tenancy model — these decisions are expensive to reverse. Design time is when they cost nothing to change.</li>
+  <li><strong>The 6-layer architecture separates concerns that must not be coupled.</strong> Surface, orchestration, model gateway, knowledge, data, and observability are each a distinct responsibility. Collapsing layers — especially coupling orchestration with model routing — creates systems that are expensive to change and impossible to govern centrally.</li>
+  <li><strong>Cost is a design variable, not a post-launch discovery.</strong> Model tiering (routing simple queries to cheap models) typically saves 50–70% compared to using the most capable model for everything. Run the unit economics calculation before the system is built, not after the first invoice arrives.</li>
+  <li><strong>Latency budget must be designed in, not hoped for.</strong> Work backward from the SLA: subtract network, subtract processing overhead, what's left is your LLM + retrieval budget. If the remaining budget is smaller than the P95 latency of your chosen model, you need a different model, a caching strategy, or a different SLA negotiation — not an optimistic assumption.</li>
+  <li><strong>Fallback architecture is not optional for production systems.</strong> LLM API uptime is 99.5–99.9% — that's 4–44 hours of downtime per year. Design the primary → secondary model fallback, graceful degradation, and circuit breaker patterns before launch. Discovering you have no fallback during a production outage is the worst time to design one.</li>
+</ul>

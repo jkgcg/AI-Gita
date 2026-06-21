@@ -1,0 +1,324 @@
+<div class="ibox">This module covers the three clusters of math and statistics that underpin machine learning: linear algebra (vectors, dot products, cosine similarity), probability and statistics (distributions, Bayes' theorem, entropy), and calculus/optimisation (gradient descent, loss functions). You do not need to derive formulas — you need enough intuition to understand model outputs, ask the right questions, and make sound architectural decisions.</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro above, you're done with this topic at a conceptual level.<br>
+  <strong>&#128993; Keep going for the full architect-level detail.</strong> The structured content below builds a complete mental model.
+</div>
+
+<div class="sh">1. What Is It</div>
+
+<p>Math and statistics are the language that machine learning models use internally. You do not need to speak this language fluently to be an effective AI architect. You need to be able to read it well enough to understand what someone is telling you, to catch when something does not make sense, and to ask the right questions.</p>
+
+<p>Think of it this way: you do not need to know how an internal combustion engine works at the level of thermodynamic cycles to drive a car well. But if you know that a car engine converts fuel into motion through controlled explosions in cylinders, you understand why it overheats, why it needs oil, and why a diesel engine behaves differently from a petrol one. That level of understanding is what this module gives you for AI math.</p>
+
+<p>The math behind AI lives in three clusters:</p>
+
+<ul class="dl">
+  <li><strong>Linear algebra:</strong> how information is represented and compared (vectors, matrices, dot products, cosine similarity)</li>
+  <li><strong>Probability and statistics:</strong> how uncertainty is modelled and decisions are made under uncertainty (distributions, Bayes' theorem, entropy)</li>
+  <li><strong>Calculus/Optimisation:</strong> how models learn by improving themselves over time (gradient descent, loss functions)</li>
+</ul>
+
+<p>You will encounter all three when working with AI systems. This module tells you what you need to understand intuitively, when you will encounter it, and what you can safely leave to the data scientists on your team.</p>
+
+<div class="sh">2. Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>When you are selecting a vector database, configuring a similarity search, or evaluating why a recommendation engine is surfacing the wrong products, you are working with linear algebra — specifically cosine similarity and dot products. You do not need to derive these formulas. You need to understand that "similarity" in AI is not the same as "equality", and that two things can be close in meaning while having no words in common.</p>
+    <p>When a data scientist says "the model is overfitting" or "the loss is not converging", you are in the territory of gradient descent and loss functions. Understanding what these mean at a conceptual level lets you make better trade-off decisions: more training time, more data, different architecture.</p>
+    <p>When your AI system gives you confidence scores — "this customer has a 73% probability of churning" — you are reading the output of a probability model. Knowing what that means (and what it does not mean) helps you set thresholds, handle false positives, and explain outputs to business stakeholders.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>The language of AI governance is the language of probability and statistics. Model bias, fairness metrics, calibration, distributional shift — all of these are statistical concepts. If you are responsible for AI governance policies, you need enough statistical literacy to evaluate whether a vendor's claims about their model are credible, whether an evaluation framework is measuring the right thing, and whether a model's confidence scores can be trusted.</p>
+    <p>Linear algebra appears in your architecture decisions when you are dealing with embedding-based systems: semantic search, RAG pipelines, recommendation engines, knowledge graphs. The dimension of an embedding space, the choice of similarity metric, and the cost of indexing millions of vectors are all architecture-level concerns with mathematical underpinnings.</p>
+    <p>Gradient descent matters to you primarily as a training-time concern: it determines how long training takes, how expensive it is, and whether a fine-tuned model is likely to degrade on your specific data distribution.</p>
+  </div>
+</div>
+
+<div class="sh">3. Think About It Like This</div>
+
+<div class="ibox">
+  <p>Imagine your enterprise knowledge base as a vast library where every book has been assigned a GPS coordinate in a 1,000-dimensional space. Books about the same topic cluster together, even if they use completely different words. Finding "similar" books is not about keyword matching — it is about finding the nearest GPS coordinates.</p>
+  <p>This is exactly what embedding spaces do. Every piece of text, every product image, every customer profile gets converted into a set of coordinates. "Similarity" means "nearby in this coordinate space." The mathematical operation that measures closeness between two sets of coordinates is the dot product — and when you normalise it so that the size of the vectors does not matter, only the direction, you get cosine similarity.</p>
+  <p>Gradient descent is what happens when you imagine standing on a hilly landscape in thick fog, trying to reach the lowest valley. You cannot see the whole landscape. You can only feel which direction the ground slopes under your feet right now. You take a small step downhill, check again, take another step. Over millions of steps, you reach the bottom. That "checking which direction is downhill" is what the gradient is — it is the slope of the error landscape, and descent is the process of following it down.</p>
+  <p><strong>For probability and Bayes:</strong> Think of a weather forecaster. They don't say 'it will rain' — they say '70% chance of rain.' That number reflects their prior belief (it's usually dry this time of year) updated by new evidence (a pressure system moving in). When AI models output probabilities, they're doing the same thing: combining what they learned during training with the specific evidence in your prompt.</p>
+</div>
+
+<div class="sh">4. Step-by-Step Walkthrough</div>
+
+<div class="alayer al1">
+  <div class="ln">4.1 Linear Algebra Intuitions</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine you are describing a job candidate using a structured profile: years of experience, communication score, technical depth, leadership rating, domain expertise — all rated 1–10. That profile is a vector. Now imagine you do this for every candidate in your database. To find the most "similar" candidates to a star performer, you are literally measuring which other profiles sit closest in that multi-dimensional rating space. AI does exactly this for words, products, customers, and images — it converts them into numeric profiles and then measures closeness. The coordinate system is called an <em>embedding space</em>.
+  </div>
+
+  <p><strong>Vectors</strong> are ordered lists of numbers. In AI, almost everything becomes a vector: a word, an image, a product, a customer. The numbers capture features or properties of the thing, placed in a shared coordinate system so that similar things end up with similar numbers.</p>
+  <p>A word embedding might look like: <code>[0.23, -0.71, 0.55, 0.08, ...]</code> across 768 dimensions. You will never read these numbers directly. What matters is that words used in similar contexts — "king" and "monarch", "quick" and "fast" — end up with coordinates that are numerically close to each other.</p>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of a city map. Every location has two coordinates: latitude and longitude. To ask "how close is the office to the train station?" you compare their coordinates. Vectors in AI are the same idea — but instead of 2 dimensions (latitude, longitude), you might have 768 dimensions (one per learned feature). "Similarity" between two pieces of text means their 768-dimensional coordinates are close together. The <em>dot product</em> is the mathematical ruler used to measure that closeness. A high dot product means "pointing in the same direction" — conceptually similar.
+  </div>
+
+  <p><strong>Dot product</strong> is the operation that takes two vectors and returns a single number representing how aligned they are. Mathematically it is the sum of element-wise products. Intuitively: if two vectors point in the same direction, their dot product is large and positive. If they point in opposite directions, it is large and negative. If they are perpendicular (completely unrelated), it is zero.</p>
+  <p>This is the core of attention in transformers. When a model decides how much a word "attends to" another word, it is computing a dot product between their vector representations.</p>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine two arrows drawn from the centre of a compass. <em>Cosine similarity</em> asks: "what is the angle between those two arrows?" — it ignores how long the arrows are, only cares about which direction they point. This matters in enterprise search because a long, detailed product description naturally produces a "bigger" vector than a short one. If you compared their sizes (Euclidean distance), the short description would always seem "further away" even if it means the same thing. Cosine similarity corrects for this: same direction = same meaning, regardless of description length.
+  </div>
+
+  <p><strong>Cosine similarity</strong> is the dot product normalised so that the magnitude (length) of the vectors does not affect the result — only the angle between them. This matters because longer texts naturally produce larger vectors. By normalising, you compare direction, not size. Cosine similarity of 1.0 means identical direction (perfectly similar). 0 means perpendicular (unrelated). -1 means opposite.</p>
+  <p>For architects: most vector databases (Pinecone, Weaviate, pgvector) use cosine similarity or inner product as their default distance metric. The choice of metric affects what "nearest neighbour" means and, therefore, the quality of your semantic search results.</p>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "Cosine similarity of 0.3 means there's a 30% chance the items are related." — This is wrong. Cosine similarity is not a probability. It is a geometric angle measurement ranging from -1 to +1. A score of 0.3 does not mean "30% similar." What it means depends entirely on the distribution of scores in your specific embedding model and domain. Two genuinely similar products in a retail catalogue may score 0.85, while two clearly different items may still score 0.25 just because they share general language patterns. Always calibrate thresholds against labelled examples from your own domain.</div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "More embedding dimensions is always better." — Not necessarily. Higher dimensionality does capture richer semantics, but it increases storage costs (60GB+ for 10M items at 1536 dimensions), slows similarity search, and can actually hurt performance if the extra dimensions encode noise rather than signal. Architecture decisions around dimensionality involve real cost-quality tradeoffs, not a simple "bigger is better" rule.</div>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">4.2 Probability Basics</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> AI never gives you certainty — it gives you degrees of belief expressed as probabilities. Think of a doctor reading an X-ray: "I'm 80% confident this is a stress fracture, 15% confident it's a benign cyst, 5% other." That is a probability distribution — a complete picture of how likely each outcome is, where all the probabilities add up to 100%. When an AI classifier returns scores, it is producing the same thing: a probability distribution across possible labels. <em>Variance</em> in this distribution tells you how confident the model is — a flat distribution (all options equally likely) means high uncertainty. A sharp peak (one option dominates) means high confidence.
+  </div>
+
+  <p><strong>Probability distributions</strong> describe how likely different outcomes are. The two you encounter most in AI:</p>
+  <ul class="dl">
+    <li><strong>Normal (Gaussian) distribution:</strong> the bell curve. Values cluster around a mean, taper off symmetrically. Many natural quantities follow this distribution, which is why so many ML algorithms assume it.</li>
+    <li><strong>Bernoulli/Categorical distribution:</strong> probability of discrete outcomes. A binary classifier produces a Bernoulli distribution — probability of class A vs class B. A multiclass classifier produces a categorical distribution over all classes.</li>
+  </ul>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine a bell curve as a histogram of your employees' commute times. Most cluster around 30 minutes (the peak, or "mean"). A few commute in 10 minutes, a few take an hour. The width of the bell — how spread out the data is — is called <em>variance</em>. High variance means the data is widely spread (commutes range from 5 to 90 minutes). Low variance means it's tightly clustered (almost everyone commutes 28–32 minutes). In AI, variance tells you how consistent or unpredictable a model's behaviour is. A model with high output variance is erratic. A model with low bias AND low variance is what you want: it makes accurate, consistent predictions.
+  </div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "Bias just means the model is unfair to certain groups." — In statistics, "bias" has a precise meaning that is different from fairness bias. Statistical bias means the model's predictions are systematically off in one direction — like a scale that always reads 2kg too heavy. A model can be statistically biased (consistently underestimates customer churn) without being demographically unfair. And conversely, a model can be demographically biased without having high statistical bias overall. Architects need to be precise about which type of bias is being discussed.</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Bayes' theorem is simply: <em>"Start with what you already believe. Update that belief when you see new evidence."</em> Think of a bank's fraud analyst. Before looking at any transaction, they know that 0.5% of transactions are fraudulent (the prior belief). Then a transaction arrives that matches several fraud patterns — unusual merchant, overseas location, large amount. Each piece of evidence updates the probability upward. After combining all evidence, the analyst concludes: "Given everything I see, there's a 78% chance this is fraud." That updating process — prior belief × evidence strength = updated belief — is Bayes' theorem. Every AI system that outputs a probability score is doing some version of this.
+  </div>
+
+  <p><strong>Bayes' theorem</strong> states that your updated belief about something (after seeing evidence) equals your prior belief multiplied by how likely you were to see that evidence if your belief were true, divided by how likely you were to see the evidence at all.</p>
+  <p><strong>Quick example:</strong> Your fraud detection model has 99% accuracy. But only 1 in 1,000 transactions is genuinely fraudulent. If the model flags a transaction, the probability it is actually fraud is still only ~9% — because the base rate of fraud is so low that false positives dominate. This is why base rate always matters, regardless of model accuracy.</p>
+  <p>For architects: Bayesian reasoning is the conceptual foundation for how AI systems handle uncertainty. When a fraud detection model returns "92% probability of fraud", it has combined a prior (how common fraud is in your customer base) with the likelihood of the specific transaction pattern. If your business has very low fraud rates, even a 92% score may have many false positives — this is why base rate matters more than model accuracy in imbalanced domains.</p>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "A model that is 99% accurate is highly reliable." — Accuracy is almost meaningless when classes are imbalanced. If only 0.5% of transactions are fraudulent, a model that classifies <em>everything</em> as legitimate achieves 99.5% accuracy — and catches zero fraud. The metrics that matter are precision (of all flagged cases, how many are actually positive?) and recall (of all actual positives, how many did we catch?). Always ask about these metrics — not accuracy — when evaluating AI models for business decisions.</div>
+
+  <p><strong>Entropy</strong> measures uncertainty or information content. High entropy means high uncertainty — the probability is spread across many outcomes. Low entropy means you are confident — one outcome dominates. This concept underpins loss functions (cross-entropy), decision trees (information gain), and token sampling strategies in LLMs (temperature and top-p are entropy-controlling parameters).</p>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">4.3 Gradient Descent Intuition</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine you are designing a product configuration system. You start with a guess at the best settings — prices, feature toggles, UI options — and you measure customer satisfaction (your <em>loss function</em> — the scorecard). You then ask: "If I tweak each setting slightly, does satisfaction go up or down?" You adjust in the direction that improves the score. Then you measure again. Then adjust again. After thousands of iterations you converge on the best configuration. That iterative "measure, adjust, repeat" process is <em>gradient descent</em>. The model's "settings" are its weights (billions of numbers). The "scorecard" is the loss function. Training is just running this loop millions of times on millions of examples until the scorecard stops improving.
+  </div>
+
+  <p>Training a model means finding the settings (weights) that produce the least error on your training data. The error is measured by a <strong>loss function</strong> — a formula that takes the model's predictions and the actual answers, and produces a single number representing how wrong the model is.</p>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> The <em>loss function</em> is simply a scorecard that tells the model how badly it performed on a batch of examples. If the model predicted "this email is NOT spam" but it actually was spam, the loss is high. If it correctly predicted "spam" with high confidence, the loss is low. The entire goal of training is to minimise this score across all training examples. Different tasks use different scorecards: mean squared error for predicting continuous values (house prices), cross-entropy for classification (spam vs not-spam), and custom loss functions for specialised tasks. When a data scientist says "the loss is plateauing," they mean the scorecard has stopped improving — the model may have found its best configuration, or it may be stuck.
+  </div>
+
+  <p>Gradient descent is the algorithm that iteratively adjusts the model's weights to reduce this loss. Each iteration:</p>
+  <ol>
+    <li>Make predictions on a batch of training examples</li>
+    <li>Calculate the loss (how wrong the predictions are)</li>
+    <li>Calculate the gradient (which direction each weight needs to move to reduce loss)</li>
+    <li>Adjust each weight by a small amount in that direction (the <strong>learning rate</strong> controls how small)</li>
+    <li>Repeat</li>
+  </ol>
+  <p>For architects: the learning rate is the most consequential hyperparameter. Too large and the model overshoots — it bounces around the loss landscape and never settles. Too small and training takes forever and may get stuck in a local minimum. This is why fine-tuning LLMs requires careful learning rate selection, and why it is a common point of failure in internal model training projects.</p>
+  <p><strong>Stochastic gradient descent (SGD)</strong> and <strong>Adam</strong> are variants that estimate the gradient from small batches rather than the full dataset, and add momentum to avoid getting stuck. Adam is the default for most deep learning. SGD with momentum is often preferred for fine-tuning.</p>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> <em>Overfitting</em> is what happens when a model "memorises" the training examples instead of learning general patterns — like a consultant who memorises past project reports word-for-word but cannot adapt when a new client presents a slightly different situation. The model performs brilliantly on data it has seen before but fails on new data. In enterprise deployments, this is dangerous because your production data (real customer behaviour, live transactions) is always at least slightly different from your training data. Overfitting is the most common reason a model that looks great in evaluation falls apart in production.
+  </div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "If training accuracy is high, the model is good." — High training accuracy combined with low validation accuracy is the classic signature of overfitting. The model has learned to recognise the specific training examples rather than the underlying patterns. It is like a student who memorises past exam questions verbatim rather than understanding the subject — they will fail on any new exam question. Always evaluate models on held-out data (validation set or test set) that was never used during training.</div>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">4.4 The Attention Formula (Intuition Level)</div>
+  <p>The attention mechanism, the core of transformers, computes a weighted average of values based on the similarity between queries and keys.</p>
+  <p>Concretely: for every word in a sentence, attention asks "which other words are most relevant to understanding this word right now?" It computes dot-product similarities between the current word (the query) and every other word (the keys), converts these similarities into weights using softmax (so they sum to 1), and then takes a weighted average of the value representations.</p>
+  <p>The formula is: <code>Attention(Q, K, V) = softmax(QK^T / sqrt(d_k)) V</code></p>
+  <p>What this means in plain English:</p>
+  <ul class="dl">
+    <li><strong>QK^T:</strong> compute similarity scores between every query and every key</li>
+    <li><strong>/ sqrt(d_k):</strong> scale down by the square root of dimension to prevent the dot products from getting too large</li>
+    <li><strong>softmax:</strong> convert scores to probabilities that sum to 1</li>
+    <li><strong>multiply by V:</strong> use these probabilities as weights to blend the value vectors</li>
+  </ul>
+  <p>For architects: the "quadratic scaling" problem you hear about — why attention is expensive for long contexts — comes from the QK^T step. Every word must be compared to every other word, so the cost scales as sequence length squared. This is why techniques like sliding window attention, sparse attention, and linear attention approximations exist.</p>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">4.5 Softmax vs Sigmoid — Decision Guide</div>
+  <p><strong>Sigmoid</strong> maps any number to a value between 0 and 1. Use it for <strong>binary classification</strong> — one output neuron, one decision (yes/no, fraud/not-fraud, click/no-click). The output is the probability of the positive class.</p>
+  <p><strong>Softmax</strong> takes a vector of numbers and converts them into a probability distribution that sums to 1. Use it for <strong>multiclass classification</strong> — multiple output neurons, one winner (which of these 10 product categories does this item belong to?).</p>
+  <p>The rule of thumb for architects evaluating model outputs:</p>
+  <ul class="dl">
+    <li><strong>Single probability score (0–1):</strong> sigmoid output, binary decision</li>
+    <li><strong>Vector of probabilities summing to 1:</strong> softmax output, multiclass decision</li>
+    <li><strong>Multiple independent probabilities that do not sum to 1:</strong> sigmoid applied independently to each output, multi-label decision (an item can belong to multiple categories simultaneously)</li>
+  </ul>
+</div>
+
+<div class="sh">5. Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Enterprise Example: Cosine Similarity for Product Matching in a Retail Catalogue</div>
+  <p><strong>Scenario:</strong> A global retail group runs a product catalogue of 4.2 million items across 18 categories. Product teams from acquired brands need to map their local catalogue items to the global master catalogue. Manual mapping takes 3–4 weeks per brand integration. The target: automate 80% of matches with high confidence.</p>
+  <p><strong>The architecture:</strong> Each product in both catalogues is embedded using a fine-tuned multilingual embedding model. The embedding captures product name, description, category, and key attributes. Each embedding is a 768-dimensional vector stored in a vector database (Weaviate, chosen for its native multi-tenancy).</p>
+  <p><strong>How cosine similarity works here:</strong> When a new product arrives ("Men's Lightweight Trail Running Shoe, Breathable Mesh Upper, EU 42"), its embedding is computed and compared against every product in the master catalogue using cosine similarity. Products with similarity &gt; 0.92 are auto-matched. Products with similarity 0.82–0.92 are flagged for human review. Below 0.82, the item is treated as a new unique product.</p>
+  <p><strong>What the architects had to decide:</strong></p>
+  <ul class="dl">
+    <li><strong>Embedding model:</strong> domain-specific fine-tuned model outperformed generic sentence transformers by 8% on internal evaluation — but required a fine-tuning pipeline and labelled match data</li>
+    <li><strong>Similarity threshold:</strong> set through analysis of the precision-recall tradeoff on a held-out set of known matches; 0.92 gave 96% precision at 70% recall for auto-matching</li>
+    <li><strong>Vector index:</strong> HNSW (Hierarchical Navigable Small World) index for approximate nearest neighbour search, giving millisecond search over 4.2M items</li>
+    <li><strong>Re-ranking:</strong> a lightweight cross-encoder re-ranked the top-20 cosine similarity candidates before the final decision, improving precision by 4%</li>
+  </ul>
+  <p><strong>The outcome:</strong> 83% of mappings automated at 96% precision. Brand integration time reduced from 3–4 weeks to 3–4 days.</p>
+</div>
+
+<div class="sh">6. Architecture Perspective</div>
+
+<div class="kv">
+  <div class="kvr">
+    <span class="kvk">Embedding pipelines are infrastructure, not an afterthought</span>
+    <span class="kvv">Cosine similarity only works as well as the quality of the embeddings. The embedding model, the data fed into it, the preprocessing pipeline, and the re-embedding strategy when items change are all architecture concerns. A brittle embedding pipeline is as damaging as a brittle data pipeline.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Dimensionality is a scaling decision</span>
+    <span class="kvv">768-dimensional embeddings are standard for BERT-class models. 1536-dimensional embeddings are standard for OpenAI text-embedding-ada-002. Higher dimensionality generally means better semantic capture, but higher storage cost, higher compute cost for similarity search, and higher memory requirement for the vector index. For a 10M-item catalogue with 1536-dimensional float32 embeddings, the raw vector storage alone is ~60GB.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Normalise before you index</span>
+    <span class="kvv">Most vector databases can apply cosine similarity natively, but if you normalise your embeddings to unit length before insertion, cosine similarity becomes equivalent to inner product — which is faster to compute on most hardware (no square root needed). This is a standard production pattern.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Gradient descent failure modes to recognise</span>
+    <span class="kvv">Loss not decreasing: learning rate is too low, data quality issue, or wrong loss function. Loss oscillating wildly: learning rate is too high. Loss decreasing on training but not validation: overfitting — the model is memorising training data. NaN loss: numerical instability, often from too-large learning rate or unscaled inputs.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Probability calibration matters for decisions</span>
+    <span class="kvv">A model that says "73% confidence" should be right 73% of the time when it says that. Many models are not calibrated — they are overconfident or underconfident. If your AI system is making decisions based on probability thresholds, verify that the model has been calibrated (Platt scaling, isotonic regression) on a held-out validation set.</span>
+  </div>
+</div>
+
+<div class="sh">7. Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">&#10003; Check Yourself</div>
+  <ol class="sl">
+    <li>
+      <strong>Q:</strong> You are comparing two product descriptions using cosine similarity and get a score of 0.31. A colleague says "that's basically zero — they're unrelated." Is your colleague correct? What would you need to know before agreeing or disagreeing?<br>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Your colleague is likely wrong, but the key point is that 0.31 cannot be interpreted without context. Cosine similarity ranges from -1 to +1, and in text embedding spaces, even unrelated documents often score 0.1–0.3 because they share common language patterns (function words, general vocabulary). Whether 0.31 indicates "related" or "unrelated" depends entirely on the distribution of scores in your specific embedding model and domain. You need to compare 0.31 against: (a) the score between known-similar pairs in your domain, and (b) the score between known-unrelated pairs. If similar products score 0.85–0.95 in your catalogue, then 0.31 is indeed low. But if your domain produces generally lower scores, 0.31 might represent moderate similarity. An absolute threshold is meaningless without calibration against labelled examples.<br>
+        <strong>Simple explanation:</strong> A score of 0.31 means nothing on its own — you need to know what "similar" and "different" look like in your specific domain before you can interpret any cosine similarity score.<br>
+        <strong>Architecture takeaway:</strong> Always calibrate similarity thresholds against labelled examples from your own domain before setting auto-match or routing thresholds. Generic rules of thumb ("&gt;0.8 is similar") can fail badly in specialised domains.
+      </div>
+    </li>
+    <li>
+      <strong>Q:</strong> Your fine-tuned model has a training loss that decreases smoothly from 2.1 to 0.3 over 10 epochs. The validation loss decreases from 2.1 to 0.8, then stops improving and begins rising from epoch 7 onward. What is happening, why is it dangerous for production deployment, and what should you do?<br>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The model is overfitting. It is memorising the training data rather than learning generalisable patterns — like a student who memorises past exam papers but cannot handle new questions. The divergence between training loss (still falling) and validation loss (rising) is the textbook signature of overfitting. This is dangerous for production because real-world inputs will always differ slightly from training data — different phrasing, seasonal patterns, new products — and a model that has memorised its training set will degrade on anything novel. The optimal model is the checkpoint from epoch 6 (where validation loss was at its lowest), not the final epoch-10 model. Remedies include: early stopping (save checkpoint at best validation loss), regularisation (dropout, weight decay), more diverse training data, or reducing model complexity. In production: always deploy the epoch with the best validation performance, not the final epoch.<br>
+        <strong>Simple explanation:</strong> The model got too good at remembering its training examples and stopped learning patterns that work on new data — always pick the checkpoint where held-out performance was best.<br>
+        <strong>Architecture takeaway:</strong> Build early stopping and checkpoint tracking into every fine-tuning pipeline. The model that trains longest is rarely the model you want in production.
+      </div>
+    </li>
+    <li>
+      <strong>Q:</strong> A vendor shows you a fraud detection model with 99.2% accuracy. Your fraud rate is 0.5% (5 in 1,000 transactions). The vendor claims this makes the model enterprise-ready. What is the flaw in this argument, and what metrics would you actually request?<br>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The 99.2% accuracy figure is almost meaningless in this context. A trivial model that classifies every single transaction as legitimate would achieve 99.5% accuracy — and catch zero fraud. This is the base rate trap: when the positive class (fraud) is rare, accuracy is dominated by the majority class (legitimate transactions) and tells you nothing about fraud detection capability. The metrics that actually matter are: <strong>Precision</strong> — of all transactions the model flags as fraud, what fraction is actually fraud? (High precision = fewer false alarms, less operational burden on fraud analysts.) <strong>Recall</strong> — of all actual fraud transactions, what fraction does the model catch? (High recall = less fraud slipping through.) <strong>F1 or F-beta score</strong> — the balance between precision and recall. You should also ask: what is the model's performance at specific operating thresholds (e.g., at a threshold that catches 80% of fraud, how many false positives per day does that generate?), and how does performance vary by transaction type and customer segment?<br>
+        <strong>Simple explanation:</strong> When only 0.5% of transactions are fraud, a model that catches none of them can still score 99.5% accuracy — accuracy is the wrong metric for imbalanced problems; demand precision and recall instead.<br>
+        <strong>Architecture takeaway:</strong> In any AI procurement or evaluation involving imbalanced outcomes (fraud, defects, churn, disease detection), reject accuracy as the headline metric and insist on precision, recall, and confusion matrix details at your specific operating threshold.
+      </div>
+    </li>
+    <li>
+      <strong>Q:</strong> An engineer proposes using Euclidean distance instead of cosine similarity for your product matching system. In what scenario would Euclidean distance give worse results, and why? What is the practical fix if you want to use Euclidean distance anyway?<br>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Euclidean distance measures the straight-line distance between two points in vector space — it is affected by both direction and magnitude (length) of vectors. If your embedding model produces longer vectors for longer product descriptions, Euclidean distance will systematically penalise detailed descriptions even when they are semantically identical to shorter ones. For example, a brief description "Trail Running Shoe, mesh upper" and a detailed description "Premium Lightweight Trail Running Shoe, breathable mesh upper, waterproof coating, Vibram outsole, EU sizing" might represent the same product, but the detailed version produces a longer vector, making Euclidean distance artificially large. Cosine similarity avoids this entirely by measuring only the angle, ignoring length. The practical fix: normalise all vectors to unit length before indexing. After normalisation, Euclidean distance becomes a monotonic function of cosine similarity (they produce the same ranking), and you can use either metric with equivalent results. This is why "normalise before you index" is a standard production pattern.<br>
+        <strong>Simple explanation:</strong> Euclidean distance is fooled by description length — normalise all vectors to unit length first, and both metrics give the same answer.<br>
+        <strong>Architecture takeaway:</strong> Standardise your embedding pipeline to always normalise vectors to unit length before storage. This makes your similarity search metric-agnostic, enables inner product as a fast equivalent to cosine similarity, and removes description-length bias from your matching results.
+      </div>
+    </li>
+    <li>
+      <strong>Q:</strong> You are asked to review a model that uses softmax output for a product categorisation task. The product can belong to multiple categories simultaneously (a "running shoe" can also be "trail", "waterproof", and "sale"). Is softmax the right choice, and what happens to the model's outputs if you keep softmax for a multi-label task?<br>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> No, softmax is the wrong choice for multi-label classification. Softmax is designed for mutually exclusive categories — it forces all output probabilities to sum to 1.0, which means increasing the probability of one category mathematically reduces the probability of all others. If a product is both "trail" AND "waterproof" AND "sale," softmax cannot represent this: assigning high probability to "trail" steals probability mass from "waterproof" and "sale." The consequence: the model is structurally unable to output high confidence for multiple labels simultaneously, even when the correct answer is multiple labels. The correct architecture is independent sigmoid outputs for each label — each neuron independently produces a probability (0–1) for its label, with no constraint that they sum to 1. The training objective also changes: from categorical cross-entropy (one correct class) to binary cross-entropy applied independently to each label. A practical symptom that reveals the softmax mistake: if you see a product's categorisation scores always summing to approximately 1.0 across all labels, softmax is being misapplied.<br>
+        <strong>Simple explanation:</strong> Softmax assumes only one answer can be right at a time — for multi-label tasks where multiple answers can be simultaneously true, use independent sigmoid outputs instead.<br>
+        <strong>Architecture takeaway:</strong> When reviewing AI model specifications, always clarify whether the classification task is mutually exclusive (one winner — use softmax) or multi-label (multiple simultaneous answers — use sigmoid per label). Mismatched output activation is a silent failure mode that can be hard to diagnose post-deployment.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<div class="sh">8. Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin:10px 0">
+  <strong>&#128993; Optional depth —</strong> This section covers cross-entropy loss, KL divergence, and information theory. These underpin LLM training and evaluation but are not required for most architecture decisions. Safe to skip on a first pass.
+</div>
+
+<div class="g3">
+  <div class="card ai">
+    <div class="ch ai">8.1 Cross-Entropy Loss</div>
+    <p>Cross-entropy is the loss function used to train classifiers. It measures the difference between the model's predicted probability distribution and the true distribution.</p>
+    <p>For binary classification:</p>
+    <div class="code-label">Formula</div>
+    <div class="code">L = -(y * log(p) + (1-y) * log(1-p))</div>
+    <p>Where <code>y</code> is 0 or 1 (the true label) and <code>p</code> is the predicted probability of class 1.</p>
+    <p>Intuitively: if the true label is 1 and the model predicts p = 0.99, the loss is tiny (-log(0.99) ≈ 0.01). If the model predicts p = 0.01, the loss is huge (-log(0.01) ≈ 4.6). The logarithm creates an asymmetry that severely punishes confident wrong answers.</p>
+    <p>For architects: cross-entropy loss is why models learn to be well-calibrated when properly trained. The training signal pushes the model toward accurate probabilities, not just correct classifications. A model trained with cross-entropy that consistently gives 90% confidence when it is right 60% of the time has not been properly trained (or has been trained on a different distribution than you are evaluating on).</p>
+    <p><strong>Categorical cross-entropy</strong> generalises this to multiple classes: <code>L = -sum(y_i * log(p_i))</code> where <code>y</code> is a one-hot vector and <code>p</code> is the softmax output vector. For a correct prediction, only the term for the true class contributes to the loss.</p>
+  </div>
+
+  <div class="card b">
+    <div class="ch b">8.2 KL Divergence</div>
+    <p>Kullback-Leibler (KL) divergence measures how different one probability distribution is from another. It answers: "if I use distribution Q as an approximation of the true distribution P, how much information am I losing?"</p>
+    <div class="code-label">Formula</div>
+    <div class="code">KL(P || Q) = sum(P(x) * log(P(x)/Q(x)))</div>
+    <p>Key properties:</p>
+    <ul class="dl">
+      <li><strong>Not symmetric:</strong> KL(P || Q) ≠ KL(Q || P) in general</li>
+      <li><strong>Zero when identical:</strong> KL divergence is zero when P and Q are identical</li>
+      <li><strong>Non-negative:</strong> you always lose information by using an approximation</li>
+    </ul>
+    <p>Where architects encounter KL divergence:</p>
+    <ul class="dl">
+      <li><strong>RLHF and PPO:</strong> the KL penalty term in reinforcement learning from human feedback keeps the fine-tuned model close to the original policy, preventing the model from "reward hacking" by producing nonsensical outputs that score highly on the reward model</li>
+      <li><strong>VAEs (Variational Autoencoders):</strong> the training objective includes a KL divergence term between the latent distribution and a standard normal distribution — this is what forces the latent space to be smooth and interpolable; encountered when reviewing vendors offering image synthesis or anomaly detection pipelines</li>
+      <li><strong>Knowledge distillation:</strong> training a smaller student model to match the probability distribution of a larger teacher model uses KL divergence as the training signal</li>
+    </ul>
+  </div>
+
+  <div class="card t">
+    <div class="ch t">8.3 Information Theory Basics</div>
+    <p>Information theory (Claude Shannon, 1948) provides the mathematical foundation for understanding what "information" means quantitatively.</p>
+    <p><strong>Entropy</strong> (Shannon entropy):</p>
+    <div class="code-label">Formula</div>
+    <div class="code">H(X) = -sum(p(x) * log2(p(x)))</div>
+    <p>This measures the average information content (surprise) of a random variable. High entropy means outcomes are unpredictable (maximum uncertainty). Low entropy means one outcome is very likely (minimum uncertainty).</p>
+    <p>For architects, information theory explains:</p>
+    <ul class="dl">
+      <li><strong>Why LLM temperature works:</strong> at temperature 0, the model always picks the highest-probability token (zero entropy — fully deterministic). At temperature 1, the model samples from its learned distribution (natural entropy). At temperature &gt; 1, the distribution is flattened (higher entropy — more random, more creative).</li>
+      <li><strong>Why decision trees split on information gain:</strong> at each node, the tree picks the feature that most reduces entropy in the target variable — the feature that tells you the most about the outcome.</li>
+      <li><strong>Why tokenisation efficiency matters:</strong> BPE tokenisation is essentially a compression algorithm. More efficient tokenisation (fewer tokens per unit of meaning) means less context window consumption and lower inference cost. This is directly connected to information-theoretic compression principles.</li>
+    </ul>
+    <p><strong>Mutual information</strong> measures how much knowing one variable tells you about another. It is the information-theoretic equivalent of correlation, but captures non-linear dependencies. Used in feature selection (which features share the most information with the target variable?) and in evaluating whether two model representations have learned the same things.</p>
+  </div>
+</div>
+
+<div class="sh">9. Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Cosine similarity measures the angle between two vectors,</strong> making it the right metric for semantic similarity — two things can be meaningfully similar even if they share no words, as long as their embeddings point in the same direction.</li>
+  <li><strong>Gradient descent is how models learn:</strong> repeatedly measuring the error (loss), computing which direction to adjust the weights, and taking a small step in that direction — the learning rate controls the step size and is the most critical hyperparameter to get right.</li>
+  <li><strong>Probability calibration is an architectural concern:</strong> a model's confidence score is only meaningful if the model has been calibrated — otherwise "73% confidence" is a number, not a reliable probability, and thresholds set against it will produce unpredictable system behaviour.</li>
+  <li><strong>Softmax is for one-of-many (mutually exclusive classes), sigmoid is for yes/no</strong> (binary or multi-label where categories are independent) — choosing the wrong output activation changes both the training objective and the interpretation of output scores.</li>
+  <li><strong>Cross-entropy loss and KL divergence both appear in LLM training workflows</strong> (RLHF, fine-tuning, distillation) — understanding them at the intuition level ("how far is this distribution from the target distribution?") helps you reason about why fine-tuned models drift, why RLHF works, and how knowledge distillation compresses capability.</li>
+</ul>

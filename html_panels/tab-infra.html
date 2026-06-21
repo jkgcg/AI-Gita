@@ -1,0 +1,677 @@
+<!-- ============================================================
+     TAB: AI Infrastructure
+     Source: AI_Gita_Transformed_AIInfrastructure.md
+     ============================================================ -->
+
+<!-- PREREQ BAR -->
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of AI infrastructure the same way you think about database infrastructure. You don't need to understand the B-tree internals of PostgreSQL to make good database architecture decisions — but you do need to understand "this query will hit every row in a 500M-row table, that's going to be slow and expensive." AI infrastructure is the same: you don't need a PhD in CUDA programming, but you do need to know which decisions drive cost and latency, and which levers you actually control.
+</div>
+
+<div class="ibox">
+  AI infrastructure is the hardware, software, and serving stack that makes AI models run — fast enough, cheaply enough, and reliably enough to be useful in production.<br><br>
+  Most architects never need to train a large model. But every architect deploying an AI system makes infrastructure decisions that directly affect cost, latency, and reliability:
+  <ul class="dl" style="margin-top:10px">
+    <li><strong>Which model to use</strong> — a 7B parameter open-weight model self-hosted on your GPU, a 70B model via API, or a frontier model like GPT-4o at a premium price point</li>
+    <li><strong>How to serve it</strong> — serverless API calls (pay per token), a dedicated endpoint (fixed cost), or self-hosted inference (capital cost + ops burden)</li>
+    <li><strong>How to optimise it</strong> — quantisation (run a smaller, cheaper version with minimal quality loss), caching (avoid recomputing what you've already computed), batching (process multiple requests together for efficiency)</li>
+    <li><strong>How to scale it</strong> — when traffic spikes, what happens? How does cost scale with volume? What's the latency at P95 under load?</li>
+  </ul>
+  <br>Understanding AI infrastructure gives you the vocabulary and the mental models to have these conversations credibly — with engineering teams, cloud vendors, and finance stakeholders — without needing to have built a GPU cluster yourself.
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>Infrastructure decisions are cost decisions. The difference between a poorly chosen infrastructure setup and a well-optimised one can be 5–10× on the monthly AI bill at scale.</p>
+    <p><strong>Concrete examples of infrastructure decisions that architects own:</strong></p>
+    <ul class="dl">
+      <li><strong>Self-hosted vs API:</strong> a 7B model self-hosted on a single A10G GPU (£0.60/hr) can handle ~100 requests/minute at £0.001/request. The equivalent via GPT-4o API is £0.003–0.006/request — 3–6× more expensive, but zero ops burden, no GPU procurement, and automatic scaling.</li>
+      <li><strong>Quantisation trade-off:</strong> a 70B model at FP16 precision requires ~140GB GPU memory (2× H100s). The same model quantised to 4-bit requires ~35GB (one H100). 75% memory reduction, 5–10% quality degradation. For many use cases, the quality loss is invisible; the cost saving is decisive.</li>
+      <li><strong>Caching:</strong> if 15% of your API requests have identical system prompts, prompt caching saves 50–80% on those requests' input token costs. At 1M requests/day, this compounds quickly.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>AI infrastructure introduces a new cost model to enterprise IT. Traditional software infrastructure costs are fixed or scale with compute (CPU/memory). AI inference costs scale with <strong>tokens</strong> — the amount of text processed. This is a fundamentally different cost structure:</p>
+    <ul class="dl">
+      <li><strong>Variable query cost:</strong> a 5-word query costs a fraction of a 5,000-word document analysis</li>
+      <li><strong>Variable output:</strong> output length is model-determined — not fixed like a database row</li>
+      <li><strong>Model swap leverage:</strong> a model swap (GPT-4o → GPT-4o-mini) can cut costs 10× with no infrastructure change</li>
+      <li><strong>Context window as cost driver:</strong> context window length is the primary cost driver for long-document use cases — not the number of requests</li>
+    </ul>
+    <p>Enterprise architects need to understand token economics to forecast AI costs accurately, build governance controls around them, and evaluate build-vs-buy decisions for AI serving infrastructure.</p>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This</div>
+<div class="ibox">
+  <strong>The Delivery Fleet Analogy</strong><br><br>
+  Imagine you're running a delivery operation. You need to get packages from warehouse to customers.<br><br>
+  <strong>The GPU is your fleet.</strong> A high-end H100 GPU is like a fleet of 100 vans — enormous capacity, very fast, very expensive. An A10G is like 20 vans — still capable, much cheaper. A CPU trying to do inference is like a bicycle — technically possible, but not viable at any meaningful scale.<br><br>
+  <strong>Quantisation is like load optimisation.</strong> Your vans can carry packages in custom foam packaging (full precision, FP16) — safe, but each van carries fewer packages. Or you can standardise packaging (quantise to INT4/FP4) — slightly less protection, but you fit 4× as many packages per van. The packages arrive in essentially the same condition; you've dramatically increased fleet utilisation.<br><br>
+  <strong>Batching is filling the van before it leaves.</strong> Sending one package per van trip is wasteful. If you wait 50ms to collect 10 requests and process them together, each GPU computation amortises across 10 requests. Throughput goes up; cost per request goes down.<br><br>
+  <strong>KV cache is your local depot.</strong> When a van makes a repeat delivery to the same neighbourhood (same prompt prefix), it's wasteful to drive from the central warehouse every time. The local depot stores the work already done for that neighbourhood — the van starts from there, not from scratch.<br><br>
+  <strong>Speculative decoding is the fast courier service.</strong> A small motorbike (small draft model) guesses the next few deliveries and races ahead; a big van (the main model) quickly verifies and approves the guesses. When the guesses are right (they usually are), you've delivered 4 packages in the time it would take the van to deliver 1.<br><br>
+  <strong>Serverless API vs self-hosted</strong> is the classic make-vs-buy decision: use a courier service (API) for variable demand — pay per package, no fleet management — or run your own fleet (self-hosted) for predictable high volume — higher fixed cost, lower per-package cost at scale.
+</div>
+
+<!-- S4: Step-by-Step Walkthrough -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 GPU Memory: Why It's the Primary Constraint</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Why GPUs instead of CPUs for AI? A CPU is like a team of 10 world-class specialists — each one can handle any complex problem independently. A GPU is like a workforce of 10,000 labourers who can only do simple tasks, but can do them all simultaneously. AI model inference is basically millions of simple multiplications happening in parallel — the labourers win every time. A single H100 GPU has 16,896 CUDA cores working at once; your server CPU has 64 cores. For the specific arithmetic AI models need, the GPU is 100–1,000× faster. The cost? GPU memory (VRAM) is limited and expensive — an H100 has 80GB; a CPU server might have 1TB RAM at a fraction of the cost per GB. The entire AI infrastructure challenge is essentially: how do we fit our model into this expensive-but-fast VRAM?
+</div>
+
+<p>Everything about LLM inference — which models you can run, at what speed, at what cost — is constrained by <strong>GPU memory (VRAM)</strong>. The model weights must fit entirely in GPU VRAM before any inference can happen.</p>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "We can just use our existing cloud VMs with a lot of RAM for AI inference." Regular RAM (system memory) and GPU VRAM are not interchangeable. The AI model must live in GPU VRAM to run at useful speeds. Running a 7B model on CPU RAM instead of a GPU is technically possible but typically 10–50× slower — too slow for any production use case. Think of it like asking an accountant to do a warehouse worker's job: same building, completely wrong tool.</div>
+
+<div class="alayer al1">
+  <div class="ln">Memory Required to Load a Model</div>
+  <div class="math">Memory (bytes) = Parameters × Bytes per parameter</div>
+  <div class="code-label">Precision vs memory footprint</div>
+  <div class="code">FP32 (full precision):     7B model  = 7B × 4 bytes  = 28 GB
+FP16 / BF16 (half):        7B model  = 7B × 2 bytes  = 14 GB
+INT8 (8-bit quantised):    7B model  = 7B × 1 byte   =  7 GB
+INT4 / FP4 (4-bit):        7B model  = 7B × 0.5 byte =  3.5 GB
+
+FP16:                      70B model = 70B × 2 bytes = 140 GB
+INT4:                      70B model = 70B × 0.5 byte = 35 GB</div>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Common GPU VRAM Capacities</div>
+  <table class="t">
+    <tr><th>GPU</th><th>VRAM</th><th>Fits at FP16</th><th>Fits at INT4</th><th>Typical cost</th></tr>
+    <tr><td>RTX 4090 (consumer)</td><td>24 GB</td><td>13B models</td><td>48B models</td><td>£0.40/hr (cloud)</td></tr>
+    <tr><td>A10G</td><td>24 GB</td><td>13B models</td><td>48B models</td><td>£0.80/hr</td></tr>
+    <tr><td>A100 40GB</td><td>40 GB</td><td>20B models</td><td>80B models</td><td>£2.50/hr</td></tr>
+    <tr><td>A100 80GB</td><td>80 GB</td><td>40B models</td><td>160B models</td><td>£3.50/hr</td></tr>
+    <tr><td>H100 80GB</td><td>80 GB</td><td>40B models</td><td>160B models</td><td>£5.00/hr</td></tr>
+    <tr><td>H100 NVLink (2×)</td><td>160 GB</td><td>80B models</td><td>320B models</td><td>£10.00/hr</td></tr>
+  </table>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">The KV Cache — Additional Memory on Top of Model Weights</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> What is a KV cache? Imagine you're reading a long document and answering questions about it. Every time someone asks a new question, you don't re-read the entire document from scratch — you keep notes from your previous reading (the "KV cache") and just read the new question. That's exactly what the KV cache does: it stores the model's internal "notes" (key-value pairs from the attention mechanism) about the prompt it already processed. Without it, every new word generated would require re-reading the entire conversation from scratch — catastrophically slow. The trade-off: these notes consume GPU memory, and longer conversations mean bigger notes. A 128K-token conversation can have notes that are bigger than the model itself.
+  </div>
+
+  <p>When generating a response, the model caches the key-value pairs from the attention computation for all processed tokens. The KV cache grows with sequence length. Longer inputs, more layers, and larger batches all multiply together. Context length is the most controllable lever architects have.</p>
+  <div class="code-label">KV cache memory formula</div>
+  <div class="code">KV cache memory = 2 × num_layers × num_heads × head_dim × seq_length × batch_size × bytes_per_value
+
+For Llama-3 70B at FP16, 4K sequence, batch size 1:
+≈ 2 × 80 × 8 × 128 × 4096 × 1 × 2 bytes ≈ 1.3 GB</div>
+  <p style="margin-top:8px">At 128K context length, the KV cache for a single request can approach 40GB on some models — exceeding the model weights themselves. This is why long-context serving is memory-constrained, not compute-constrained.</p>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">The Memory Bandwidth Bottleneck</div>
+  <p>LLM inference at typical batch sizes is <strong>memory-bandwidth bound</strong>, not compute bound. The GPU spends most of its time moving data between VRAM and compute cores — not doing arithmetic. This is why:</p>
+  <ul class="dl">
+    <li><strong>Bandwidth trumps FLOPS:</strong> a GPU with 2 TB/s memory bandwidth generates tokens faster than a GPU with 1 TB/s bandwidth, even at the same FLOP count</li>
+    <li><strong>Smaller models often serve faster:</strong> less data to move per token, even when the larger model "fits"</li>
+    <li><strong>Quantisation double benefit:</strong> helps not just by fitting the model in less memory, but by reducing data moved per operation</li>
+  </ul>
+</div>
+
+<div class="sh2">4.2 Quantisation: The Practical Decision Guide</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Quantisation is a compression trade-off that every architect makes decisions about — just usually in different domains. Think of it like image compression: a PNG file stores every pixel as a precise 24-bit colour value (full quality). A JPEG stores approximate colour values using fewer bits — the photo looks nearly identical, downloads 10× faster, and uses 10× less storage. Quantising an AI model is the same idea: instead of storing each weight as a precise 16-bit decimal number (FP16), you round it to a cruder 4-bit integer (INT4). The model is 4× smaller, loads 4× faster, uses 4× less GPU memory. The "quality loss" is usually 1–3% on benchmarks — often invisible in real applications. The architectural decision: how much quality loss is acceptable for your use case? Legal document review: probably FP16. Internal FAQ chatbot: probably INT4 is fine.
+</div>
+
+<p>Quantisation reduces the numerical precision of model weights — from 16-bit floats (FP16) to 8-bit integers (INT8) or 4-bit integers (INT4/FP4). The model becomes smaller and faster; there is some quality degradation, which varies by model and task.</p>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Quantisation is a lossy last resort — only use it if you have no other choice." In practice, 4-bit quantisation (AWQ, GPTQ) is the standard production choice for self-hosted open-weight models, not a compromise. At 4-bit, a 70B model outperforms most un-quantised 13B models. You get a much smarter model at a smaller footprint — the quality per GB of VRAM is often higher with a quantised larger model than an unquantised smaller one.</div>
+
+<table class="t">
+  <tr><th>Format</th><th>Bits</th><th>Memory saving vs FP16</th><th>Quality impact</th><th>Best for</th></tr>
+  <tr><td><strong>FP16 / BF16</strong></td><td>16</td><td>Baseline</td><td>None (full quality)</td><td>Training, high-precision inference</td></tr>
+  <tr><td><strong>GPTQ</strong></td><td>4</td><td>4×</td><td>1–3% on benchmarks</td><td>Self-hosted open-weight models</td></tr>
+  <tr><td><strong>AWQ</strong> (Activation-aware)</td><td>4</td><td>4×</td><td>&lt; 1% on benchmarks</td><td>Self-hosted, quality-sensitive</td></tr>
+  <tr><td><strong>NF4</strong> (QLoRA)</td><td>4</td><td>4×</td><td>Minimal for fine-tuning</td><td>Fine-tuning large models on limited GPU</td></tr>
+  <tr><td><strong>FP8</strong></td><td>8</td><td>2×</td><td>&lt; 0.5%</td><td>H100/H200 inference, best quality/size ratio</td></tr>
+  <tr><td><strong>FP4</strong></td><td>4</td><td>4×</td><td>1–2%</td><td>Bleeding edge; H200 and Blackwell GPUs</td></tr>
+  <tr><td><strong>GGUF</strong> (llama.cpp)</td><td>2–8 (mixed)</td><td>2–8×</td><td>Variable by bit depth</td><td>Local / edge inference, CPU-compatible</td></tr>
+</table>
+
+<div class="sh2">Practical Decision Matrix</div>
+<table class="t">
+  <tr><th>Scenario</th><th>Recommended Quantisation</th></tr>
+  <tr><td>Cloud API (GPT-4o, Claude)</td><td>Irrelevant — provider handles this</td></tr>
+  <tr><td>Self-hosted, quality-critical (legal, medical)</td><td>FP16 or AWQ 4-bit</td></tr>
+  <tr><td>Self-hosted, cost-optimised, quality tolerance</td><td>GPTQ 4-bit or AWQ 4-bit</td></tr>
+  <tr><td>Edge / local inference (laptop, on-prem constrained)</td><td>GGUF Q4_K_M or Q5_K_M</td></tr>
+  <tr><td>Fine-tuning a large model on limited GPU</td><td>NF4 (QLoRA)</td></tr>
+  <tr><td>H100 production serving</td><td>FP8 (best perf/quality tradeoff for this hardware)</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>What architects should know:</strong> going from FP16 to 4-bit for a 7B model: 14 GB → 3.5 GB, enabling it to run on a single 4090 or A10G. Quality degradation at 4-bit is typically imperceptible for instruction-following and conversation tasks; noticeable for complex reasoning and code generation. Always evaluate quantised models on your specific task before deploying — benchmark numbers are averages that may not represent your use case.
+</div>
+
+<div class="sh2">4.3 The Production Inference Stack</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> "Model serving" vs "model training" — these are as different as a car factory and a motorway. Training is building the factory: you're teaching the model (takes weeks, costs millions, happens once). Serving (inference) is running finished cars on the motorway: you're using the already-trained model to respond to live user requests (happens continuously, must be fast and cheap). When you deploy an AI feature in your enterprise application, you are doing serving — not training. The "inference stack" (vLLM, SGLang, TGI) is the software that turns a pile of model weights into an API endpoint your application can call. Think of it as the web server for your AI model — just as Nginx turns your application code into a web service, vLLM turns your model weights into an AI service.
+</div>
+
+<p>The inference stack is the software layer that takes model weights and serves them as an API endpoint. In 2026, the production standard is:</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">vLLM (most widely deployed)</div>
+    <ul class="dl">
+      <li><strong>PagedAttention:</strong> manages the KV cache like virtual memory in an OS — allocates KV cache in non-contiguous blocks ("pages"), eliminating fragmentation. Enables serving 2–4× more concurrent requests on the same GPU vs naïve KV cache management.</li>
+      <li><strong>Continuous batching:</strong> instead of processing a batch as a unit (waiting for the slowest request), processes tokens continuously — new requests join the batch as soon as a slot is free. Dramatically improves GPU utilisation under variable load.</li>
+      <li><strong>Prefix caching:</strong> caches KV states for common prompt prefixes — if 80% of requests share the same system prompt, that prefix is computed once and reused, cutting input processing time for those requests.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">SGLang &amp; TGI</div>
+    <p><strong>SGLang</strong> — strong alternative for structured output and complex workflows:</p>
+    <ul class="dl">
+      <li><strong>Structured generation:</strong> runtime constraint enforcement during generation (JSON, constrained output)</li>
+      <li><strong>Multi-call programs:</strong> state is shared across calls rather than re-initialised</li>
+      <li><strong>Speculative decoding</strong> with RadixAttention</li>
+    </ul>
+    <p style="margin-top:10px"><strong>TGI (Text Generation Inference, Hugging Face)</strong> — good for: straightforward deployment of HuggingFace models; solid observability; simpler configuration than vLLM for standard use cases.</p>
+  </div>
+</div>
+
+<div class="sh2">Batch vs Streaming Inference — The Latency SLA Decision</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Batch vs streaming inference is the same trade-off as batch ETL vs real-time event processing — and architects already understand this instinctively. <strong>Batch inference</strong> is like running a nightly SQL job: you queue up 10,000 documents, the model processes them overnight, you collect results in the morning. Great for throughput, irrelevant for latency. <strong>Streaming inference</strong> is like a real-time chat response: the model generates each word as it computes it, and your application displays it immediately (the "typing…" effect). Users perceive the response as instant even though full generation takes 5–10 seconds, because they see the first words in under a second. The architectural decision: what does your SLA require? A nightly report generation job needs batch. A customer-facing chatbot needs streaming. Getting this wrong means either unnecessary complexity (streaming for a batch job) or poor UX (waiting for the full response before displaying anything).
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Batch Inference</div>
+    <ul class="dl">
+      <li>Process many requests together; optimise for <strong>throughput</strong></li>
+      <li>No real-time SLA — results delivered asynchronously</li>
+      <li>50% cost discount at most API providers (async batch endpoints)</li>
+      <li><strong>Use for:</strong> nightly document processing, bulk data enrichment, offline analytics, report generation</li>
+      <li><strong>Latency:</strong> minutes to hours — irrelevant by design</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Streaming Inference</div>
+    <ul class="dl">
+      <li>Tokens sent to client as they are generated (Server-Sent Events / WebSockets)</li>
+      <li>Time-to-first-token (TTFT) matters — user sees response starting in &lt; 1 second</li>
+      <li>Full generation latency (5–15 seconds for 300 tokens) felt less because response is progressive</li>
+      <li><strong>Use for:</strong> customer-facing chatbots, copilots, real-time assistants</li>
+      <li><strong>SLA metric:</strong> P95 TTFT &lt; 1s; P95 generation speed &gt; 15 tokens/second</li>
+    </ul>
+  </div>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Streaming inference is always better because users get faster responses." Streaming adds infrastructure complexity (persistent connections, SSE/WebSocket handling, partial response state management) and is unnecessary for back-end batch workloads. Use streaming only for interactive user-facing applications. A nightly document summarisation pipeline should use batch — it's simpler, cheaper, and processes more documents per hour.</div>
+
+<div class="sh2">The 2026 Production Serving Stack</div>
+<div class="alayer al1">
+  <div class="ln">Load Balancer</div>
+  nginx / cloud LB — distributes traffic across inference server instances
+</div>
+<div class="alayer al2">
+  <div class="ln">vLLM / SGLang Inference Servers</div>
+  Multiple instances for horizontal scale — continuous batching, PagedAttention KV cache, prefix caching, FP8/INT4 quantised weights, OTel instrumentation
+</div>
+<div class="alayer al3">
+  <div class="ln">GPU Fleet</div>
+  H100s / A100s / A10Gs — model weights and KV cache reside in VRAM
+</div>
+<div class="alayer al4">
+  <div class="ln">Observability</div>
+  Metrics → Prometheus / Grafana &nbsp;|&nbsp; Traces → OTel collector
+</div>
+
+<div class="sh2">Cold Start: Why Serverless Inference Has Latency Spikes</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> "Cold start" in AI inference is identical to cold start in serverless functions (AWS Lambda, Azure Functions) — but 100× worse. When a Lambda function cold-starts, it takes 200–500ms to spin up the container. When an AI inference endpoint cold-starts, it takes 30–120 seconds to load 140GB of model weights into GPU VRAM. Imagine asking your database to load its entire data file into RAM before answering every query that comes in after an idle period. That's the cold start problem. For a customer-facing feature with sporadic traffic (e.g., an internal tool used 9–5 on weekdays), a serverless AI endpoint can introduce a 60-second first-request delay after any idle period — catastrophic for user experience. The fix: keep a "warm" instance running permanently (dedicated endpoint) — but that costs money even at zero traffic.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">What Causes Cold Start</div>
+    <ul class="dl">
+      <li>Model weights must be loaded from storage into GPU VRAM before any inference</li>
+      <li>A 7B model at FP16 = 14 GB to load. At ~2 GB/s typical storage throughput: ~7 seconds</li>
+      <li>A 70B model at FP16 = 140 GB to load: ~70 seconds</li>
+      <li>Container/runtime initialisation adds further overhead</li>
+      <li>Serverless providers scale to zero after idle periods — triggering cold start on next request</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Cold Start Mitigation Strategies</div>
+    <ul class="dl">
+      <li><strong>Dedicated (always-on) endpoints:</strong> instance stays warm; no cold start; fixed cost even at zero traffic</li>
+      <li><strong>Minimum instance count:</strong> keep at least 1 warm instance; scale to 0 never triggered</li>
+      <li><strong>Provisioned concurrency:</strong> cloud-managed pre-warming (AWS Bedrock, Azure AI, Google Vertex)</li>
+      <li><strong>Smaller quantised models:</strong> INT4 7B = 3.5 GB to load ≈ 2 seconds cold start vs 70 seconds for FP16 70B</li>
+      <li><strong>Fast storage:</strong> NVMe SSD or RAM-backed model cache dramatically reduces load time</li>
+    </ul>
+  </div>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Serverless AI endpoints are always cheaper because you only pay when you use them." Serverless is cheaper only for intermittent workloads. For steady-state traffic, a dedicated instance runs at lower cost per request. More importantly: if your application has an SLA, cold start can violate it. Always model the traffic pattern before choosing serverless — the cost saving is real, but the cold-start penalty must be acceptable for your use case.</div>
+
+<div class="sh2">4.4 Speculative Decoding: Faster Generation for Free</div>
+<p>LLM generation is slow because it's <strong>autoregressive</strong> — each token is generated one at a time, requiring a full forward pass of the model. A 70B model producing a 200-token response makes 200 sequential forward passes.</p>
+
+<div class="alayer al1">
+  <div class="ln">How It Works</div>
+  <ol class="sl">
+    <li>A small <strong>draft model</strong> (e.g. 7B) generates K tokens speculatively — very fast, it's small</li>
+    <li>The large <strong>target model</strong> (e.g. 70B) verifies all K tokens in a <em>single</em> forward pass — parallel, not sequential</li>
+    <li>If the draft's tokens match what the target model would have generated: accept all K tokens — you've generated K tokens in the time of 1 large model pass</li>
+    <li>If the draft diverges at token j: accept tokens 1…j-1, reject j onwards, regenerate from j with the target model</li>
+  </ol>
+</div>
+
+<div class="kv">
+  <div class="kvr"><span class="kvk">Typical gain</span><span class="kvv">3–5× throughput improvement with zero quality degradation</span></div>
+  <div class="kvr"><span class="kvk">Requirements</span><span class="kvv">Draft model must use same tokeniser as target model; compatible token distributions</span></div>
+  <div class="kvr"><span class="kvk">Best when</span><span class="kvv">Output is predictable — common phrases, structured formats, boilerplate code</span></div>
+  <div class="kvr"><span class="kvk">Helps less when</span><span class="kvv">Output is highly creative or diverse — draft is wrong more often, rejection overhead increases</span></div>
+</div>
+
+<div class="sh2">4.5 Disaggregated Prefill / Decode (P/D Split)</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> Relevant if you are planning infrastructure at 100+ GPU scale or overseeing a platform engineering team building an inference cluster. For most enterprise AI deployments using managed API services, this is background context rather than an immediate design decision. Safe to skim on a first pass.</div>
+
+<p>LLM serving has two computationally distinct phases with completely different hardware requirements:</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Prefill Phase</div>
+    <p>Processing the input prompt. <strong>Compute-intensive</strong> — all input tokens are processed in parallel. A 4,000-token input prompt is processed in one shot. This phase is <strong>compute-bound</strong> (arithmetic-heavy).</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Decode Phase</div>
+    <p>Generating output tokens one at a time. <strong>Memory-bandwidth intensive</strong> — each generation step loads the full model weights and KV cache. This phase is <strong>memory-bandwidth bound</strong>.</p>
+  </div>
+</div>
+
+<div class="code-label">Disaggregated serving flow</div>
+<div class="code">Request with long prompt (4K tokens)
+    │
+    ▼
+Prefill Pool (compute-optimised GPUs — e.g., H100 SXM)
+  → Process input prompt in parallel
+  → Generate initial KV cache
+  → Transfer KV cache to decode pool
+    │
+    ▼
+Decode Pool (memory-bandwidth-optimised GPUs — e.g., H100 NVL)
+  → Generate output tokens autoregressively
+  → Using transferred KV cache</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>When it matters:</strong> disaggregated serving matters for large-scale deployments (100+ GPUs) or for use cases with highly variable input length (some requests with 100-token inputs, others with 100K-token inputs). For smaller deployments, the engineering complexity is not justified.
+</div>
+
+<div class="sh2">4.6 Multi-GPU Serving: Tensor Parallelism and Pipeline Parallelism</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> When a model is too big for one GPU, you split it across multiple GPUs. There are two main ways, and the analogy is a factory production line vs a team of co-workers. <strong>Tensor parallelism</strong> is like a team of 4 co-workers all working on the same spreadsheet simultaneously — each handles different columns, they communicate every few seconds to share intermediate results, and together they finish in a quarter of the time. Fast, but they need to talk to each other constantly (high communication overhead). <strong>Pipeline parallelism</strong> is like a production line: GPU 1 does the first 20 layers, passes the result to GPU 2 which does layers 21–40, and so on. Less communication, but GPUs can sit idle waiting for their turn (pipeline "bubbles"). For enterprise architects overseeing a 70B model self-hosting project: tensor parallelism across 2–4 GPUs within a single server is the standard choice. Pipeline parallelism is for very large models spanning multiple servers.
+</div>
+
+<div class="sh2">4.7 Cost Model: Self-Hosted vs API</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> The build/buy/rent decision for AI inference follows the same economics as every enterprise IT decision — but with a twist most architects miss. In traditional software, "build" means high upfront cost but low marginal cost at scale. For AI inference, "build" (self-hosted) means: buy or rent expensive GPUs, hire MLOps engineers to operate them, and manage model updates, security, availability, and capacity. "Buy" (API) means: pay per request, no ops, no GPU procurement, but vendor dependency and data-leaves-your-network concerns. The critical number most business cases miss is the <strong>ops overhead</strong>: running a self-hosted LLM endpoint requires roughly 0.25–0.5 FTE of MLOps engineering time. At a fully-loaded cost of £100K/year, that's £25,000–£50,000/year of hidden cost before you count a single GPU. Include this in every build-vs-buy analysis.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">API Pricing (pay-per-token)</div>
+    <ul class="dl">
+      <li>No fixed cost; scales to zero at zero usage</li>
+      <li>No GPU procurement, no ops burden</li>
+      <li>Cost scales linearly with usage</li>
+      <li>Subject to provider pricing changes and availability</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Self-Hosted (fixed + variable)</div>
+    <ul class="dl">
+      <li>Fixed cost: GPU reservation (£0.60–£5.00/GPU/hr depending on type)</li>
+      <li>Variable cost: electricity, networking (usually minor)</li>
+      <li>Requires MLOps team to operate</li>
+      <li>Fully predictable once utilisation is understood</li>
+    </ul>
+  </div>
+</div>
+
+<div class="code-label">Break-even analysis example</div>
+<div class="code">Self-hosted break-even daily requests:
+
+GPU cost:     1× A10G at £0.80/hr = £19.20/day
+Serves:       ~100 req/min for a 7B model = 144,000 req/day max
+At 60% util: 86,400 req/day
+
+API equivalent (GPT-4o-mini at £0.0003/req):
+  86,400 × £0.0003 = £25.92/day
+
+Break-even: ~74,000 req/day
+Below 74K req/day → API cheaper (no ops overhead)
+Above 74K req/day → self-hosted cheaper</div>
+
+<div class="g2">
+  <div class="card a">
+    <div class="ch a">Hidden Costs of Self-Hosted</div>
+    <ul class="dl">
+      <li>MLOps engineering team (typically 1–2 FTEs)</li>
+      <li>GPU procurement lead time (weeks to months)</li>
+      <li>Model update and maintenance overhead</li>
+      <li>Redundancy and availability infrastructure</li>
+      <li>Security and compliance for self-hosted model endpoints</li>
+    </ul>
+  </div>
+  <div class="card a">
+    <div class="ch a">Hidden Costs of API</div>
+    <ul class="dl">
+      <li>Vendor lock-in risk (pricing changes, model deprecation)</li>
+      <li>Data residency constraints (prompts leave your network)</li>
+      <li>Latency variability (shared infrastructure)</li>
+      <li>Rate limits that constrain burst capacity</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2">Decision Framework</div>
+<table class="t">
+  <tr><th>Signal</th><th>Self-Hosted</th><th>API</th></tr>
+  <tr><td>Volume &gt; 1M requests/day</td><td>&#10003;</td><td>&#10007; too expensive</td></tr>
+  <tr><td>Data cannot leave your network</td><td>&#10003;</td><td>&#10007;</td></tr>
+  <tr><td>Team has GPU ops capability</td><td>&#10003;</td><td>—</td></tr>
+  <tr><td>Variable/unpredictable demand</td><td>—</td><td>&#10003;</td></tr>
+  <tr><td>Need latest frontier model</td><td>&#10007;</td><td>&#10003;</td></tr>
+  <tr><td>Startup / no ops team</td><td>—</td><td>&#10003;</td></tr>
+  <tr><td>Regulatory: model lineage required</td><td>&#10003;</td><td>Partial</td></tr>
+</table>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">Scenario: Infrastructure Design for a Retail Customer Intelligence Platform</div>
+  <p>Three AI workloads to support:</p>
+  <ul class="dl">
+    <li><strong>Real-time product Q&amp;A</strong> — 200K queries/day, avg 800 input + 150 output tokens, SLA: 2-second P95</li>
+    <li><strong>Nightly contract analysis</strong> — 500 contracts/day, avg 40K input + 2K output tokens, no SLA constraint</li>
+    <li><strong>Internal knowledge assistant</strong> — 50K queries/day, avg 1K input + 300 output tokens, SLA: 3-second P95</li>
+  </ul>
+</div>
+
+<div class="sh2">Workload Analysis</div>
+<table class="t">
+  <tr><th>Workload</th><th>Daily Tokens</th><th>Pattern</th><th>Cost Driver</th></tr>
+  <tr><td>Product Q&amp;A</td><td>200K × 950 = 190M</td><td>Real-time, bursty</td><td>Latency + throughput</td></tr>
+  <tr><td>Contract analysis</td><td>500 × 42K = 21M</td><td>Batch, overnight</td><td>Input cost (long context)</td></tr>
+  <tr><td>Knowledge assistant</td><td>50K × 1.3K = 65M</td><td>Real-time, steady</td><td>Cost efficiency</td></tr>
+</table>
+
+<div class="sh2">Infrastructure Decisions</div>
+<div class="g3">
+  <div class="card b">
+    <div class="ch b">Product Q&amp;A</div>
+    <ul class="dl">
+      <li><strong>Model:</strong> GPT-4o-mini via API — fast, cheap, adequate quality</li>
+      <li><strong>Serving:</strong> serverless API — demand is bursty (peaks at lunch and evening); self-hosting would require over-provisioning for peak</li>
+      <li><strong>Optimisations:</strong> semantic caching (15% cache hit rate estimated → 15% cost reduction); prompt caching for static system prompt (saves ~200 tokens per request)</li>
+      <li><strong>Cost:</strong> 190M tokens/day × £0.00015/1K ≈ £730/month after caching</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Contract Analysis</div>
+    <ul class="dl">
+      <li><strong>Model:</strong> Claude Opus via API — best long-context performance for legal reasoning</li>
+      <li><strong>Pattern:</strong> batch job, 2am–4am window, no SLA</li>
+      <li><strong>Serving:</strong> API with async batch endpoint (50% discount on batch pricing)</li>
+      <li><strong>Key concern:</strong> 40K input tokens per contract at £0.015/1K = £0.60 input cost per contract. 500 contracts = £300/day.</li>
+      <li><strong>Optimisation:</strong> contextual retrieval — pre-process contracts to extract structured clause summaries, reducing average input from 40K to 8K tokens</li>
+      <li><strong>Cost before:</strong> £300/day. <strong>After:</strong> £60/day. <strong>Saving: 80%</strong></li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">Knowledge Assistant</div>
+    <ul class="dl">
+      <li><strong>Model:</strong> open-weight Llama-3 70B (quantised AWQ 4-bit, 2× A100 80GB)</li>
+      <li><strong>Reason:</strong> 50K queries/day at steady load; data sensitivity (internal employee queries should not leave company network)</li>
+      <li><strong>Serving:</strong> vLLM with continuous batching and prefix caching</li>
+      <li><strong>GPU config:</strong> 2× A100 80GB per node, 2 nodes (4 GPUs total) for redundancy</li>
+      <li><strong>Self-hosted cost:</strong> 4× A100 80GB at £3.50/hr = £336/day</li>
+      <li><strong>API equivalent:</strong> 65M tokens/day at £0.003/1K = £195/day</li>
+      <li><strong>Decision:</strong> API is cheaper. Switch to self-hosted only if volume doubles or data residency requirements change.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh2">Total Monthly AI Infrastructure Cost</div>
+<table class="t">
+  <tr><th>Workload</th><th>Monthly Cost</th></tr>
+  <tr><td>Product Q&amp;A (API, with caching)</td><td>£730</td></tr>
+  <tr><td>Contract analysis (API, batch, optimised)</td><td>£1,800</td></tr>
+  <tr><td>Knowledge assistant (API, pending volume growth)</td><td>£5,850</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>£8,380/month</strong></td></tr>
+</table>
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4">
+  Before the infrastructure analysis and optimisations (no caching, no contextual retrieval, no batch pricing): estimated £31,000/month. The infrastructure decisions reduced the cost by <strong>73%</strong>.
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">The Infrastructure Decision Stack</div>
+<p>Every AI system requires decisions at four levels:</p>
+
+<div class="alayer al1">
+  <div class="ln">Level 1 — Model Selection</div>
+  Which model fits the quality/cost/latency envelope? Frontier API vs mid-tier API vs self-hosted open-weight.
+</div>
+<div class="alayer al2">
+  <div class="ln">Level 2 — Serving Strategy</div>
+  API (serverless) vs dedicated endpoint vs self-hosted? Driven by demand pattern, data residency, ops capability.
+</div>
+<div class="alayer al3">
+  <div class="ln">Level 3 — Optimisation</div>
+  Which efficiency techniques apply? Quantisation, caching, batching, speculative decoding.
+</div>
+<div class="alayer al4">
+  <div class="ln">Level 4 — Scaling</div>
+  How does cost and latency behave as volume grows? Linear scaling? Break-even thresholds? Spot vs reserved?
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  Make all four decisions explicitly at design time. The default (always use the frontier API, no optimisations) is almost never the right answer for production systems.
+</div>
+
+<div class="sh2">The 2026 GPU Landscape for Architects</div>
+<p>You don't need to know GPU specifications to make infrastructure decisions. You need to know the decision-relevant categories:</p>
+
+<table class="t">
+  <tr><th>Category</th><th>GPUs</th><th>When to Choose</th></tr>
+  <tr><td><strong>Consumer / edge</strong></td><td>RTX 4090, RTX 5090</td><td>Local dev, small models, cost experiments</td></tr>
+  <tr><td><strong>Cloud mid-tier</strong></td><td>A10G, L4</td><td>Self-hosted models up to 13B (INT4: up to 48B), balanced cost</td></tr>
+  <tr><td><strong>Cloud high-end</strong></td><td>A100 40/80GB</td><td>Models up to 40B (FP16), multi-tenant serving</td></tr>
+  <tr><td><strong>Frontier serving</strong></td><td>H100, H200</td><td>Large model serving, FP8 support, best performance/watt</td></tr>
+  <tr><td><strong>Next generation</strong></td><td>Blackwell B200</td><td>2025–2026 deployments, FP4 support, 2× H100 performance</td></tr>
+</table>
+
+<div class="sh2">Distributed Training (For Architects Who Oversee Fine-Tuning Projects)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> When a model is too big for one GPU during training, you need multiple GPUs working together. There are three main patterns — think of them as different ways to organise a large team project. <strong>Data parallelism</strong>: everyone gets a copy of the full project specification (model weights) and works on different data simultaneously, then merges notes at the end (gradient synchronisation). Works when the specification fits in one person's desk. <strong>Tensor parallelism</strong>: the project specification itself is split across desks — desk 1 has chapters 1–5, desk 2 has chapters 6–10. They need to constantly share results (high communication, like a Slack channel that never stops). <strong>Pipeline parallelism</strong>: desk 1 finishes their section and passes the work downstream, like a manufacturing production line. Less interruption, but some desks wait idle while the previous stage completes. Enterprise architects: for a typical fine-tuning project, data parallelism with QLoRA quantisation on 2–4 GPUs is almost always the right starting point.
+</div>
+
+<div class="g3">
+  <div class="card b">
+    <div class="ch b">Data Parallelism (DDP)</div>
+    <p>Copy the full model to N GPUs; each GPU processes a different batch; gradients are synchronised across GPUs. Straightforward — works when the model fits on one GPU. Most fine-tuning uses this.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Tensor Parallelism (TP)</div>
+    <p>Split individual weight matrices across N GPUs; each GPU holds a slice of every layer. Required when the model is too large for one GPU. High communication overhead between GPUs.</p>
+  </div>
+  <div class="card g">
+    <div class="ch g">Pipeline Parallelism (PP)</div>
+    <p>Split model layers across N GPUs; GPU 1 runs layers 1–20, GPU 2 runs 21–40, etc. Lower communication overhead than TP; introduces pipeline "bubbles" (GPUs waiting). Used for very large models.</p>
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>For a typical enterprise fine-tuning project</strong> (LoRA fine-tuning of a 7B–70B model): DDP with QLoRA (NF4 quantisation for fine-tuning) on 1–4 A100 80GB GPUs is the standard setup. Full pre-training requires hundreds to thousands of GPUs and is not an enterprise activity.
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">Self-Assessment Questions</div>
+  <ol class="sl">
+    <li>
+      <strong>Your team wants to self-host a Llama-3 70B model. A developer says one H100 80GB GPU should be sufficient. Explain whether this is correct — and what would actually happen if you tried to load the model.</strong>
+
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The developer is incorrect. At FP16, a 70B model requires 140 GB just for model weights (70B parameters × 2 bytes each). An H100 80GB has only 80 GB of VRAM — the model will physically not load, and inference cannot start. You need at minimum 2× H100 80 GB (160 GB total) for FP16, or you can quantise to AWQ/GPTQ 4-bit, which reduces memory to ~35 GB — fitting comfortably on a single H100 80 GB with room for the KV cache. For production with reasonable batch sizes, 2× A100 80 GB (quantised INT4/FP8) or 2× H100 80 GB (FP16) are the standard configurations for 70B models. The KV cache and framework overhead also consume additional VRAM on top of the model weights — so "just fits" on paper usually means "runs out of memory at non-trivial batch sizes."<br>
+        <strong>Simple explanation:</strong> 70B at FP16 needs 140 GB; one H100 only has 80 GB — it's like trying to fit a 140 GB file onto an 80 GB drive.<br>
+        <strong>Architecture takeaway:</strong> Always calculate model memory footprint before choosing hardware. The formula is simple: parameters × bytes-per-precision. Know it before every self-hosting conversation.
+      </div>
+    </li>
+    <li>
+      <strong>Your nightly batch process sends 10,000 documents averaging 8,000 tokens each to an LLM for summarisation. The current API cost is £2,400/month. An engineer proposes switching to self-hosted. What questions must you answer before making this decision — and what are you likely missing from the cost model?</strong>
+
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> First, verify the current cost: 10,000 docs × 8,000 tokens × 30 days = 2.4 billion tokens/month input, plus output. If that equals £2,400 the model pricing is quite low — worth checking whether async batch pricing (50% discount) has already been applied. For the self-hosted comparison: (1) GPU cost for a batch workload that runs overnight only — a spot/preemptible A100 at ~£1/hr for 4 hours/night = ~£120/month, dramatically cheaper than £2,400. But then add: (2) MLOps FTE overhead — 0.25 FTE at £100K/year = £25,000/year = £2,083/month. That immediately inverts the equation. (3) Storage, networking, monitoring, security, redundancy, model update effort. (4) The batch job currently has no SLA — if self-hosted GPU is unavailable one night, do you have a fallback? A complete cost model presents: (GPU cost) + (amortised ops FTE cost) + (amortised setup cost) + (risk premium for availability) vs API at current and projected volume.<br>
+        <strong>Simple explanation:</strong> The GPU is often the cheapest part of self-hosting — the people who operate it are usually the most expensive part.<br>
+        <strong>Architecture takeaway:</strong> Never present a self-hosted cost model with only GPU costs. Always include the fully-loaded ops overhead. Run the break-even analysis at 3 usage scenarios: current, 2× current, 5× current.
+      </div>
+    </li>
+    <li>
+      <strong>What is prefix caching, and describe a concrete enterprise scenario where it produces the largest possible cost saving — with rough numbers.</strong>
+
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Prefix caching stores the KV cache computation for a static prefix shared across many requests — typically the system prompt and fixed few-shot examples. When a new request arrives with the same prefix, the model reuses the cached computation instead of reprocessing those tokens. The provider charges at a discounted rate (typically 50–90% off) for cached tokens. Largest saving scenario: a customer service agent with a 2,000-token system prompt handling 200,000 queries/day. Without prefix caching: 2,000 input tokens × 200,000 = 400M tokens/day of system prompt processing. With prefix caching at 75% discount: you pay 25% of £0.0015/1K = £0.000375/1K on those cached tokens. Over a month: saving ≈ 75% × 400M × 30 × £0.0015/1K = approximately £13,500/month — purely from caching a static system prompt. The saving is proportional to (system prompt length / average total request length) × request volume × input token price.<br>
+        <strong>Simple explanation:</strong> If you have a long fixed instruction at the start of every request, the model only needs to read it once instead of every time — and you pay a fraction of the price for those tokens.<br>
+        <strong>Architecture takeaway:</strong> Prefix caching is free money. Enable it first, before any infrastructure change. It requires zero hardware changes and typically delivers 20–50% input cost reduction for workloads with consistent system prompts.
+      </div>
+    </li>
+    <li>
+      <strong>A colleague says your inference server is "compute-bound" and you need more powerful GPUs. You disagree — you believe it is memory-bandwidth-bound. How do you explain the difference, and what evidence would confirm your position?</strong>
+
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Compute-bound means the bottleneck is arithmetic operations — the GPU is doing maths as fast as it can and waiting for more to do. Memory-bandwidth-bound means the bottleneck is moving data between VRAM and compute cores — the GPU finishes its calculations quickly but spends most time waiting for the next chunk of data to arrive. LLM inference at typical serving batch sizes (1–8 concurrent requests) is almost always memory-bandwidth-bound. Evidence to confirm: check GPU utilisation metrics — if GPU compute utilisation is 30–50% but memory bandwidth utilisation is 80–95%, you are bandwidth-bound. The practical implication: upgrading to a GPU with higher FLOPS but the same memory bandwidth will not help — you need higher GB/s. This is why an H100 SXM (3.35 TB/s bandwidth) outperforms an H100 PCIe (2 TB/s) for inference even with similar compute specs. Quantisation helps throughput not just by reducing footprint but by reducing bytes moved per operation — a direct bandwidth benefit.<br>
+        <strong>Simple explanation:</strong> The GPU isn't struggling to do the maths — it's struggling to read the data fast enough. The bottleneck is the data highway, not the calculation engine.<br>
+        <strong>Architecture takeaway:</strong> When evaluating GPUs for LLM serving, prioritise memory bandwidth (GB/s) over raw FLOPS. For storage and retrieval-heavy workloads, this extends to NVMe speed and CPU-GPU transfer bandwidth.
+      </div>
+    </li>
+    <li>
+      <strong>A business case for deploying a self-hosted Llama-3 70B model quotes GPU cost of £3.50/hr and expects to handle 50 requests/minute. You are presenting this to a finance stakeholder. What is incomplete and what would a complete cost model include?</strong>
+
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> GPU hardware cost is only one of six components a finance stakeholder needs. The complete model requires: (1) <strong>GPU cost with redundancy</strong> — production needs at least 2 instances for high availability: £3.50 × 2 × 24 = £168/day. (2) <strong>MLOps engineering overhead</strong> — operating a self-hosted LLM requires monitoring, incident response, updates, capacity management — typically 0.25–0.5 FTE at £25,000–£50,000/year = £2,000–£4,000/month. (3) <strong>Storage</strong> — model weights (140 GB at FP16, 35 GB at INT4), log storage, monitoring data. (4) <strong>Networking</strong> — data transfer costs, especially cross-region. (5) <strong>Initial setup investment</strong> — vLLM configuration, load balancing, monitoring, CI/CD, security review: typically 2–4 weeks of engineering time (£15,000–£30,000 amortised). (6) <strong>Ongoing model refresh</strong> — migration and testing cost when a new model version is adopted. Compare the fully-loaded total against: API cost at current volume + projected volumes + the cost of the ops risk (GPU unavailability = your AI feature is down).<br>
+        <strong>Simple explanation:</strong> The GPU is the cheap part. The people managing it are the expensive part — and they are invisible in most business cases that only show hardware costs.<br>
+        <strong>Architecture takeaway:</strong> Present 3-year TCO for any self-hosting proposal: GPU cost (annualised) + ops FTE cost + setup amortisation + risk. Compare against 3-year API cost at projected volume. Let the numbers make the decision — not gut instinct.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers PagedAttention internals, knowledge distillation, and financial cost modelling in depth. Safe to skip on a first pass and return here later.</div>
+
+<div class="sh2">8.1 PagedAttention: How vLLM Manages Memory</div>
+<p>The KV cache is the primary memory consumer during inference. Naïvely, each request pre-allocates a contiguous block of memory equal to its maximum sequence length. This wastes memory (most requests are shorter than maximum) and causes fragmentation (free memory scattered in unusable gaps).</p>
+
+<div class="card b">
+  <div class="ch b">PagedAttention — virtual memory for the KV cache</div>
+  <ul class="dl">
+    <li><strong>Pages:</strong> memory is divided into fixed-size blocks of 16–32 tokens</li>
+    <li><strong>On-demand allocation:</strong> each request is allocated pages on demand, not upfront</li>
+    <li><strong>Non-contiguous:</strong> pages for a single sequence need not be contiguous in physical memory — a mapping table tracks which pages belong to which sequence</li>
+    <li><strong>Immediate reclamation:</strong> when a sequence completes, its pages are immediately freed and available for other sequences</li>
+  </ul>
+  <div class="kv" style="margin-top:10px">
+    <div class="kvr"><span class="kvk">GPU memory utilisation</span><span class="kvv">~55% (naïve) → ~95% (PagedAttention)</span></div>
+    <div class="kvr"><span class="kvk">Throughput impact</span><span class="kvv">2–4× more concurrent requests on the same GPU</span></div>
+  </div>
+</div>
+
+<div class="sh2">8.2 Knowledge Distillation and Pruning</div>
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Knowledge Distillation</div>
+    <p>Train a small "student" model to mimic the output distribution of a large "teacher" model. The student learns not just the correct labels but the teacher's full probability distribution — which encodes more information than hard labels alone. GPT-4o-mini is (reportedly) a distilled version of GPT-4o.</p>
+    <p><strong>For architects:</strong> distillation is relevant when you want to fine-tune a custom model for your domain that is small enough to self-host cheaply, but trained with the quality signal of a much larger model.</p>
+    <p><strong>In a vendor conversation:</strong> if a vendor claims their 7B model performs comparably to a 70B model, ask: distilled from which teacher model? On which benchmark tasks? Evaluated against which baseline?</p>
+  </div>
+  <div class="card b">
+    <div class="ch b">Structured Pruning</div>
+    <p>Systematically remove entire attention heads, neurons, or layers that contribute least to model quality. A pruned model has fewer parameters and is genuinely faster — unlike quantisation which keeps the same computation in lower precision.</p>
+    <p><strong>For architects:</strong> pruning is less commonly needed in deployment decisions (quantisation usually suffices), but you may encounter it in model cards — e.g. "this model uses structured pruning to reduce from 70B to 40B parameters."</p>
+  </div>
+</div>
+
+<div class="sh2">8.3 The Token Budget: A Financial Model</div>
+<p>For any production AI system, build a token budget at design time:</p>
+<div class="code-label">Monthly token budget — worked example</div>
+<div class="code">Workload: customer service assistant
+Queries/day:          50,000
+Input tokens/query:    1,200  (system prompt 800 + user message 400)
+Output tokens/query:     300
+Days/month:               30
+
+Monthly input tokens:  50,000 × 1,200 × 30 = 1,800,000,000 (1.8B)
+Monthly output tokens: 50,000 × 300 × 30   =   450,000,000 (450M)
+
+At Claude Sonnet pricing (£1.50/M input, £6.00/M output):
+Input cost:  1,800M × £1.50/M = £2,700/month
+Output cost:   450M × £6.00/M = £2,700/month
+Total:                          £5,400/month
+
+With prefix caching (800-token system prompt cached, 60% discount):
+Cached input: 800/1,200 × 1,800M × £0.60/M = £720/month
+Uncached input: 400/1,200 × 1,800M × £1.50/M = £900/month
+Output: £2,700/month
+Total with caching: £4,320/month (20% saving)
+
+With 10% semantic cache hit rate (avoids entire LLM call):
+Effective queries: 50,000 × 0.90 = 45,000/day
+Adjusted total: £4,320 × 0.90 = £3,888/month</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  Building this model before deployment surfaces the cost sensitivity to each variable. <strong>Output token length has 4× the price impact of input token length</strong> — so controlling output length (max_tokens parameter, concise prompting) has high leverage.
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>GPU VRAM is the primary constraint for LLM deployment — everything else follows from it.</strong> Model weights must fit in VRAM before any inference happens. A 70B model at FP16 needs 140 GB; quantised to INT4 it needs 35 GB. Know the memory requirement before choosing hardware or deciding between self-hosted and API.</li>
+  <li><strong>Quantisation is the highest-leverage optimisation for self-hosted models.</strong> Going from FP16 to AWQ/GPTQ 4-bit reduces memory 4×, enabling larger models on smaller hardware with typically &lt; 2% quality degradation on most tasks. Always evaluate on your specific task — benchmark averages may not represent your use case.</li>
+  <li><strong>LLM inference is memory-bandwidth-bound, not compute-bound.</strong> The bottleneck is moving data between VRAM and compute cores, not arithmetic. Memory bandwidth (GB/s) matters more than FLOPS for serving throughput, and quantisation helps throughput not just by reducing size but by reducing bytes moved per operation.</li>
+  <li><strong>The self-hosted vs API decision is a volume and ops-capability threshold.</strong> Below ~50–100K requests/day for a mid-tier model, API is almost always cheaper once ops overhead is included. Above that threshold — or with strict data residency requirements — self-hosted pays off. Run the break-even analysis with your actual numbers, not generic estimates.</li>
+  <li><strong>Cold start latency is a hidden SLA risk for serverless inference.</strong> Loading a 70B model from storage into GPU VRAM takes 60–120 seconds. For customer-facing features or any SLA-bound workload, always provision a minimum warm instance — the cost is trivial compared to the UX damage of a 90-second first-response delay.</li>
+  <li><strong>Batch inference is 50% cheaper and simpler than streaming for non-interactive workloads.</strong> Nightly document processing, bulk enrichment, and report generation should use async batch endpoints. Reserve streaming for interactive user-facing applications. Getting this right halves the cost of non-real-time AI workloads.</li>
+  <li><strong>Caching (prefix, semantic, KV) is cost reduction that requires no hardware change.</strong> Prefix caching saves 50–80% on static system prompt tokens. Semantic caching eliminates entire LLM calls for repeated similar queries. Prompt caching is available from most API providers at 50–90% discount on cached tokens. Implement caching before considering infrastructure changes — it typically delivers 20–40% cost reduction with minimal engineering effort.</li>
+</ul>

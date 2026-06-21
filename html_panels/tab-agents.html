@@ -1,0 +1,705 @@
+<!-- ============================================================
+     TAB: Agents & Prompting
+     Source: AI_Gita_Transformed_Agents_Prompting.md
+     ============================================================ -->
+
+<!-- PREREQ BAR -->
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of the difference between a <em>calculator</em>, a <em>spreadsheet</em>, and a <em>project manager</em>. A calculator answers one question at a time. A spreadsheet links answers together so one result feeds the next. A project manager takes a vague goal, breaks it into tasks, assigns them to the right people, waits for results, adapts when things go wrong, and reports back. AI has the same progression: prompting (one question, one answer) → function calling (one question, one lookup, one answer) → agents (goal in, multi-step plan, multiple tools, final result out). Each step is a different architectural contract.
+</div>
+
+<div class="ibox">
+  There is a progression from <em>using</em> AI to <em>designing</em> AI systems.<br><br>
+  <strong>Prompting</strong> is how you communicate intent to an LLM. A prompt is the instruction you give the model — and the quality of that instruction determines whether you get a useful answer or a fluent non-answer. Prompt engineering is the discipline of writing those instructions well: structuring them, providing examples, guiding the model's reasoning process.<br><br>
+  <strong>Function calling (tool use)</strong> is the mechanism by which an LLM can invoke external capabilities — call an API, query a database, run code — instead of answering purely from its training weights. The model doesn't execute the call itself; it outputs a structured request, and the application executes it and returns the result.<br><br>
+  <strong>Agents</strong> combine prompting and tool use with a loop: the model thinks, decides whether to use a tool, uses it, observes the result, thinks again, and repeats — until it has enough information to answer. An agent is an LLM that can take multi-step actions rather than produce a single response.<br><br>
+  <strong>The protocol stack</strong> (MCP, A2A, AG-UI) is the emerging set of standards that make agents interoperable — so a tool built by one team can be used by any agent, an agent built on one framework can delegate to an agent built on another, and a human can interact with an agent workflow without custom integration.<br><br>
+  For Solution Architects, this progression matters because each step is a design decision with architectural implications. "How should we prompt this?" is a different question from "should this be an agent?" is a different question from "how do we connect this agent to our enterprise tool estate?" This module gives you the mental model to answer all three.
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>Prompting is not a developer task to be delegated — it is a system design decision. The system prompt defines the model's role, boundaries, tone, tool access, and escalation behaviour. A poorly designed system prompt produces inconsistent behaviour, unexpected refusals, and compliance risks. A well-designed system prompt is the first layer of governance for any LLM-based system.</p>
+    <p>The agent decision — "should this be a single LLM call or an agent loop?" — has major implications for your architecture:</p>
+    <ul class="dl">
+      <li><strong>Single call:</strong> deterministic, fast, cheap, easy to test. Output is one response to one input.</li>
+      <li><strong>Agent loop:</strong> non-deterministic, variable latency, variable cost, harder to test. Output is a sequence of actions that may span multiple systems.</li>
+    </ul>
+    <p>Most use cases start as a single LLM call and evolve toward agents when users ask for tasks the single call can't complete. Designing the boundary between "this is a generation task" and "this is an agent task" upfront saves significant rework.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>The MCP/A2A/AG-UI protocol stack is to agents what REST was to web APIs — a standardisation moment. Before REST, every API was bespoke. After REST, APIs could be composed and integrated at scale.</p>
+    <p><strong>Before MCP:</strong> every team builds their own tool integrations — each agent team writes its own OMS connector, its own Confluence connector, its own email integration. No sharing, no governance, no central tool registry.</p>
+    <p><strong>After MCP:</strong> tools are built once, registered centrally, and available to any agent that has permission. Your enterprise tool estate becomes a shared capability that all agent-based applications can draw on.</p>
+    <p>The architectural implication: the investment you make in MCP-compatible tool development today is infrastructure, not application code. It compounds. Every new agent that joins your enterprise benefits from the tools already built.</p>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> An AI agent is not a smarter chatbot. It is closer to a contractor you hire for a specific project. A chatbot answers questions. A contractor takes a brief, figures out the steps needed, uses specialist subcontractors (tools), checks results, and delivers a finished outcome. The crucial difference: a contractor acts autonomously between the brief and the delivery. That autonomy is what makes agents powerful — and what makes blast-radius management non-negotiable in enterprise design.
+</div>
+
+<div class="ibox">
+  <strong>The Operations Manager Analogy</strong><br><br>
+  Think about an experienced operations manager at a logistics company. They have three modes of working:<br><br>
+  <strong>Mode 1 — Direct answer (prompting):</strong> Someone asks "what's our standard lead time for European shipments?" They answer immediately from knowledge: "10–14 days, 7 for premium." No tools needed. The quality of their answer depends on how well they understood the question and how clearly they were briefed when they joined.<br><br>
+  <strong>Mode 2 — Tool-assisted lookup (function calling):</strong> Someone asks "what's the status of shipment SH-9823?" They can't answer from memory — they open the tracking system, look it up, and report back. They know <em>which</em> tool to use and <em>how</em> to use it, but they need the tool to get the answer.<br><br>
+  <strong>Mode 3 — Multi-step investigation (agent loop):</strong> Someone asks "why is our on-time delivery rate down 12% this month and what should we do?" The manager checks the tracking system (tool 1), identifies the worst-performing carriers, queries the carrier performance database (tool 2), looks up recent weather events (tool 3), checks contract penalty clauses (tool 4), then synthesises everything into a recommendation. Each step informs the next.<br><br>
+  <strong>Prompting</strong> is how well you briefed the manager when they started — what their role is, what they can and can't do, what tone to use, what to escalate.<br><br>
+  <strong>The protocol stack</strong> is the company's standard systems and procedures — so the manager can look up shipments the same way regardless of which carrier, and delegate tasks to other managers using the same escalation framework.<br><br>
+  The key insight: a well-briefed manager with clear procedures and good tools is dramatically more effective than a brilliant manager with none of these. The same is true for LLM-based systems.
+</div>
+
+<!-- S4: Step-by-Step Walkthrough -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 Prompt Engineering: A Practical Taxonomy</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Prompt engineering is the art of writing clear briefs for a very capable but very literal contractor. If you write a vague job description, you get inconsistent work. If you write a precise one with worked examples and clear boundaries, you get reliable, repeatable output. The difference between "be helpful" and a well-structured system prompt is the difference between hiring someone off the street and giving them a proper onboarding pack. A "shot" is simply an example you include in the prompt — zero-shot means no examples, few-shot means you include a handful of worked examples to show exactly what good output looks like.
+</div>
+
+<p>Prompt engineering is the practice of writing instructions that reliably get the output you need from an LLM. The techniques form a progression from simple to complex. A 'shot' means an example you provide in the prompt. Zero-shot means no examples given. Few-shot means 2–5 examples are included.</p>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Prompt engineering is just typing better questions — any developer can figure it out on the fly." In reality, system prompts in production are a form of API specification. They define role, scope, output contract, escalation logic, and safety boundaries. A poorly written prompt produces inconsistent behaviour at scale — just like a poorly written API contract produces unpredictable integrations. Prompt design deserves the same rigour as interface design.</div>
+
+<div class="alayer al1">
+  <div class="ln">Zero-Shot</div>
+  No examples — just the instruction. Use when the task is straightforward and the model has strong training signal for it.
+  <div class="code-label">Example</div>
+  <div class="code">Classify the sentiment of this customer review as positive, negative, or neutral:
+"The delivery was late but the product quality was excellent."</div>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Few-Shot</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:8px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Few-shot prompting is the difference between handing an employee a vague task description versus giving them three worked examples alongside it. The examples calibrate exactly what "good" looks like — the format, the tone, the level of detail. For enterprise use cases with specific output requirements (risk ratings, structured reports, regulated classifications), few-shot examples dramatically reduce variance. Think of them as acceptance criteria expressed as examples rather than rules.
+  </div>
+
+  Provide 2–5 examples of input → output pairs before the actual query. Use when zero-shot quality is inconsistent, you need a specific output format, or the task is domain-specific.
+  <div class="code-label">Example</div>
+  <div class="code">Classify the sentiment:
+Review: "Fast delivery, exactly as described." → Positive
+Review: "Arrived broken, terrible packaging." → Negative
+Review: "Product is fine, nothing special." → Neutral
+
+Review: "The delivery was late but the product quality was excellent." → </div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Chain-of-Thought (CoT)</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:8px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Asking the model to "think step by step" is like asking a consultant to show their working before giving a recommendation. When the model externalises its reasoning, two things happen: it catches its own errors mid-thought (just like writing out the logic helps a human spot a flaw), and you can see where it went wrong if the answer is incorrect. For enterprise decisions — eligibility checks, risk assessments, compliance reviews — the reasoning trace is as valuable as the answer itself: it is your audit trail.
+  </div>
+
+  Instruct the model to reason step by step before answering. Use for multi-step reasoning, calculation, or logic. CoT dramatically improves accuracy on complex tasks.
+  <div class="code-label">Example</div>
+  <div class="code">A customer ordered 3 items: £45, £23, and £12.
+They have a 15% loyalty discount and paid £5 shipping.
+What is their total? Think step by step.</div>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Zero-Shot CoT</div>
+  Add "Let's think step by step." to any prompt — surprisingly effective without providing explicit examples.
+  <div class="code-label">Example</div>
+  <div class="code">Is this refund request eligible under our 30-day policy?
+Order date: 15 May. Return request: 18 June.
+Let's think step by step.</div>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">Structured Output</div>
+  Instruct the model to return a specific format (JSON, XML, markdown table). Use when downstream systems need to parse the output programmatically. Modern LLMs support this natively via "structured output" or "JSON mode."
+  <div class="code-label">Example</div>
+  <div class="code">Extract the following from this contract clause and return as JSON:
+{fields: party_names, effective_date, termination_notice_period}
+
+Clause: "This agreement between RetailCo Ltd and SupplierX GmbH,
+effective 1 January 2026, may be terminated by either party
+with 90 days written notice..."</div>
+</div>
+
+<div class="alayer al6">
+  <div class="ln">Role Prompting</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:8px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> The system prompt is the employment contract and job description rolled into one. The user prompt is the daily task or question. The system prompt runs once at the start of the session and sets everything — who the model is, what it can do, what it must never do, and how it should communicate. The user prompt is what the end user types. This separation is critical: your governance, compliance rules, and safety boundaries live in the system prompt where they cannot be easily overridden by user input.
+  </div>
+
+  Assign the model an explicit role that activates relevant knowledge and tone.
+  <div class="code-label">Example</div>
+  <div class="code">You are a senior contract analyst for a retail company.
+Your role is to identify clauses that deviate from our standard MSA template
+and flag them with a risk rating (High/Medium/Low) and brief explanation.</div>
+</div>
+
+<div class="card a" style="margin-top:16px">
+  <div class="ch a">System Prompt Design Principles for Production</div>
+  <ul class="dl">
+    <li><strong>State the role explicitly</strong> at the start of the system prompt</li>
+    <li><strong>Define boundaries</strong> — what the model can and cannot do</li>
+    <li><strong>Specify the output format</strong> — structure, length, tone</li>
+    <li><strong>Include escalation instructions</strong> — e.g. "if you cannot answer from the provided context, say 'I don't have that information'"</li>
+    <li><strong>Add few-shot examples</strong> for the most common and most error-prone cases</li>
+    <li><strong>Never rely on a single instruction</strong> for safety-critical behaviours — back up prompt instructions with technical controls</li>
+  </ul>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "The system prompt is just a polite introduction — users can override it by asking nicely." The system prompt is not just a suggestion. It is the authoritative configuration layer that governs model behaviour for the session. However, it is not a hard security boundary on its own — a sufficiently crafted user message (prompt injection) can sometimes override poorly written system prompts. This is why safety-critical rules must be backed by application-level controls, not just prompt instructions.</div>
+
+<div class="sh2">4.2 Function Calling: How Tools Actually Work</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of tool use as the model acting like a skilled consultant who knows they do not have all the answers in their head. When they need current data, they raise a request: "I need the live inventory figure for SKU-4421." Your application goes and fetches it from the real system and hands the number back to the consultant, who then uses it in their analysis. The model never directly touches your database — it writes a ticket, your code fetches the data, your code hands it back. This separation is intentional and is your security boundary: the model has no direct access to your systems.
+</div>
+
+<p>Function calling (also called tool use) is the mechanism by which an LLM can request the execution of an external function. The model does not execute the function — it outputs a structured request, and the application executes it.</p>
+
+<div class="code-label">The mechanism, step by step</div>
+<div class="code">1. Application sends the LLM:
+   - The user's message
+   - A list of available tools (name, description, parameters, required fields)
+   - The system prompt
+
+2. LLM decides whether a tool call is needed.
+   If yes, instead of a text response, it outputs:
+   {
+     "tool_call": {
+       "name": "get_order_status",
+       "arguments": {"order_id": "12345"}
+     }
+   }
+
+3. Application receives the tool call specification.
+   Application executes: OMS_API.get_order(id="12345")
+   Result: {"status": "shipped", "estimated_delivery": "2026-06-23"}
+
+4. Application sends the tool result back to the LLM:
+   [previous messages] + [tool result]
+
+5. LLM generates the final text response based on the tool result.
+   "Order 12345 has shipped and is estimated to arrive on 23 June."</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Why this matters architecturally:</strong> The LLM decides <em>when</em> to call a tool and <em>which</em> tool to call based on the tool descriptions you provide. Tool descriptions are part of your system design — write them precisely. The model never has direct access to your systems; the application controls execution. This is the correct security boundary. Tool results go back into the context window — large tool responses consume context budget. Return only what the model needs.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "The AI is calling our API directly — we need to lock it down at the API level." The model never calls your API. It outputs a structured specification of what it wants to call. Your application code receives that specification, decides whether to honour it (applying authorisation, rate limiting, audit logging), executes the actual API call, and returns the result. The model is isolated from your systems by design. Your application code is the gatekeeper — that is where your security controls belong.</div>
+
+<div class="code-label">Tool description quality matters enormously</div>
+<div class="code">Poor: "get_order": "Gets an order."
+
+Good: "get_order_status": "Retrieve the current status and estimated
+delivery date for a customer order. Use when the customer asks about
+order progress, delivery timing, or shipment tracking.
+Parameters: order_id (string, required) - the 8-digit order number
+from the customer's confirmation email."</div>
+
+<div class="sh2">4.3 The ReAct Agent Loop</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> ReAct is the detective pattern. A good detective does not walk in, hear the question, and immediately name the culprit. They reason ("I need the CCTV footage"), act (request it), observe (review it), reason again ("That narrows it to three suspects — I need the alibi records"), act again, and so on — each clue informing the next step. An AI agent does exactly the same thing: it alternates between thinking and doing until it has enough evidence to give a confident answer. The word ReAct is literally "Reason + Act" compressed into one word. Every production agent framework — LangGraph, CrewAI, AutoGen — is an implementation of this same loop with different features layered on top.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>ReAct (Reasoning + Acting)</strong> is the canonical pattern for AI agents. The agent alternates between reasoning (thinking about what to do) and acting (calling a tool), with each action informing the next round of reasoning.
+</div>
+
+<div class="code-label">Full loop walkthrough</div>
+<div class="code">Task: "Check if order #12345 is at risk of being late
+       and draft a proactive message to the customer."
+
+Step 1 — Reason:
+  "I need to know the order status. I'll call get_order_status."
+
+Step 2 — Act:
+  Tool call: get_order_status(order_id="12345")
+  Result: {status: "in_warehouse", ship_date: "2026-06-22",
+           carrier: "FedEx", estimated_delivery: "2026-06-24"}
+
+Step 3 — Reason:
+  "Ship date is tomorrow. I should check current FedEx delays
+   to assess late delivery risk."
+
+Step 4 — Act:
+  Tool call: get_carrier_delays(carrier="FedEx", region="UK")
+  Result: {delay_status: "2-day delay on standard services",
+           effective_date: "2026-06-21"}
+
+Step 5 — Reason:
+  "2-day delay means delivery by 26 June instead of 24 June.
+   The order is at risk of being late. I have enough to draft
+   the customer message now."
+
+Step 6 — Generate final response:
+  "Order #12345 is at moderate risk of a 2-day delay due to current
+   FedEx service disruptions. Here is a draft customer message:..."</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Agentic Loops and Blast Radius:</strong> Every step an agent takes autonomously is a step that could go wrong without a human catching it. When an agent can browse the web, send emails, update records, and initiate payments — all in one loop — a single bad instruction or compromised input can cascade through all of those actions before anyone notices. This is "blast radius." The architectural response is the same as for any high-risk automated process: least privilege (each agent only has the tools it needs), human-in-the-loop gates for high-stakes actions, max-step limits, and circuit breakers. Autonomy and guardrails are not in tension — they are designed together.
+</div>
+
+<div class="sh2">Six Production Failure Modes</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Agents are just like microservices — if we build them right, they run reliably." Agents introduce a fundamentally new failure category: emergent failure. A microservice either works or returns an error. An agent can appear to be working — making tool calls, generating text — while actually looping, drifting from the original goal, or producing plausible-sounding but incorrect outputs. You cannot rely on traditional success/error signals alone. You need step counting, loop detection, goal re-anchoring, and output verification as first-class design concerns.</div>
+
+<table class="t">
+  <tr><th>Failure Mode</th><th>What Happens</th><th>Mitigation</th></tr>
+  <tr><td><strong>Infinite loop</strong></td><td>Agent calls the same tool repeatedly without progress</td><td>Loop detection: flag if identical tool call appears &gt; 3 times; max step limit</td></tr>
+  <tr><td><strong>Tool error spiral</strong></td><td>Tool returns an error; agent retries without backing off</td><td>Circuit breaker on tool calls; explicit error handling in system prompt</td></tr>
+  <tr><td><strong>Context overflow</strong></td><td>Tool results fill the context window; agent loses earlier reasoning</td><td>Context budget management; summarise older steps; limit tool response size</td></tr>
+  <tr><td><strong>Hallucinated tool call</strong></td><td>Agent calls a tool that doesn't exist or with wrong parameter names</td><td>Strict schema validation on tool calls; return clear error if tool unknown</td></tr>
+  <tr><td><strong>Goal drift</strong></td><td>Agent pursues a sub-goal that diverges from the original task</td><td>Include the original task in every reasoning step; periodically re-anchor to goal</td></tr>
+  <tr><td><strong>Overconfident completion</strong></td><td>Agent stops and reports success without actually completing the task</td><td>Include a verification step: "before responding, confirm each required action was completed"</td></tr>
+</table>
+
+<div class="tbox" style="margin-top:8px">
+  <strong>Architecture takeaway — design for failure from day one:</strong> These are not edge cases — they are expected behaviours of any autonomous loop system. Build loop detection, step limits, circuit breakers, and human escalation paths before you deploy, not after your first production incident.
+</div>
+
+<div class="sh2">4.4 Multi-Agent Architecture Patterns</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Multi-agent systems exist for the same reason you have project teams rather than one person who does everything. A single agent trying to handle order management, legal compliance, financial analysis, and customer communications simultaneously would need access to all those systems — creating an enormous blast radius and a tool list too long to manage reliably. Instead, you build a team: a PM agent that understands the full task and delegates, specialist agents with narrow tool access and deep domain focus, and optionally a quality reviewer agent. Each specialist can be tested independently. If the email agent is compromised, it cannot touch financial data. The same governance principles that apply to human team structures apply here.
+</div>
+
+<p>A single agent has limits — context window, tool permission scope, reasoning depth. Multi-agent architectures distribute work across specialised agents.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Pattern 1 — Orchestrator + Specialist</div>
+    <p>A manager agent decomposes the task, delegates sub-tasks to specialist agents, and synthesises the results. Benefits: each specialist has a narrow tool permission set (reduced blast radius), can run in parallel (faster), and can be tested independently.</p>
+    <div class="code-label">Example</div>
+    <div class="code">Manager Agent:
+  ├── On-Time Delivery Agent (OMS + carrier tools)
+  ├── Cost Analysis Agent (ERP + finance tools)
+  └── Supplier Performance Agent (supplier tools)
+
+Each specialist returns a structured report.
+Manager synthesises into a unified recommendation.</div>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Pattern 2 — Sequential Pipeline</div>
+    <p>Agents in a chain, where each agent's output is the next agent's input. Use when each step requires different tools or domain expertise, and output must be verified before passing on.</p>
+    <div class="code-label">Structure</div>
+    <div class="code">Document → Extraction Agent → Validation Agent
+         → Enrichment Agent → Output</div>
+  </div>
+  <div class="card g">
+    <div class="ch g">Pattern 3 — Critic / Verifier</div>
+    <p>A generator agent produces an output; a separate critic agent evaluates it. Use when output quality is critical and the cost of a verification pass is worth the quality improvement.</p>
+    <div class="code-label">Structure</div>
+    <div class="code">Draft Agent → produces initial response
+Critic Agent → evaluates accuracy, policy, tone
+  → approves or returns with specific feedback</div>
+  </div>
+  <div class="card t">
+    <div class="ch t">Pattern 4 — Parallel Explorers + Synthesiser</div>
+    <p>Multiple agents explore different aspects of a problem simultaneously; a synthesiser combines their findings. Use when the problem has multiple independent dimensions that can be researched without coordination.</p>
+    <div class="code-label">Example: "Should we switch OMS providers?"</div>
+    <div class="code">Agent A: Technical capabilities assessment
+Agent B: Cost and licensing analysis
+Agent C: Integration complexity assessment
+Agent D: Vendor risk and support assessment
+Synthesiser: Combines all four into a recommendation</div>
+  </div>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Multi-agent systems are just a way of running one big agent faster — split it up and parallelise." Multi-agent architecture is primarily a <em>governance and safety</em> decision, not just a performance optimisation. Splitting agents enforces least-privilege tool access, creates independently testable components with clear contracts, and contains blast radius when one agent misbehaves. The performance benefit from parallelism is a secondary advantage. If you only think about multi-agent as parallelism, you will miss the most important design principle.</div>
+
+<div class="sh2">4.5 The Agent Protocol Stack — MCP, A2A, AG-UI</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Before REST became the standard for web APIs, every system integration was bespoke — unique protocol, unique authentication, unique data format. REST standardised the conversation so any client could talk to any server with a shared contract. The same standardisation moment is happening for agents right now. MCP (how agents talk to tools), A2A (how agents talk to other agents), and AG-UI (how agents talk to human-facing interfaces) are collectively doing for agents what REST did for APIs. If you build tools and agents to these standards today, they compose freely — with each other and with future systems you have not built yet.
+</div>
+
+<p>The agent protocol stack is the emerging set of open standards for how agents connect to tools, other agents, and humans. Think of it as the "OSI model for agents" — each protocol addresses a different layer of interoperability.</p>
+
+<div class="g3">
+  <div class="card b">
+    <div class="ch b">MCP — Model Context Protocol</div>
+    <p><strong>What it does:</strong> defines how agents discover and invoke tools.</p>
+    <p><strong>Analogy:</strong> USB-C for agent tools — a standard plug that works regardless of which agent framework or LLM is running.</p>
+    <p><strong>Why it matters:</strong> tools built to MCP standard can be registered once and used by any agent. Your OMS integration, Confluence connector, and email tool are built once, not once per agent team.</p>
+    <div class="code-label">Structure</div>
+    <div class="code">MCP Server (exposes tools):
+  Tools: [get_order_status, create_refund, ...]
+  Each with: name, description, param schema, auth
+
+MCP Client (agent framework):
+  Discovers tools from server
+  Calls tools via standard MCP protocol
+  Works with any LLM: GPT-4o, Claude, Llama...</div>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">A2A — Agent-to-Agent Protocol</div>
+    <p><strong>What it does:</strong> defines how agents discover and delegate to other agents.</p>
+    <p><strong>Analogy:</strong> the standard escalation procedure that lets any manager in the organisation delegate to any other manager without knowing how their team works internally.</p>
+    <p><strong>Why it matters:</strong> enables composable multi-agent systems. Your customer service agent can delegate to your logistics specialist agent without either knowing the other's internal implementation.</p>
+    <div class="code-label">Flow</div>
+    <div class="code">Agent A (customer service) receives task
+  → Queries A2A registry for logistics agent
+  → Finds Logistics Agent, sends delegation
+  → Logistics Agent executes, returns result
+  → Customer Service Agent incorporates &amp; responds</div>
+  </div>
+  <div class="card g">
+    <div class="ch g">AG-UI — Agent-User Interface Protocol</div>
+    <p><strong>What it does:</strong> defines the streaming interface between an agent workflow and a human-facing UI.</p>
+    <p><strong>Why it matters:</strong> standardises how agent progress, tool calls, intermediate results, and HITL approval requests are streamed to the UI — so UI components can be built once and work with any agent framework.</p>
+    <div class="code-label">Event stream</div>
+    <div class="code">→ thinking: "Checking order status..."
+→ tool_call: get_order_status(12345)
+→ tool_result: {status: "shipped"...}
+→ approval_required: "Refund £450 — supervisor approval"
+→ awaiting_approval
+→ approval_received
+→ final_response: "Refund of £450 has been approved..."</div>
+  </div>
+</div>
+
+<div class="sh2">The Complete Stack</div>
+<div class="alayer al1">
+  <div class="ln">Human / Application</div>
+  AG-UI (streaming UX events)
+</div>
+<div class="alayer al2">
+  <div class="ln">Agent Framework</div>
+  LangGraph, CrewAI, custom — A2A (agent-to-agent delegation)
+</div>
+<div class="alayer al3">
+  <div class="ln">Other Agents</div>
+  Specialists, sub-agents — MCP (tool invocation)
+</div>
+<div class="alayer al4">
+  <div class="ln">Tool Servers</div>
+  OMS, CRM, knowledge base, email...
+</div>
+<div class="alayer al5">
+  <div class="ln">Enterprise Systems</div>
+  Source of truth — order data, customer records, inventory
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">Scenario: Order Exception Handling Agent at a Retail Company</div>
+  <p>Customer contacts support: "I've been waiting 3 weeks for my order #OD-78234. I want an update and compensation."</p>
+  <p>This is a multi-step task: look up the order, diagnose the delay, check compensation policy, calculate appropriate offer, draft a response. A single LLM call cannot do this. An agent can.</p>
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Durable Execution:</strong> Imagine the agent is halfway through this investigation — it has checked the order status and carrier history, and is waiting for a supervisor to approve a £250 compensation offer — when the server restarts. Without durable execution, the whole task is lost and the customer gets no response. With durable execution (checkpointing), the agent resumes from exactly where it paused: the approval request is still pending, the earlier tool results are preserved, and the supervisor can approve or reject without the agent starting over. For long-running workflows that involve human approval steps, durable execution is not optional — it is the difference between a reliable enterprise process and an unreliable demo.
+</div>
+
+<div class="code-label">System Prompt Design</div>
+<div class="code">You are a customer service resolution specialist for RetailCo.
+
+YOUR ROLE: Resolve customer order issues by investigating the root cause,
+applying our compensation policy, and communicating professionally.
+
+YOUR TOOLS:
+- get_order_details: look up any order by order ID
+- get_carrier_history: check shipment tracking history
+- get_compensation_policy: retrieve current compensation guidelines
+- create_compensation_offer: generate a compensation offer in our system
+- draft_customer_email: prepare a response email for human review
+
+BOUNDARIES:
+- Compensation offers above £100 require supervisor approval
+- Never promise a specific delivery date you cannot confirm from tracking data
+- Never reveal internal system IDs or carrier account details
+- If the order has a fraud flag, stop and escalate to the fraud team
+
+ESCALATION: If you cannot resolve with available tools, say
+"I'm transferring you to a specialist" and create an escalation ticket.</div>
+
+<div class="code-label">Agent Execution Trace</div>
+<div class="code">Step 1 → get_order_details(order_id="OD-78234")
+Result: {status: "in_transit", order_date: "2026-05-28",
+         expected_delivery: "2026-06-05", carrier: "Hermes",
+         last_scan: "2026-06-02", scan_location: "Birmingham depot"}
+
+Step 2 → Reason: Order is 18 days past expected delivery.
+         Last scan was 19 days ago. Need carrier history.
+
+Step 3 → get_carrier_history(tracking_id="HRM-99234")
+Result: {carrier_note: "Item misrouted, located at Birmingham.
+                       Rescheduled delivery attempt 2026-06-24."}
+
+Step 4 → Reason: Carrier error caused the delay.
+         Need to check compensation policy.
+
+Step 5 → get_compensation_policy(reason="carrier_fault",
+                                  delay_days=18, order_value=85.00)
+Result: {eligible: true,
+         compensation_range: "£10-£25 store credit for delays > 14 days"}
+
+Step 6 → Reason: Eligible. Offer mid-range (£15). Below £100 threshold.
+
+Step 7 → create_compensation_offer(order_id="OD-78234",
+                                    amount=15.00, type="store_credit")
+Step 8 → draft_customer_email(...) → draft created for human review</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Why Agents Fail and How to Design for It:</strong> Notice what could go wrong in this trace: the carrier API could return an error (tool error spiral risk); the compensation policy lookup could time out and the agent retries infinitely (infinite loop risk); the agent could decide it has "completed" the task after drafting the email without actually creating the compensation offer (overconfident completion risk). The system prompt's BOUNDARIES section and the ESCALATION instruction are the first line of defence. But they are not sufficient alone — the orchestration layer must enforce step limits, loop detection, and circuit breakers. Partial completion — where some steps succeed and some fail — is particularly dangerous because the customer may receive a compensation email but no actual credit. Design your agent workflows so partial states are detectable and recoverable.
+</div>
+
+<div class="kv">
+  <div class="kvr"><span class="kvk">Tool calls</span><span class="kvv">5 calls, 4 reasoning steps, ~8 seconds end-to-end</span></div>
+  <div class="kvr"><span class="kvk">Policy consistency</span><span class="kvv">Same compensation logic applied for every similar case</span></div>
+  <div class="kvr"><span class="kvk">HITL threshold</span><span class="kvv">Compensation below £100 — no human approval needed</span></div>
+  <div class="kvr"><span class="kvk">Audit trail</span><span class="kvv">Every tool call, reasoning step, and output logged with case ID</span></div>
+  <div class="kvr"><span class="kvk">Email review</span><span class="kvv">Draft goes to human review queue before sending to customer</span></div>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">When to Use Agents vs Single LLM Calls</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of the build-vs-buy decision in enterprise architecture. You could implement every feature as a custom microservice — but most of the time a simpler solution (a SaaS product, a library, a single function) is better. The same applies here: reaching for an agent when a single well-prompted LLM call would do the job is the AI equivalent of building a microservice to do arithmetic. Agents are powerful — and they come with real costs: variable latency, variable cost, loop risk, harder testing, and observability complexity. Always ask "can I solve this with a single call plus one or two tool lookups?" before you architect an agent loop.
+</div>
+
+<p>This is the most consequential design decision in AI application architecture. Get it wrong and you either under-build (a complex task fails in one call) or over-build (a simple Q&amp;A becomes an agent with all the complexity that entails).</p>
+
+<table class="t">
+  <tr><th>Signal</th><th>Single Call</th><th>Agent</th></tr>
+  <tr><td>Task requires live data</td><td>Use function calling (still single call with tool)</td><td>—</td></tr>
+  <tr><td>Task requires multiple sequential tool calls</td><td>—</td><td>&#10003;</td></tr>
+  <tr><td>Output depends on intermediate results</td><td>—</td><td>&#10003;</td></tr>
+  <tr><td>Task can be fully specified upfront</td><td>&#10003;</td><td>—</td></tr>
+  <tr><td>Task requires exploration / decision at runtime</td><td>—</td><td>&#10003;</td></tr>
+  <tr><td>Latency SLA &lt; 2 seconds</td><td>&#10003;</td><td>&#10007; (agents are slower)</td></tr>
+  <tr><td>Cost must be minimised</td><td>&#10003;</td><td>&#10007; (agents use more tokens)</td></tr>
+  <tr><td>Simple, deterministic task</td><td>&#10003;</td><td>—</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>The common mistake:</strong> building an agent when a single call with a well-designed prompt and one or two tool calls would suffice. Agents introduce non-determinism, variable cost, loop risk, and observability complexity. The simplest architecture that meets the requirement is always preferred.<br><br>
+  <strong>The progression:</strong> start with a single LLM call → add function calling when the model needs live data → add an agent loop only when the task genuinely requires multi-step reasoning where each step depends on the previous.
+</div>
+
+<div class="sh2">Vendor SDK Selection in 2026</div>
+<table class="t">
+  <tr><th>Framework</th><th>Best For</th><th>Avoid When</th></tr>
+  <tr><td><strong>LangGraph</strong></td><td>Complex stateful workflows, human-in-loop gates, durable task queues</td><td>Simple single-agent use cases (overkill)</td></tr>
+  <tr><td><strong>CrewAI</strong></td><td>Multi-agent orchestration with defined roles, fast to prototype</td><td>Production enterprise deployments (less mature observability)</td></tr>
+  <tr><td><strong>AutoGen (Microsoft)</strong></td><td>Code execution agents, developer tooling agents</td><td>Non-technical workflows</td></tr>
+  <tr><td><strong>Semantic Kernel</strong></td><td>Microsoft/Azure stack, enterprise C# or Python</td><td>Non-Microsoft environments</td></tr>
+  <tr><td><strong>Custom / minimal</strong></td><td>When you need full control over the loop</td><td>When you need to move fast (framework handles boilerplate)</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Practical advice for architects:</strong> evaluate frameworks on three criteria — (1) does it support MCP natively? (2) does it have production-grade observability (OTel integration)? (3) does it support durable execution (the ability of an agent workflow to survive a process restart or a long human approval pause and resume from exactly where it stopped)? In 2026, LangGraph leads on all three for enterprise deployments.
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">Self-Assessment Questions</div>
+  <ol class="sl">
+    <li>
+      <strong>A developer shows you a system prompt that reads: "Be helpful, answer customer questions about orders and products, and be polite." Without looking anything up, list the three most important things missing — and explain what will go wrong in production for each gap.</strong><br>
+      <em>Think about: what happens when a customer asks something outside the agent's scope? What happens when the agent cannot resolve an issue? What determines the output format and tone consistently?</em>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> (1) <strong>Explicit boundaries</strong> — the prompt does not say what the agent cannot do. Without this, the model will attempt to answer anything, including questions about competitor products, legal disputes, or topics with regulatory sensitivity. In production, this produces scope creep and compliance risk. (2) <strong>Escalation instructions</strong> — the prompt does not say when or how to hand off to a human. Without this, the agent either refuses edge cases with a generic "I can't help with that" (poor CX) or attempts to resolve cases it shouldn't (risk). (3) <strong>Output format and behaviour specification</strong> — "be polite" is not a specification. At scale, different invocations will produce different tones, different structures, and different verbosity levels. A production system needs explicit format, length, and tone rules.<br>
+        <strong>Simple explanation:</strong> A vague job description produces inconsistent work — a vague system prompt produces inconsistent AI behaviour at scale.<br>
+        <strong>Architecture takeaway:</strong> Treat the system prompt as an API specification: write it with role, scope, format contract, escalation rules, and boundary conditions before any code is written around it.
+      </div>
+    </li>
+    <li>
+      <strong>An order management agent is looping — it keeps calling <code>get_carrier_status</code> repeatedly for the same order without progressing. Walk through at least two root causes and at least three architectural mitigations, explaining why each mitigation works.</strong><br>
+      <em>Think about: why would the agent keep calling the same tool? What is it hoping to get that it is not getting? What prevents a human from noticing this quickly?</em>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> <strong>Root causes:</strong> (1) The tool is returning an error or ambiguous result, and the agent has no instruction for how to handle that — so it retries hoping for a different result. (2) The tool returns data but the system prompt gives no guidance on what to do when carrier data shows no progress — so the agent is stuck between "I have a result" and "I don't know what to conclude." (3) There is no exit condition in the system prompt for the scenario where carrier data is simply unavailable. <strong>Mitigations:</strong> (1) Loop detection in the orchestration runtime — flag and escalate if the same tool is called with identical arguments more than N times (catches the cycling behaviour before it becomes expensive). (2) Circuit breaker on the tool — if a tool errors N times consecutively, stop calling it and escalate (prevents indefinite retry-on-error). (3) Explicit exit conditions in the system prompt — "if carrier data shows no progress after two lookups, escalate to the exception team" (removes ambiguity about when to stop). (4) Max step limit — the orchestration layer terminates the agent after a defined maximum number of steps regardless of state.<br>
+        <strong>Simple explanation:</strong> The agent is like someone who keeps refreshing the tracking page because they do not know what to do when it shows no update — add a rule that tells them when to stop and call someone.<br>
+        <strong>Architecture takeaway:</strong> Loop detection, circuit breakers, and max step limits are not optional add-ons — build them in before the first production deployment.
+      </div>
+    </li>
+    <li>
+      <strong>Explain what the Model Context Protocol (MCP) is and why it changes the economics of enterprise AI tool development. Use a concrete analogy and give a before/after comparison of team effort.</strong><br>
+      <em>Think about: what did API standardisation (REST) do for web development economics? What was the cost of not having a standard?</em>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> MCP is an open standard that defines how any agent discovers and invokes tools — the tool's name, description, parameter schema, and authentication. It is to agents what REST is to web APIs: a shared contract that makes tools composable across different implementers. <strong>Before MCP:</strong> every agent team builds its own integration to every enterprise system. If you have 5 agent teams and 10 enterprise systems, you need up to 50 custom integrations. Each integration has its own authentication approach, error handling, and documentation. No sharing, no central governance. <strong>After MCP:</strong> each enterprise system publishes one MCP server. Every agent team uses the same MCP client interface to access any tool. 10 MCP servers serve all 5 agent teams — 10 integrations instead of 50. Governance (auth, rate limits, audit logging) is applied once at the MCP server layer. <strong>Economic shift:</strong> tool investment becomes infrastructure that compounds — every new agent benefits from tools already built.<br>
+        <strong>Simple explanation:</strong> MCP is the USB-C standard for agent tools — build the plug once and it works with everything.<br>
+        <strong>Architecture takeaway:</strong> Prioritise MCP-compatible tool development for your highest-value enterprise systems first; those tools will serve every future agent you build.
+      </div>
+    </li>
+    <li>
+      <strong>You are designing a multi-agent system where a Manager Agent delegates to three specialist agents. The security team asks about data access controls and blast radius. What architectural principle applies, and how does multi-agent architecture enforce it — with a concrete example of what happens if one agent is compromised?</strong><br>
+      <em>Think about: in a traditional enterprise, why do different roles have different system access levels? What would happen if every employee had admin access to everything?</em>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The principle is <strong>least privilege</strong> — each agent should have access only to the tools and data required for its specific function. Multi-agent architecture enforces this naturally by scoping each agent's tool permission set at design time: the Order Agent has OMS read/write tools only; the Logistics Agent has carrier API tools only; the Customer Comms Agent has email tools only. No single agent has permissions across all systems. <strong>Compromise scenario:</strong> if the Customer Comms Agent is compromised by a prompt injection attack (a malicious user crafts an input that hijacks the agent's next action), the worst it can do is send a misleading email — because that is the only tool it has. It cannot read order data, initiate refunds, or update inventory. If a single monolithic agent with all-tools access is compromised in the same way, the attacker has access to your entire enterprise tool estate. <strong>Blast radius</strong> is the maximum damage any single agent failure can cause — multi-agent architecture with least privilege minimises it by design.<br>
+        <strong>Simple explanation:</strong> Give each specialist agent only the keys to the rooms it needs — if one is compromised, the attacker only has those keys.<br>
+        <strong>Architecture takeaway:</strong> Define tool permission sets for each agent role as part of your security design, not as an afterthought.
+      </div>
+    </li>
+    <li>
+      <strong>Explain Chain-of-Thought prompting — what it does, when it genuinely improves results, when it does not help, and describe the specific failure mode where CoT can lead to a <em>worse</em> answer than no CoT at all.</strong><br>
+      <em>Think about: when does showing your working catch errors? When does showing your working generate errors that would not have existed if you had just answered directly?</em>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Chain-of-Thought prompting instructs the model to reason step by step before giving a final answer, externalising its intermediate logic. <strong>When it helps:</strong> multi-step arithmetic and calculation (each step can be verified); logical inference (chains of if-then reasoning); eligibility and policy checks (step-by-step rule application); any task where the correct answer depends on intermediate conclusions. The model is less likely to skip a step and jump to a wrong answer. <strong>When it does not help:</strong> simple factual lookups ("What is the capital of France?"); direct classification where the answer is immediate; structured data extraction with clear field mapping; high-volume simple tasks where the additional token cost is not justified by a quality gain. <strong>The specific failure mode (CoT hurt):</strong> when the reasoning chain itself contains an error or makes an unwarranted assumption, the model can "reason itself into a wrong answer" it would not have produced with a direct response. A direct answer draws on training pattern matching; a CoT answer follows a logical chain — and if one link in that chain is wrong, all subsequent steps compound the error. This is most common in ambiguous or unusual edge cases where the model's reasoning heuristics misfire.<br>
+        <strong>Simple explanation:</strong> Asking someone to show their working usually catches mistakes — but occasionally the act of working through it creates a mistake that would not have happened if they had just trusted their instinct.<br>
+        <strong>Architecture takeaway:</strong> Use CoT for complex reasoning tasks in production; do not apply it to simple tasks where it adds cost without quality benefit, and always evaluate CoT vs direct prompting on your specific task with a golden test set.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section is for architects ready to evaluate agent frameworks and implement production agent systems. Safe to skip on a first pass and return here later.</div>
+
+<div class="sh2">8.1 LangGraph: Stateful Multi-Agent Workflows</div>
+<p>LangGraph is the most widely used framework for building production-grade stateful agent workflows. Its core abstraction: a workflow is a <strong>directed graph</strong> where nodes are agent steps (LLM calls or tool calls) and edges define the flow — including conditional branches and loops.</p>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Why the graph abstraction matters</div>
+    <ul class="dl">
+      <li><strong>Cycles are first-class:</strong> LangGraph supports loops — the ReAct loop is literally a cycle in the graph</li>
+      <li><strong>Conditional routing:</strong> edges can carry conditions — "if escalate, go to escalation node; otherwise continue"</li>
+      <li><strong>State is explicit:</strong> the graph maintains a typed state object that every node can read and update — no implicit context drift</li>
+      <li><strong>Checkpointing:</strong> LangGraph can checkpoint graph state at each node, enabling durable execution (agent can resume after crash, restart, or human approval pause)</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Minimal LangGraph agent structure</div>
+    <div class="code-label">Python</div>
+    <div class="code">from langgraph.graph import StateGraph, END
+from typing import TypedDict
+
+class AgentState(TypedDict):
+    messages: list       # conversation history
+    tool_calls_made: int # loop detection counter
+    task_complete: bool
+
+def should_continue(state: AgentState):
+    if state["task_complete"]:
+        return END
+    if state["tool_calls_made"] > 10:  # loop guard
+        return "escalate"
+    return "agent"
+
+workflow = StateGraph(AgentState)
+workflow.add_node("agent", call_llm)
+workflow.add_node("tools", execute_tools)
+workflow.add_node("escalate", escalate_to_human)
+
+workflow.add_conditional_edges("agent", should_continue)
+workflow.add_edge("tools", "agent")
+
+graph = workflow.compile(checkpointer=memory_checkpointer)</div>
+  </div>
+</div>
+
+<div class="sh2">8.2 Agent Evaluation Benchmarks</div>
+<table class="t">
+  <tr><th>Benchmark</th><th>What It Measures</th><th>Why It Matters</th></tr>
+  <tr><td><strong>GAIA</strong></td><td>Multi-step real-world task completion</td><td>Tests end-to-end agent capability on realistic tasks</td></tr>
+  <tr><td><strong>SWE-Bench</strong></td><td>Software engineering tasks (fixing GitHub issues)</td><td>Proxy for code agent capability</td></tr>
+  <tr><td><strong>ToolBench</strong></td><td>Tool selection and invocation accuracy</td><td>Directly tests function calling quality</td></tr>
+  <tr><td><strong>&#964;-bench</strong></td><td>Multi-turn tool-use in simulated environments</td><td>Tests agent behaviour over long horizons</td></tr>
+  <tr><td><strong>AgentBench</strong></td><td>Agent performance across 8 environments</td><td>Breadth coverage</td></tr>
+</table>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>What to ask vendors:</strong> "What is your model's GAIA score at the L2 level?" L2 tasks require 5–10 tool calls and moderate reasoning. A model that scores well at L2 is practically useful for enterprise agent tasks.<br><br>
+  <strong>The calibration caveat:</strong> benchmark scores are measured on public test sets. Models may have been trained on benchmark-adjacent data. Always evaluate on your own golden test set in addition to published benchmarks.
+</div>
+
+<div class="sh2">8.3 Modern Agent Loop — Reference Pseudocode</div>
+<p>The minimal production-grade agent loop, including all defensive patterns:</p>
+<div class="code-label">Python (production agent loop)</div>
+<div class="code">async def run_agent(task: str, config: AgentConfig) -> AgentResult:
+    state = AgentState(
+        messages=[SystemMessage(config.system_prompt),
+                  HumanMessage(task)],
+        step_count=0,
+        tool_calls=[]
+    )
+
+    while True:
+        # Guard: max steps
+        if state.step_count >= config.max_steps:
+            return AgentResult(status="max_steps_exceeded", escalate=True)
+
+        # Guard: budget
+        if state.token_cost > config.budget_cap:
+            return AgentResult(status="budget_exceeded", escalate=True)
+
+        # LLM call (through model gateway)
+        response = await model_gateway.complete(
+            messages=state.messages,
+            tools=tool_registry.get_permitted_tools(config.agent_role),
+            model=config.model_tier
+        )
+
+        state.step_count += 1
+        state.token_cost += response.usage.total_tokens
+
+        if response.finish_reason == "stop":
+            return AgentResult(status="complete", output=response.content)
+
+        if response.finish_reason == "tool_calls":
+            for tool_call in response.tool_calls:
+
+                # Guard: loop detection
+                if state.tool_calls.count(tool_call.signature) >= 3:
+                    return AgentResult(status="loop_detected", escalate=True)
+
+                # Guard: HITL check
+                if requires_approval(tool_call, config):
+                    approval = await request_human_approval(tool_call)
+                    if not approval.approved:
+                        state.messages.append(
+                            ToolMessage("Action not approved by supervisor."))
+                        continue
+
+                # Execute tool (via MCP)
+                try:
+                    result = await mcp_client.call_tool(
+                        tool_call.name, tool_call.arguments,
+                        timeout=config.tool_timeout_ms)
+                except ToolError as e:
+                    result = f"Tool error: {e}. Do not retry."
+
+                # Circuit breaker check
+                if circuit_breaker.should_open(tool_call.name):
+                    return AgentResult(status="tool_unavailable", escalate=True)
+
+                state.tool_calls.append(tool_call.signature)
+                state.messages.append(ToolMessage(result))
+                audit_log.record(task_id, tool_call, result)</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>Prompting is a design decision, not a developer task.</strong> The system prompt defines the model's role, boundaries, escalation behaviour, and output contract. A poorly designed system prompt produces inconsistent behaviour at scale. Write it with the same rigour you'd apply to an API specification.</li>
+  <li><strong>Function calling is the bridge between LLMs and enterprise systems — and the model never directly touches your systems.</strong> The model outputs a structured request; the application executes it. This separation is the correct security boundary. Tool descriptions are part of your system design — write them with the same care as API documentation.</li>
+  <li><strong>The ReAct loop is the foundation of all agents.</strong> Reason → Act → Observe → Repeat. Every agent framework is an implementation of this loop with different abstractions on top. The six production failure modes (infinite loop, tool error spiral, context overflow, hallucinated call, goal drift, overconfident completion) apply to every agent regardless of framework.</li>
+  <li><strong>MCP/A2A/AG-UI is the standardisation moment for agents.</strong> MCP makes tools reusable across agents. A2A makes agents composable with other agents. AG-UI makes agent workflows accessible to humans. Building tools to MCP standard today means every future agent benefits from work done once — the economics shift from O(agents × tools) to O(tools).</li>
+  <li><strong>Use agents only when the task genuinely requires multi-step reasoning with runtime decisions.</strong> Simple tasks done with an agent incur unnecessary cost, latency, and complexity. The progression is: single LLM call → single call with function calling → agent loop. Start simple and move right only when the task requires it.</li>
+  <li><strong>Autonomy requires guardrails — design both together.</strong> Blast radius (the maximum damage from an agent failure or compromise) is a first-class architectural concern. Least-privilege tool access, human-in-the-loop gates for high-stakes actions, loop detection, circuit breakers, and durable execution are not optional features — they are the difference between a demo and a production system.</li>
+</ul>

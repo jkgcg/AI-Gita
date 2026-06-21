@@ -1,0 +1,620 @@
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> You've shipped traditional software before. Once your Java service is deployed, it doesn't suddenly start giving wrong answers because the world changed outside it. AI models are different — a fraud detection model trained on pre-COVID spending patterns started flagging legitimate lockdown purchases as fraud, because human behaviour changed overnight but the model didn't know. MLOps is the discipline that (a) automates getting models from experiment to production reliably, and (b) keeps watching them after they're live so you catch that kind of silent degradation before users do.
+</div>
+
+<div class="ibox">
+  <strong>MLOps</strong> (Machine Learning Operations) is the discipline of reliably moving AI models from experiment to production — and keeping them working once they're there.
+</div>
+<div class="ibox">
+  <strong>LLMOps</strong> is the specialised variant for Large Language Models and generative AI systems. Same goals, different tools, different failure modes.
+</div>
+<div class="ibox">
+  If you've worked with DevOps, the analogy is direct: DevOps brought CI/CD, monitoring, and infrastructure-as-code to software delivery. MLOps does the same for AI models. The difference is that AI models are not just code — they encode learned behaviour from data, and that behaviour can degrade silently as the world changes around them.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "MLOps is just DevOps with a GPU." Not quite. DevOps assumes that if your tests pass, your code behaves correctly — forever, until you change the code. ML systems can fail without any code change at all. The inputs change, the world changes, and a model that was accurate last month becomes inaccurate this month. MLOps adds an entirely new monitoring concern (drift detection) that has no equivalent in standard DevOps.</div>
+
+<div class="ibox">
+  <strong>What MLOps covers in practice:</strong>
+  <ul class="dl">
+    <li><strong>The ML pipeline:</strong> automated workflows for data ingestion, feature engineering, model training, evaluation, and deployment</li>
+    <li><strong>Model registry:</strong> versioned storage of trained models, with metadata about how they were trained and what they were trained on</li>
+    <li><strong>CI/CD for ML:</strong> automated gates that run tests, evaluations, and quality checks before any model reaches production</li>
+    <li><strong>Drift detection:</strong> continuous monitoring to catch when a model's real-world performance has degraded since deployment</li>
+    <li><strong>Feedback loops:</strong> capturing production outcomes to feed back into future training data</li>
+  </ul>
+  <strong>LLMOps adds on top of this:</strong>
+  <ul class="dl">
+    <li><strong>Prompt management:</strong> versioning, testing, and deploying prompts as first-class artifacts (not hardcoded strings)</li>
+    <li><strong>LLM evaluation:</strong> assessing quality, safety, and relevance using LLM judges and benchmark suites</li>
+    <li><strong>Cost tracking:</strong> per-model, per-application, per-team token usage</li>
+    <li><strong>Observability for non-deterministic outputs:</strong> monitoring quality signals, not just error rates</li>
+  </ul>
+  The core principle: <strong>production is where AI systems actually fail.</strong> MLOps is the engineering discipline that catches those failures before users do — and builds the infrastructure to fix them fast.
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>Every AI system you design will eventually face the same operational questions:</p>
+    <ul class="dl">
+      <li><strong>How do you know the model is still working well six months after launch?</strong> The model doesn't send an error when it starts giving worse answers. You need monitoring that detects quality degradation, not just system errors.</li>
+      <li><strong>How do you update a prompt or swap a model without a production incident?</strong> Without MLOps, prompt changes are risky manual operations. With MLOps, they're versioned, tested, staged, and rolled back just like code.</li>
+      <li><strong>Who owns the AI system's ongoing quality?</strong> In traditional software, QA owns test coverage. In AI systems, quality ownership is ambiguous — and MLOps defines it.</li>
+    </ul>
+    <p>The decisions you make in architecture — which models to use, how to integrate them, what SLAs to commit to — all have downstream MLOps implications.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>MLOps is where AI strategy meets enterprise governance. The questions that matter at the enterprise level:</p>
+    <ul class="dl">
+      <li><strong>Reproducibility:</strong> if an AI system made a decision last month, can you recreate exactly the model state, data, and inputs that produced it? GDPR Article 22 requires explainability for automated decisions; the EU AI Act requires documentation of high-risk AI systems; SR 11-7 (US financial services) mandates model risk management including audit trails.</li>
+      <li><strong>Cost governance:</strong> LLM API costs are variable and can spike unexpectedly. Without per-team cost tracking and budget controls, AI costs are invisible until the invoice arrives.</li>
+      <li><strong>Model lineage:</strong> which data was used to train this model? Was any of it PII? Was it from a licensed source? This is a compliance question — and MLOps tooling is where the answer lives.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This</div>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>The Pharmaceutical Manufacturing Analogy</strong><br><br>
+  Imagine a pharmaceutical company developing a new drug. The research team (data scientists) discovers the compound works in the lab (model training). But getting from lab discovery to patients in pharmacies requires an entirely separate discipline: pharmaceutical manufacturing and quality assurance.<br><br>
+  <strong>The manufacturing process (ML pipeline)</strong> is the automated, reproducible sequence: raw ingredients (data) → processing (feature engineering) → synthesis (training) → quality testing (evaluation) → packaging (model artifact) → distribution (deployment). Every step is documented. The same inputs always produce the same outputs.<br><br>
+  <strong>Batch certification (CI/CD gates)</strong> means no drug batch ships without passing a full quality test suite. The tests are automated and run on every batch. A batch that fails a test is quarantined — not manually approved by the researcher who made it.<br><br>
+  <strong>Pharmacovigilance (drift detection)</strong> is the post-market surveillance system. After the drug is in the market, the company monitors for unexpected side effects, adverse events, and efficacy changes in the real-world population.<br><br>
+  <strong>The batch record (model registry + lineage)</strong> is the complete, immutable record of exactly what went into each batch: ingredient sources, processing steps, equipment IDs, test results. Required for regulatory compliance and for investigating adverse events.<br><br>
+  Replace "drug" with "model," "patients" with "users," and "adverse events" with "quality degradation" — and you have MLOps.
+</div>
+
+<!-- S4: Core Concepts -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 The ML Pipeline Architecture</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of a car assembly line. Every car goes through the same sequence of stations in the same order — welding, painting, engine fitting, quality checks — and no car skips a station. An ML pipeline is that assembly line for AI models. Raw data goes in one end; a tested, packaged, deployable model comes out the other. The key property: it's automated and reproducible. If you run it again with the same data, you get the same model. That reproducibility is what makes debugging and auditing possible.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">What it is</div>
+  An ML pipeline is the automated sequence that takes raw data and produces a deployable model artifact. The key property: <strong>every step is automated, versioned, and reproducible</strong>.
+</div>
+<div class="alayer al2">
+  <div class="ln">Pipeline flow</div>
+  <div class="code-label">ML Pipeline — End to End</div>
+  <div class="code">Data Sources
+    │
+    ▼
+Data Ingestion &amp; Validation
+    │ (schema checks, null rate, distribution tests)
+    ▼
+Feature Engineering
+    │ (transforms, embeddings, joins)
+    ▼
+Training
+    │ (model trains on approved dataset version)
+    ▼
+Evaluation
+    │ (held-out test set, benchmark suite, quality gates)
+    ▼
+Model Registry
+    │ (artifact stored with full metadata)
+    ▼
+Staging Deployment
+    │ (shadow traffic or canary)
+    ▼
+Production Deployment
+    │
+    ▼
+Production Monitoring
+    │ (metrics feed back into retraining trigger)
+    ▼
+Retraining Trigger
+    └────────────────────────────────→ (back to Data Ingestion)</div>
+</div>
+<div class="alayer al3">
+  <div class="ln">Ad hoc vs pipeline</div>
+  <table class="t">
+    <tr><th>Ad hoc (most teams start here)</th><th>MLOps pipeline</th></tr>
+    <tr><td>Data pulled manually by notebook</td><td>Scheduled, versioned data pipeline</td></tr>
+    <tr><td>Training run on a laptop</td><td>Reproducible training job on versioned infrastructure</td></tr>
+    <tr><td>"Let me just test it in prod"</td><td>Automated eval gates before any deployment</td></tr>
+    <tr><td>Model weights in a shared folder</td><td>Model registry with version, lineage, metrics</td></tr>
+    <tr><td>Someone checks the dashboard weekly</td><td>Automated drift alerts with defined thresholds</td></tr>
+  </table>
+  <p>The business cost of ad hoc: when something goes wrong in production, you can't reproduce the failing model state, you can't attribute the failure to a data change vs a code change, and you have no rollback artifact. The incident takes days instead of hours.</p>
+</div>
+
+<div class="sh2">4.2 What LLMOps Changes</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Classic MLOps was built for models where you train once, deploy, and retrain occasionally. LLMs flip this. The model (GPT-4o, Claude) is a pre-trained product you license — you almost never retrain it. What changes daily is the <em>prompt</em>: the instruction you send the model. A prompt is a few hundred words of text, but changing it can be as consequential as releasing new software. A prompt that said "always recommend our premium product first" and gets changed to "recommend based on customer need" is a major behavioural change — and if done without testing and versioning, it's a production incident waiting to happen. LLMOps recognises prompts as first-class production artifacts that need the same engineering discipline as code.
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Key differences</div>
+  Classic MLOps was designed for models with structured inputs and outputs. LLMs break several foundational assumptions:
+  <table class="t">
+    <tr><th>Assumption</th><th>Classic ML</th><th>LLMs</th></tr>
+    <tr><td><strong>What changes between versions</strong></td><td>Model weights</td><td>Model weights + prompts + retrieval config</td></tr>
+    <tr><td><strong>How you evaluate quality</strong></td><td>Metrics on labelled test set</td><td>LLM judges, human preference, task completion</td></tr>
+    <tr><td><strong>Training frequency</strong></td><td>Weekly / monthly retraining</td><td>Pre-trained base is stable; prompts change daily</td></tr>
+    <tr><td><strong>What "deployment" means</strong></td><td>Model endpoint update</td><td>Model + prompt + RAG index + tool config</td></tr>
+    <tr><td><strong>Primary cost driver</strong></td><td>Training compute</td><td>Inference token consumption</td></tr>
+    <tr><td><strong>Primary failure mode</strong></td><td>Accuracy degradation</td><td>Hallucination, instruction following failure, safety violation</td></tr>
+    <tr><td><strong>Rollback unit</strong></td><td>Model version</td><td>Model + prompt version (must roll back together)</td></tr>
+  </table>
+  <p><strong>The most important LLMOps shift:</strong> prompts are production artifacts, not configuration strings. A prompt change can change the model's behavior as dramatically as retraining it. Prompts need: version control, automated testing before deployment, staged rollout capability, and a rollback procedure.</p>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Prompt changes are safe to push directly — they're not code." Wrong. A prompt change is a behaviour change. In LLMOps, a prompt is treated exactly like a code change: it goes through version control, a CI/CD pipeline that runs a golden test suite, staged rollout to a subset of traffic, and has a documented rollback path. "It's just a config change" has caused production incidents that took hours to diagnose because there was no test coverage.</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Prompt Regression:</strong> Imagine your team has a carefully tested customer service prompt that works perfectly with GPT-4. Your model provider releases GPT-4o, which is faster and cheaper. You swap it in — but GPT-4o interprets one instruction slightly differently, and 12% of responses now use a tone your brand guidelines prohibit. Your old prompt "broke" on a new model. This is <em>prompt regression</em> — a prompt that worked on one model version fails on a newer one. LLMOps prevents this by running your full golden test suite against any new model version before you switch, exactly as you'd run unit tests before deploying new code.
+</div>
+
+<div class="sh2">4.3 CI/CD for ML Systems</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> You already understand CI/CD for software: code is committed → automated tests run → if tests pass, it deploys → if tests fail, it doesn't. ML CI/CD is the same idea but the "tests" are different. Instead of unit tests checking that a function returns the right value, ML gates check: "Does this new model version score at least as well as the current production model on our test set? Does it pass our safety evaluation? Does it behave correctly on our 200 curated golden examples?" Only if all these gates pass does the model advance to the next stage. An <em>evaluation harness</em> is the automated exam that runs before every deployment — you can think of it as your model's driving test before it's allowed on the road.
+</div>
+
+<div class="alayer al5">
+  <div class="ln">Four gate types</div>
+  <ul class="dl">
+    <li><strong>Gate 1 — Data quality checks:</strong> schema conformance, distribution checks, coverage checks, PII scan — before training begins</li>
+    <li><strong>Gate 2 — Training validation:</strong> training loss converging, evaluation metric exceeds current production model's score, no significant regression on a benchmark slice</li>
+    <li><strong>Gate 3 — Pre-deployment evaluation (LLM-specific):</strong> golden test set pass rate above threshold, LLM judge quality score above threshold, safety eval, regression check vs current version</li>
+    <li><strong>Gate 4 — Staged rollout:</strong> shadow mode → canary (5–10% of live traffic) → full rollout only after canary metrics are stable</li>
+  </ul>
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Shadow Mode &amp; Canary Deployments:</strong> Imagine a restaurant chain testing a new menu item. They don't replace the entire menu on day one. First, they give the new dish to kitchen staff to evaluate alongside the current dish (shadow mode — both run in parallel, but only the current dish is served to customers). Then they add the new dish to the menu at 2 branches out of 200 (canary — real customers, real feedback, limited blast radius). Only if that test goes well does it roll out to all 200 branches. In AI, shadow mode means the new model processes real traffic but its answers are <em>not</em> shown to users — you compare quality scores between old and new. Canary means the new model answers real users, but only 5–10% of them. If something goes wrong, 90–95% of users were unaffected and you roll back.
+</div>
+
+<div class="alayer al6">
+  <div class="ln">CI/CD YAML pattern</div>
+  <div class="code-label">ML CI/CD Pipeline — Schematic</div>
+  <div class="code">pipeline:
+  on: [data_pipeline_complete, prompt_change_merged]
+
+  stages:
+    - name: data_validation
+      gates: [schema_check, distribution_check, pii_scan]
+      on_failure: block_pipeline, alert_data_team
+
+    - name: training
+      trigger: data_validation_passed
+      artifact: model_weights_v{version}
+
+    - name: evaluation
+      gates: [test_set_accuracy, llm_judge_score, safety_eval]
+      threshold: {accuracy: 0.87, judge_score: 4.2, safety: 0.995}
+      on_failure: block_deployment, create_review_ticket
+
+    - name: staging
+      strategy: shadow_traffic
+      duration: 24h
+      gates: [quality_parity_with_prod]
+
+    - name: production
+      strategy: canary_5pct → canary_25pct → full
+      rollback_on: {error_rate: 0.05, quality_score_drop: 0.1}</div>
+</div>
+
+<div class="sh2">4.4 Drift Detection — A Unified Framework</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Data Drift:</strong> Your fraud detection model was trained on 2023 spending data. It learned that "purchases over £500 at electronics stores on weekday evenings" is a fraud signal. Then March 2024 arrives, there's a big promotion, and legitimate customers start buying expensive electronics in exactly that pattern. The model starts flagging real customers as fraudsters. Your data hasn't changed — your code hasn't changed — but the <em>world</em> has changed. The inputs arriving at the model now look different from the inputs it was trained on. That's data drift: the input population has shifted away from the training population. Think of it this way: you trained on summer customers, but you're serving winter customers. The model doesn't know the season changed.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">Type 1 — Data Drift</div>
+  <strong>Input distribution shift:</strong> the data coming into the model at inference time looks different from the training data.<br>
+  <em>Example:</em> a product recommendation model trained on summer purchase data is now seeing winter purchase patterns.<br>
+  <strong>Detection:</strong> compare statistical distribution of incoming features against training distribution. Tools: PSI (score above 0.2 = significant shift), KL divergence, KS test, chi-squared.<br>
+  <strong>Alert when:</strong> PSI &gt; 0.2 on any key feature, or incoming distribution is more than 2 standard deviations from the training mean.
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — PSI, KL Divergence, and KS Tests (without the statistics):</strong> These are all alarms that tell you "the population of inputs the model is seeing has changed significantly from the population it was trained on." Think of them as sensors. PSI (Population Stability Index) is like a thermometer — a score above 0.2 is the equivalent of the thermometer reading above 38°C: something is wrong, investigate. KL divergence and KS tests are different sensors measuring the same thing in different ways. You don't need to understand the maths — you need to configure the threshold (PSI &gt; 0.2 triggers an alert) and have a process for what happens when the alarm sounds. An architect's job is to ensure these sensors exist and are connected to the alerting system.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Type 2 — Concept Drift</div>
+  <strong>Label distribution shift:</strong> the relationship between inputs and correct outputs has changed, even if inputs look the same.<br>
+  <em>Example:</em> a fraud detection model trained in 2024 encounters a new fraud pattern that looks similar to legitimate transactions.<br>
+  <strong>Detection:</strong> track model accuracy on a labelled holdout refreshed with recent data. If accuracy drops without input distribution changing, it's likely concept drift.<br>
+  <strong>Alert when:</strong> accuracy on the rolling 30-day labelled holdout drops more than X% from the deployment baseline.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Data drift and model drift (concept drift) are the same thing." They're not — and the difference matters for what you do about it. Data drift = the inputs changed (the world changed around the model). Concept drift = the correct answers changed (the relationship between inputs and outputs changed). With data drift, you may need to retrain on new data. With concept drift, you definitely need new labelled examples showing the new pattern. An example: a spam filter can experience both simultaneously — new spam types arrive (concept drift) and legitimate email patterns also change over time (data drift).</div>
+
+<div class="alayer al3">
+  <div class="ln">Type 3 — LLM Output Drift</div>
+  <strong>Quality / behavior shift:</strong> the model's outputs change in quality or character without any explicit change to the system.<br>
+  <strong>Causes:</strong> the model provider silently updates the model; the retrieval index content has changed; the distribution of incoming queries has shifted.<br>
+  <strong>Detection:</strong> LLM judge scores on a golden test set run on a schedule. Compare score distribution week-over-week.<br>
+  <strong>Alert when:</strong> mean LLM judge score drops more than 0.3 points below the deployment baseline.
+</div>
+<div class="alayer al4">
+  <div class="ln">Type 4 — Prompt Drift</div>
+  System prompt assumptions no longer match reality. Detection: golden test set regression. (Covered in detail in the Agent Runtime Ops module.)
+</div>
+<div class="alayer al5">
+  <div class="ln">Unified drift response</div>
+  <div class="code-label">Drift Response Playbook</div>
+  <div class="code">Drift alert triggered
+    │
+    ├── Data drift only → investigate data pipeline,
+    │   retrain on updated data if distribution shift is sustained
+    │
+    ├── Concept drift only → collect new labelled examples
+    │   for the new pattern, retrain
+    │
+    ├── LLM output drift without system changes
+    │   → check model provider changelog for silent updates,
+    │     test on golden set, roll back model version if degraded
+    │
+    └── Drift + production incident
+        → incident response: rollback to last known good version,
+          root cause analysis, update monitoring thresholds</div>
+</div>
+
+<div class="sh2">4.5 LLM Evaluation — The New Discipline</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — What an Evaluation Harness Is:</strong> For traditional software, an automated test suite checks "did this function return the right answer?" For an LLM, there is often no single right answer — a customer service response can be good in many ways. An <em>evaluation harness</em> is the automated exam that runs before every model or prompt deployment. It has three parts: (1) a golden test set — 200+ curated examples of inputs with known-good expected outputs; (2) an LLM judge — a capable AI that reads the model's actual response and scores it against dimensions like accuracy, tone, safety; (3) pass/fail thresholds — if the average score drops below 4.1 out of 5, the deployment is blocked. Think of it as your quality assurance process, but automated and running in CI/CD. No model or prompt ships without passing this exam.
+</div>
+
+<div class="alayer al6">
+  <div class="ln">Three evaluation layers</div>
+  <ul class="dl">
+    <li><strong>Layer 1 — Automated metrics (fast, cheap, imperfect):</strong> BLEU/ROUGE (text overlap — cheap but misses semantic correctness), exact match (works when one correct answer exists), perplexity (lower = better; useful for comparing versions on same domain)</li>
+    <li><strong>Layer 2 — LLM judge (better quality, moderate cost):</strong> a capable LLM (e.g., GPT-4o or Claude Opus) evaluates production model outputs against a rubric. Dimensions scored separately: accuracy, completeness, groundedness, safety, tone and format.</li>
+    <li><strong>Layer 3 — Human evaluation (gold standard, expensive):</strong> human annotators evaluate a sample of outputs. Costs 50–200× more than LLM judging. Use it to calibrate your LLM judge, not as primary monitoring.</li>
+  </ul>
+</div>
+<div class="alayer al1">
+  <div class="ln">The eval loop</div>
+  <div class="code-label">2026 LLMOps Eval Loop</div>
+  <div class="code">Production traffic
+    │
+    ▼
+Automatic sampling (e.g., 5% of requests)
+    │
+    ▼
+LLM judge scoring (near real-time)
+    │
+    ├── Score above threshold → log, no action
+    ├── Score below threshold → flag for human review queue
+    └── Score trend declining → drift alert → pipeline trigger
+    │
+    ▼
+Human review queue (for flagged samples)
+    │
+    ▼
+Reviewed samples → fine-tuning dataset / golden test set updates
+    │
+    ▼
+Updated golden test set → next CI/CD pipeline run</div>
+  <p>This is the <strong>production traffic feeds the eval set; the eval set gates every release</strong> loop. Better monitoring produces better training data, which produces better models, which produce more reliable monitoring signals.</p>
+</div>
+
+<div class="sh2">4.6 The Feature Store</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — What a Feature Store Is:</strong> Imagine four different teams all need to know "how much has this customer spent in the last 30 days?" Without a feature store, each team writes their own version of that calculation — slightly different logic, different data sources, different update schedules. The recommendation model, the fraud model, and the churn model all compute "30-day spend" differently. When things go wrong, nobody can compare results. A feature store is the shared pantry of pre-computed ingredients. One team defines "30-day spend" once, computes it in one place, and every model that needs it takes it from the same shelf. Everyone is cooking with the same ingredients. The additional benefit: what the model trains on (historical 30-day spend) and what it gets at inference time (today's 30-day spend) come from the same computation logic — eliminating a major class of silent failures.
+</div>
+
+<div class="sh2">4.7 Experiment Tracking</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Why Experiment Tracking Matters:</strong> A data scientist runs 50 training experiments over two weeks, tweaking hyperparameters and data preprocessing each time. Without tracking, by experiment 50, nobody can remember which combination of settings produced the best result — or reproduce experiment 23 that looked promising. Experiment tracking is a lab notebook for every training run. Every experiment automatically records: what data it used (version), what parameters it trained with, what metrics it achieved, and which model artifact it produced. When you want to understand why this week's model is worse than last week's, you can compare the two experiment records side by side — data version, code version, parameters, and results — and pinpoint the change that caused the regression.
+</div>
+
+<div class="sh2">4.8 Observability — OpenTelemetry for LLMs</div>
+<div class="alayer al2">
+  <div class="ln">GenAI semantic conventions</div>
+  OpenTelemetry (OTel) is the open-source industry standard for collecting traces, metrics, and logs from distributed systems. The GenAI semantic conventions (finalized 2024) define standard attribute names for LLM spans:
+  <div class="code-label">OTel LLM Span — Standard Attributes</div>
+  <div class="code">Span: "llm.chat" (type: LLM_REQUEST)
+  gen_ai.system:              "openai"
+  gen_ai.request.model:       "gpt-4o-2025-01-15"
+  gen_ai.request.max_tokens:  2048
+  gen_ai.usage.input_tokens:  1842
+  gen_ai.usage.output_tokens: 312
+  gen_ai.response.finish_reason: "stop"
+  llm.latency_ms:             1240</div>
+  Using standard attribute names means your LLM traces work with any OTel-compatible platform (Datadog, Honeycomb, Grafana, New Relic) without custom parsing.
+</div>
+<div class="alayer al3">
+  <div class="ln">Four-layer observability stack</div>
+  <table class="t">
+    <tr><th>Layer</th><th>Tool</th><th>What it measures</th></tr>
+    <tr><td>Infrastructure</td><td>Prometheus + Grafana</td><td>GPU utilization, memory, API latency, error rates</td></tr>
+    <tr><td>Application traces</td><td>OTel + any backend</td><td>Request flow, span latency, tool call graph</td></tr>
+    <tr><td>LLM quality</td><td>LLM judge + custom metrics</td><td>Accuracy, groundedness, safety, refusal rate</td></tr>
+    <tr><td>Business outcomes</td><td>Product analytics</td><td>Task completion, user satisfaction, escalation rate</td></tr>
+  </table>
+</div>
+<div class="alayer al4">
+  <div class="ln">Critical alert set</div>
+  <table class="t">
+    <tr><th>Alert</th><th>Threshold</th><th>Why it matters</th></tr>
+    <tr><td>LLM API error rate</td><td>&gt; 1%</td><td>Upstream provider issue</td></tr>
+    <tr><td>P95 latency</td><td>&gt; 2× baseline</td><td>User experience degradation</td></tr>
+    <tr><td>Token cost per request</td><td>&gt; 150% of baseline</td><td>Runaway context or prompt bloat</td></tr>
+    <tr><td>LLM judge score</td><td>&lt; threshold for 1 hour</td><td>Quality degradation in production</td></tr>
+    <tr><td>Refusal rate</td><td>&gt; 5% above baseline</td><td>Over-triggering safety filters or prompt issue</td></tr>
+    <tr><td>Hallucination rate</td><td>&gt; 3%</td><td>Factual accuracy degradation</td></tr>
+  </table>
+</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">LLMOps for a Knowledge Management Assistant at a Retailer</div>
+  <p>An internal knowledge assistant serves 8,000 queries per day, replacing a help desk that handled 500 manual tickets per week.</p>
+
+  <div class="sh2">The ML pipeline for this system</div>
+  <div class="code-label">Pipeline — Knowledge Assistant</div>
+  <div class="code">Data sources: Confluence, SharePoint, internal wikis, policy PDFs
+    │
+    ▼
+Ingestion pipeline (nightly):
+  - Detect changed documents
+  - Chunk and embed new/updated content
+  - Update vector store index
+  - Run coverage validation (are all critical policy docs indexed?)
+    │
+    ▼
+Evaluation gate (before index update goes live):
+  - Golden test set: 200 curated Q&amp;A pairs
+  - Pass rate threshold: &gt; 92%
+  - If below: block update, alert knowledge ops team
+    │
+    ▼
+Staged rollout:
+  - Shadow: new index serves 10% of queries alongside live index
+  - Compare LLM judge scores for both
+  - Promote if new index scores ≥ live index
+    │
+    ▼
+Production monitoring (continuous):
+  - LLM judge scoring on 10% sample
+  - Document freshness tracking (flag docs &gt; 90 days old in responses)
+  - Query coverage (are there query categories with no matching docs?)</div>
+
+  <div class="sh2">Drift event — 3 months post-launch</div>
+  <p>The HR team updated the annual leave policy. The old policy document was not removed from the index — the vector store kept old chunks alongside new ones. For 2 weeks, queries about annual leave returned a mix of old policy (20 days) and new policy (25 days). No system error. The LLM judge score didn't drop dramatically because the answers were still plausible.</p>
+  <p><strong>Detection:</strong> a spike in "I got conflicting information" follow-up tickets to the help desk.</p>
+  <p><strong>MLOps process improvement:</strong> the ingestion pipeline now includes a document supersession check — when a document is updated, all chunks from the previous version are explicitly deleted before the new version is indexed. A conflict detection eval was added to the golden test set.</p>
+
+  <div class="sh2">Cost tracking by team</div>
+  <table class="t">
+    <tr><th>Team</th><th>Queries/day</th><th>Avg tokens/query</th><th>Monthly cost</th></tr>
+    <tr><td>HR queries</td><td>1,200</td><td>2,400</td><td>£1,840</td></tr>
+    <tr><td>Finance queries</td><td>800</td><td>3,100</td><td>£1,590</td></tr>
+    <tr><td>Operations queries</td><td>3,400</td><td>1,800</td><td>£3,910</td></tr>
+    <tr><td>IT support queries</td><td>2,600</td><td>2,200</td><td>£3,650</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>8,000</strong></td><td></td><td><strong>£10,990/month</strong></td></tr>
+  </table>
+  <p>Finance queries had 72% higher average token usage than HR queries — investigation found the finance knowledge base had very long documents with minimal chunking. Re-chunking reduced average query cost from £0.066 to £0.038, saving £1,700/month with no quality change.</p>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">The MLOps Maturity Model</div>
+<div class="g3">
+  <div class="card b">
+    <div class="ch b">Level 1 — Manual MLOps</div>
+    <ul class="dl">
+      <li><strong>Training:</strong> by hand in notebooks</li>
+      <li><strong>Deployment:</strong> manual, no CI/CD</li>
+      <li><strong>Monitoring:</strong> someone checks a dashboard occasionally</li>
+      <li><strong>Rollback:</strong> "redeploy the old version manually"</li>
+      <li><strong>Suitable for:</strong> proof-of-concept, single model, low traffic</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">Level 2 — Automated Pipeline</div>
+    <ul class="dl">
+      <li><strong>Training:</strong> automated pipeline triggered by data or schedule</li>
+      <li><strong>Deployment:</strong> CI/CD with automated eval gates</li>
+      <li><strong>Registry:</strong> versioned model artifacts</li>
+      <li><strong>Monitoring:</strong> drift alerts with defined thresholds</li>
+      <li><strong>Suitable for:</strong> production systems, multiple models, regulated use cases</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">Level 3 — Continuous Learning</div>
+    <ul class="dl">
+      <li><strong>Eval:</strong> production traffic automatically samples into eval set</li>
+      <li><strong>Gates:</strong> eval set gates every pipeline run</li>
+      <li><strong>Retraining:</strong> triggered automatically by drift signals</li>
+      <li><strong>Deployment:</strong> shadow/canary standard for every release</li>
+      <li><strong>Governance:</strong> full cost governance with per-team chargeback</li>
+      <li><strong>Suitable for:</strong> business-critical AI, multiple teams, enterprise scale</li>
+    </ul>
+  </div>
+</div>
+<div class="ibox">Most enterprise AI initiatives in 2026 are at Level 1 or early Level 2. The gap between Level 1 and Level 2 is where most production incidents happen.</div>
+
+<div class="sh2">Where MLOps Fits in Your Enterprise Architecture</div>
+<div class="code-label">Enterprise MLOps Architecture Map</div>
+<div class="code">Data Platform                    Model Registry
+(data lake, feature store)  ──→  (artifact versioning,
+         │                        lineage, metadata)
+         │                              │
+         ▼                              ▼
+   Training Pipeline  ─────────→  Evaluation Gates
+         │                              │
+         │                              ▼
+         │                    Staging / Canary Deployment
+         │                              │
+         └──────────────────────────────▼
+                              Production Serving
+                              (model endpoint / API)
+                                        │
+                                        ▼
+                              Observability Platform
+                              (OTel traces, LLM judge,
+                               cost tracking, drift alerts)
+                                        │
+                                        ▼
+                              Feedback Loop
+                              (production samples → training data)</div>
+
+<div class="sh2">Integration points with your existing stack</div>
+<div class="kv">
+  <div class="kvr"><span class="kvk">Data pipeline</span><span class="kvv">Your data platform (Databricks, Snowflake, BigQuery)</span></div>
+  <div class="kvr"><span class="kvk">Model registry</span><span class="kvv">Artifact storage (S3, Azure Blob, GCS) + metadata DB</span></div>
+  <div class="kvr"><span class="kvk">CI/CD</span><span class="kvv">Your existing CI/CD tool (GitHub Actions, Azure DevOps, Jenkins)</span></div>
+  <div class="kvr"><span class="kvk">Observability</span><span class="kvv">Your OTel backend (Datadog, Grafana, Honeycomb)</span></div>
+  <div class="kvr"><span class="kvk">Cost tracking</span><span class="kvv">Your FinOps tooling + tag-based cloud cost allocation</span></div>
+  <div class="kvr"><span class="kvk">Governance</span><span class="kvv">Your data governance platform (Collibra, Alation, Purview)</span></div>
+</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">Test your understanding — 5 questions</div>
+  <ol class="sl">
+    <li>
+      <strong>Six months after deploying a product recommendation model, accuracy dropped from 87% to 71% with no code changes. Your colleague says "the model must be broken." What are the two most likely real causes, and how would you investigate each?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The two most likely causes are data drift (the input population has changed — seasonal shift, new product catalogue, changed user demographics) and concept drift (the relationship between inputs and correct outputs has changed — what users want from a recommendation has shifted). To investigate data drift: compare the statistical distribution of incoming features today against the training data baseline using PSI scores per feature — any feature with PSI &gt; 0.2 is a candidate. To investigate concept drift: measure accuracy on a labelled holdout set refreshed with recent user interactions — a drop without input distribution change points to concept drift.<br>
+        <strong>Simple explanation:</strong> The model didn't break — the world changed and the model didn't know about it.<br>
+        <strong>Architecture takeaway:</strong> Every production AI system needs drift monitoring from day one. When designing the system, budget for (1) a scheduled data distribution comparison job, (2) a rolling labelled holdout dataset refreshed with recent data, and (3) a defined threshold that triggers a retraining pipeline automatically. Without these, accuracy degradation is silent until users complain.
+      </div>
+    </li>
+    <li>
+      <strong>Your team wants to update the system prompt for a customer service LLM. A developer says "it's just a config change, I'll push it directly to production." What's the correct MLOps response, and what specific risks does skipping the process create?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The correct response is: no prompt change goes directly to production. The prompt change must go through the same pipeline as a code change — commit to the prompt registry, trigger the CI/CD evaluation pipeline, run the full golden test set (200+ curated Q&amp;A pairs) through the LLM judge with the new prompt, verify pass rate above threshold, deploy to shadow/canary first, monitor quality metrics before full rollout. The specific risks of skipping: (1) behaviour regression — the new prompt may subtly change responses in ways that violate brand guidelines, legal requirements, or user expectations that your test suite would have caught; (2) no rollback artifact — if you pushed directly, rolling back requires manually reconstructing the previous prompt from memory or git history; (3) no audit trail — for regulated industries, you cannot demonstrate what changed and when if an adverse customer outcome is investigated.<br>
+        <strong>Simple explanation:</strong> A prompt change is a behaviour change — treat it like a code release, not a spelling correction.<br>
+        <strong>Architecture takeaway:</strong> Store all prompts in a prompt registry (a versioned repository — could be as simple as a git folder with a naming convention). Wire the prompt registry to your CI/CD pipeline so any merge to the production branch triggers the evaluation harness automatically. Make "prompt deployed without passing eval" impossible by design.
+      </div>
+    </li>
+    <li>
+      <strong>What is an LLM judge and why is it preferable to BLEU/ROUGE for evaluating a customer service LLM? What are its limitations?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> An LLM judge is a capable large language model (e.g., GPT-4o, Claude Opus) configured to evaluate another model's outputs against a scoring rubric. You give it: (a) the original user query, (b) the model's response, and optionally (c) a reference answer — and ask it to score dimensions like accuracy, completeness, groundedness, safety, and tone on a 1–5 scale. BLEU and ROUGE measure text overlap — they check whether the model's response contains the same words as a reference answer. For customer service, two responses can be equally correct while being phrased completely differently. BLEU/ROUGE would score the phrased-differently response poorly even if it's semantically better. An LLM judge understands meaning, not just word matches. Limitations: LLM judges have their own biases (they tend to prefer longer, more confident-sounding responses), they add inference cost, and they can be inconsistent — requiring calibration against human annotators. LLM judge scores should be calibrated quarterly against a human-labelled sample to ensure the judge's standards haven't drifted.<br>
+        <strong>Simple explanation:</strong> BLEU/ROUGE checks whether the words match; an LLM judge checks whether the answer is actually good.<br>
+        <strong>Architecture takeaway:</strong> Design your evaluation harness with a tiered approach: BLEU/ROUGE for fast regression detection (cheap, runs on every commit), LLM judge for quality scoring (moderate cost, gates every deployment), human review for quarterly calibration (expensive, small sample). Never use BLEU/ROUGE alone as your quality gate for free-text AI systems.
+      </div>
+    </li>
+    <li>
+      <strong>Describe the "production traffic feeds the eval set; the eval set gates every release" loop. Why does an AI system that closes this loop continuously improve, while one that doesn't gradually degrades?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The loop works like this: (1) production traffic is continuously sampled (e.g., 5% of requests); (2) an LLM judge scores each sampled response automatically; (3) responses that score below threshold are flagged for human review; (4) human reviewers classify them — correct/incorrect, what the right answer should have been; (5) the reviewed examples are added to the golden test set; (6) the expanded golden test set now gates every future CI/CD pipeline run. A system that closes this loop improves because: its test coverage expands to include real failure patterns from production (not just patterns the team could imagine at launch); each production failure that makes it into the test set prevents that failure from passing QA undetected in future. A system that doesn't close this loop degrades because: the world changes (new question types, new user needs, new edge cases emerge), but the test set stays static — the CI/CD gates become less representative of real production quality over time, and the model can "pass" the test suite while failing users.<br>
+        <strong>Simple explanation:</strong> Every time the system fails in production and you capture that failure in your test set, you make the system smarter about not failing that way again.<br>
+        <strong>Architecture takeaway:</strong> Design the feedback loop into the system from day one. The pipeline needs: a sampling mechanism on the production request handler, a flagging queue fed by the LLM judge, a human review workflow (JIRA tickets or a custom tool), and a defined process for promoting reviewed examples to the golden test set. The review workflow is often the bottleneck — design for it, don't assume it will happen organically.
+      </div>
+    </li>
+    <li>
+      <strong>Your finance director asks why the AI knowledge assistant cost 40% more than budgeted last quarter. What monitoring would have caught this earlier, and what are the two most likely root causes to investigate?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Monitoring that would have caught this: per-team, per-query-type token cost tracking with weekly budget alerts set at 110% of baseline. Specifically: (1) track average input tokens per request and output tokens per request as daily metrics — a sustained upward trend is an early warning; (2) set a budget alert that fires when weekly spend exceeds the baseline by &gt;15%; (3) track cost per query by team and query category, not just total cost. Two most likely root causes: (a) Context bloat — the RAG retrieval is returning more chunks per query than necessary (e.g., top-10 instead of top-3), adding thousands of tokens per request. Fix: reduce retrieved chunk count, test that quality doesn't drop; (b) Query volume increase in a high-cost category — certain query types (e.g., complex multi-document financial analysis) consume 3–5× more tokens than average. If one team's query volume grew unexpectedly, total cost grows disproportionately. Fix: check per-team query volume growth against the budget model.<br>
+        <strong>Simple explanation:</strong> LLM costs grow with every token processed — if nobody is watching the per-query token count trend, cost overruns arrive as surprises.<br>
+        <strong>Architecture takeaway:</strong> Treat LLM token cost as an operational metric, not just a finance metric. Wire cost-per-request alerts into the same observability platform as latency and error rate alerts. Set budget envelopes per team with automated alerts, and include cost-per-query in your weekly operational review dashboard. A 40% cost overrun discovered quarterly is a governance failure — it should have been caught in week 2.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section goes further for architects who want to understand the mechanisms in detail. Safe to skip on a first pass.</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">8.1 Feature Stores and Why They Matter</div>
+    <p>A <strong>feature store</strong> is a centralized platform for storing, sharing, and serving ML features — the engineered inputs to your models. Without one, near-duplicate features proliferate across teams, computed slightly differently, each maintained separately.</p>
+    <ul class="dl">
+      <li><strong>Centralised feature definitions:</strong> one canonical definition of "customer 30-day purchase value"</li>
+      <li><strong>Consistent train/serve:</strong> the same feature computation logic runs at training time and inference time — eliminating the most common source of train-serve skew</li>
+      <li><strong>Point-in-time correctness:</strong> for training, the feature store can reconstruct what the feature value was at any historical timestamp — critical for avoiding data leakage in time-series models</li>
+      <li><strong>Offline store (batch):</strong> historical feature values in a data warehouse, used for training</li>
+      <li><strong>Online store (real-time):</strong> current feature values served at inference time with low latency (typically Redis or DynamoDB backed)</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">8.2 Train-Serve Skew</div>
+    <p><strong>Train-serve skew</strong> is the silent killer of ML systems: the model was trained with features computed one way, but at inference time the same features are computed slightly differently.</p>
+    <p><em>Example:</em> during training, "days since last purchase" used <code>floor()</code>. At inference time, the serving pipeline uses <code>ceil()</code>. Off by at most 1 day — but enough to shift the score distribution and degrade precision.</p>
+    <p>This is why the feature store's train/serve consistency guarantee matters. Model performance in shadow mode often differs from test set performance: if the online feature computation differs from the offline version, the model operates on data it was never trained on.</p>
+    <p><strong>Detection:</strong> compare the statistical distribution of features in training data vs. features in the online feature store. Any systematic difference is a skew candidate.</p>
+  </div>
+</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">8.3 Reasoning Model Cost Management</div>
+    <p>Models with extended thinking (o3, DeepSeek R1, Claude Opus with extended thinking) charge for reasoning tokens — often at 2–4× the rate of standard output tokens.</p>
+    <ul class="dl">
+      <li><strong>Budget tokens per query tier:</strong> simple factual queries get a small thinking budget (e.g., 1K tokens); complex multi-step reasoning gets a larger budget (e.g., 16K tokens). Route by query complexity classifier.</li>
+      <li><strong>Thinking token monitoring:</strong> track <code>reasoning.budget_utilization</code> per query type. If a query type consistently uses 100% of its budget, consider increasing it — hitting the budget cap degrades answer quality.</li>
+      <li><strong>Cached reasoning:</strong> for common reasoning patterns, some providers support prompt caching that includes the reasoning trace — you pay once for the reasoning, then reuse the cached result for identical queries.</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">8.4 CI/CD YAML Deep Dive</div>
+    <div class="code-label">Full LLM CI/CD Pipeline Configuration</div>
+    <div class="code">trigger:
+  - pull_request to: prompt-registry/customer-service/**
+  - data-pipeline: completion event from ingestion pipeline
+
+jobs:
+  data-validation:
+    steps:
+      - run: schema_validation.py --dataset $DATASET_URI
+      - run: distribution_check.py --reference training_baseline.json
+      - run: pii_scan.py --fail-on-detection
+
+  model-evaluation:
+    needs: data-validation
+    steps:
+      - run: run_golden_testset.py --prompt $PROMPT_VERSION
+      - run: llm_judge_eval.py --min-score 4.1 --dimensions accuracy,safety,tone
+      - run: safety_eval.py --test-suite owasp-llm-top10
+      - upload: eval_report.json to model-registry/$MODEL_VERSION/eval/
+
+  staging-deploy:
+    needs: model-evaluation
+    steps:
+      - deploy: shadow-mode --traffic 10% --duration 4h
+      - monitor: compare_judge_scores --baseline prod --candidate shadow
+      - gate: shadow_score >= prod_score - 0.1
+
+  canary-deploy:
+    needs: staging-deploy
+    steps:
+      - deploy: canary --traffic 5% → 25% → 100%
+      - monitor: error_rate, latency_p95, llm_judge_score
+      - rollback-on: error_rate > 0.02 OR judge_score &lt; prod_baseline - 0.15</div>
+  </div>
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>MLOps is the discipline that bridges AI experiments and production reliability.</strong> Without it, you have no reproducibility, no automated quality gates, no rollback capability, and no early warning when models degrade. The gap between Level 1 (manual) and Level 2 (automated pipeline) is where most production AI incidents originate.</li>
+  <li><strong>Prompts are production artifacts — treat them like code.</strong> A prompt change can alter model behavior as dramatically as retraining. Version control, automated testing, staged deployment, and rollback procedures apply to prompts exactly as they apply to code. "It's just a config change" is the most dangerous phrase in LLMOps.</li>
+  <li><strong>Drift comes in four types, each needing different detection.</strong> Data drift (inputs changed), concept drift (correct outputs changed), LLM output drift (quality degraded), and prompt drift (context assumptions changed). A monitoring strategy that only watches error rates will miss all four — they typically manifest as silent quality degradation, not system errors.</li>
+  <li><strong>The eval loop is the core of LLMOps maturity.</strong> Production traffic samples → LLM judge scoring → human review of failures → golden test set updates → gates on every release. The teams that close this loop continuously improve their systems. The teams that don't are operating blind.</li>
+  <li><strong>Cost is a first-class operational signal, not an afterthought.</strong> LLM costs are variable, runtime-determined, and can spike 10–100× due to context bloat, retry loops, or unexpected volume. Per-team, per-model cost tracking with weekly budget alerts is as important as latency monitoring — and usually catches system anomalies faster.</li>
+</ul>

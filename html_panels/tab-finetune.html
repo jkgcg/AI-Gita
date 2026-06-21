@@ -1,0 +1,592 @@
+<!-- prereq bar placeholder — inject via platform -->
+<div class="ibox">
+  <strong>Fine-tuning</strong> is the process of taking a model that has already learned general language understanding from trillions of tokens, and continuing to train it on a much smaller, domain-specific dataset — so it becomes specialised for your use case.<br><br>
+  Think of it as the difference between hiring a university graduate (the base model — broad knowledge, general capability) and running them through a company-specific onboarding programme (fine-tuning — they now know your processes, your terminology, your output format, your risk tolerance).
+</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
+  <strong>&#128993; Keep going for architect-level detail.</strong>
+</div>
+
+<!-- S1 -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine you hired a brilliant new graduate from a top university. They know everything about software engineering in general — but they don't know your company's naming conventions, your deployment approval process, your customer codes, or your specific report format. Pre-training is the university degree: years of broad learning. Fine-tuning is the two-week company induction: focused, fast, and specific. After induction, they no longer need a briefing document every time they write a report — the company way is part of how they think.
+</div>
+
+<div class="ibox">
+  After fine-tuning, the model:
+  <ul class="dl">
+    <li><strong>Domain terminology:</strong> uses your company's vocabulary and style naturally</li>
+    <li><strong>Format consistency:</strong> follows your output format reliably (JSON schema, clause numbering, ticket format)</li>
+    <li><strong>Scope enforcement:</strong> refuses requests outside its specialised scope consistently</li>
+    <li><strong>Task performance:</strong> performs your specific task better than a general-purpose model of the same size</li>
+  </ul>
+</div>
+<div class="ibox" style="border-left-color:#dc2626;background:#fef2f2">
+  <strong>What fine-tuning cannot do:</strong>
+  <ul class="dl" style="margin-bottom:0">
+    <li><strong>Inject knowledge:</strong> if the model has never seen a fact, fine-tuning won't reliably make it retrievable — use RAG instead</li>
+    <li><strong>Fix base-model reasoning errors:</strong> fine-tuning can't repair logical gaps in the underlying model</li>
+    <li><strong>Scale up a small model:</strong> a 7B model fine-tuned for a complex task still won't match a 70B model on that complexity</li>
+    <li><strong>Replace prompting:</strong> the best fine-tuned model still needs clear instructions</li>
+  </ul>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Fine-tuning teaches the model new facts." — It does not. Fine-tuning teaches the model new <em>behaviours</em>: how to format output, what style to use, what to refuse, what vocabulary to apply. If you train on "the API endpoint is /v2/orders", the model will parrot it back in familiar patterns but will not reliably retrieve it under varied phrasings. For facts, use RAG. Fine-tuning is for behaviour, not knowledge.</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  <strong>The honest cost picture:</strong> fine-tuning requires a dataset (hundreds to thousands of examples), GPU time (hours to days), evaluation infrastructure, and ongoing maintenance as the model or requirements evolve. For most enterprise use cases, prompting or RAG solves the problem more cheaply. Fine-tuning is for when they don't.
+</div>
+
+<!-- S2 -->
+<div class="sh">Why Should I Care</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    Fine-tuning decisions arise at specific points in a system's evolution:
+    <ul class="dl">
+      <li><strong>The consistency problem:</strong> your GPT-4o-powered assistant produces correctly structured JSON in 95% of cases but diverges in 5% — causing downstream pipeline failures. Fine-tuning on structured examples can push this to 99.8%.</li>
+      <li><strong>The terminology problem:</strong> your supply chain assistant uses generic logistics vocabulary but your team uses domain-specific terms (SKU codes, fulfilment centre IDs, system names). Fine-tuning teaches the model your vocabulary without rewriting prompts.</li>
+      <li><strong>The cost optimisation problem:</strong> a fine-tuned 7B model can match a GPT-4o response on a narrow task at 1/10th the cost. Once you have sufficient volume, this matters.</li>
+      <li><strong>The latency problem:</strong> a fine-tuned small model generates 3–5× faster than a frontier model for simple classification or extraction tasks.</li>
+    </ul>
+    <div class="ibox" style="border-left-color:#dc2626;background:#fef2f2;margin-top:8px">
+      <strong>The risk:</strong> fine-tuning creates a <strong>model dependency</strong>. Your fine-tuned model is tied to a specific base model version. When the base model is deprecated or updated, you either retrain or stay on an old model version. This is a real lifecycle management cost that prompting-based solutions avoid.
+    </div>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    Fine-tuning introduces AI model versioning into your software delivery lifecycle. Unlike a software update, a model update changes system behaviour in probabilistic, non-deterministic ways.
+    <ul class="dl">
+      <li><strong>Governance:</strong> a fine-tuned model is an artifact requiring version control, evaluation records, and deployment approval — the same as any software release</li>
+      <li><strong>Data governance:</strong> the training dataset must be tracked, curated, and potentially defensible under audit (what did you train on? was it licensed? was it PII-scrubbed?)</li>
+      <li><strong>Regression risk:</strong> fine-tuning can improve performance on the target task while degrading performance on adjacent tasks (catastrophic forgetting)</li>
+      <li><strong>Cost model:</strong> fine-tuning is a one-time training cost + ongoing serving cost at the fine-tuned model's compute tier, versus ongoing API cost that scales with usage</li>
+    </ul>
+    <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:8px">
+      The governance and lifecycle complexity of fine-tuning is often <strong>underestimated at project initiation</strong>. Budget for it explicitly.
+    </div>
+  </div>
+</div>
+
+<!-- S3 -->
+<div class="sh">Think About It Like This</div>
+<div class="ibox">
+  <strong>The Management Consultant Analogy</strong><br><br>
+  Imagine you hire a top management consulting firm to run a specific process — say, quarterly supplier risk reviews.<br><br>
+  <strong>Base model = the consultant on their first day.</strong> Brilliant, broad, highly capable — but they don't know your supplier naming conventions, your risk scoring framework, your escalation thresholds, or your report format. Every report requires 30 minutes of correction.<br><br>
+  <strong>Prompting = detailed briefing documents.</strong> You write a comprehensive brief: "Use the following format… flag any score below 7 as high risk…" This works well. But you repeat this brief every session, and if the brief is too long, the consultant occasionally forgets parts.<br><br>
+  <strong>RAG = giving the consultant access to your knowledge base.</strong> They look up supplier records and past reports as needed. This solves the knowledge problem but not the style/format/behaviour problem.<br><br>
+  <strong>Fine-tuning = a two-week onboarding programme.</strong> The consultant reads 500 past reports, sits in on 20 real risk review meetings, and practices producing reports in your format. After onboarding, they know your vocabulary and format — without needing to be briefed every time.<br><br>
+  <strong>The trade-off is real:</strong> the onboarding programme takes two weeks and costs money. If you only need 10 reports a year, prompting is more efficient. If you're producing 5,000 reports a year, the onboarding investment pays back quickly.<br><br>
+  <strong>LoRA = condensed onboarding notes.</strong> Instead of changing everything the consultant knows (expensive, risky), you give them a small reference card that modifies just the relevant parts of their behaviour. They still have all their general knowledge; the card adjusts how they apply it in your specific context.
+</div>
+
+<!-- S4 -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 The Decision Framework: Fine-tuning vs RAG vs Prompting</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of it as "open-book exam vs baked-in expertise." RAG is an open-book exam — the model doesn't know your content ahead of time, but it can look it up on the spot. Fine-tuning is baked-in expertise — the behaviour is trained in, no lookup needed, but it's fixed at training time and can't be updated without retraining. Use RAG when the answer might change tomorrow. Use fine-tuning when the <em>way</em> of answering must be consistent regardless of what the answer is.
+</div>
+
+<div class="ibox">
+  Before spending engineering time on fine-tuning, work through this framework. Most teams reach for fine-tuning too early.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "We should fine-tune to make the model smarter." — Fine-tuning does not make the model smarter or more capable. It makes the model more <em>consistent</em> at a specific task. A fine-tuned smaller model can outperform a general frontier model on a narrow task — but only on that narrow task. If you need broader intelligence, you need a bigger base model, not more fine-tuning.</div>
+
+<div class="alayer al1">
+  <div class="ln">Step 1 — Can prompting solve it?</div>
+  Try these in order before considering fine-tuning:
+  <table class="t">
+    <tr><th>Technique</th><th>What it solves</th><th>When it's enough</th></tr>
+    <tr><td>Zero-shot prompting</td><td>Basic task with clear instructions</td><td>General tasks, no edge cases</td></tr>
+    <tr><td>Few-shot prompting (5–20 examples in prompt)</td><td>Consistent format, style, classification</td><td>When 10–20 examples cover most cases</td></tr>
+    <tr><td>System prompt engineering</td><td>Persona, scope, tone, refusal behaviour</td><td>Behaviour and constraint problems</td></tr>
+    <tr><td>Chain-of-thought</td><td>Complex reasoning, step-by-step tasks</td><td>Accuracy problems on hard reasoning</td></tr>
+  </table>
+  If the problem persists after all of these: the issue is likely (a) knowledge gap, (b) format consistency at scale, or (c) a general model being too expensive/slow for the task volume.
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — When NOT to fine-tune:</strong> If your manager asks "can you just set up the model to do this?" and you can hand them a working prompt in 30 minutes — that is your answer. Don't invest six weeks building a fine-tuning pipeline when a good system prompt already solves it. The base model is already highly capable; fine-tuning is expensive, brittle, and creates a maintenance burden. Reserve it for when prompting genuinely fails at scale.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Step 2 — Is it a knowledge problem or a behaviour problem?</div>
+  <table class="t">
+    <tr><th>It's a knowledge problem</th><th>It's a behaviour problem</th></tr>
+    <tr><td>The model answers incorrectly because it doesn't have the facts</td><td>The model has the capability but doesn't format, style, or scope correctly</td></tr>
+    <tr><td><strong>Correct answer: RAG</strong></td><td><strong>Correct answer: Fine-tuning</strong></td></tr>
+    <tr><td>Example: asks about your internal API schema</td><td>Example: formats JSON with wrong field names despite correct facts</td></tr>
+    <tr><td>Example: doesn't know your 2025 product catalogue</td><td>Example: uses generic customer service tone instead of your brand voice</td></tr>
+  </table>
+  <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:8px">
+    <strong>Fine-tuning cannot inject facts reliably.</strong> A model trained on "the API endpoint is /v2/orders" will memorise this for common patterns but won't reliably retrieve it under varied phrasings. Use RAG for facts. Use fine-tuning for behaviour.
+  </div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Step 3 — Full decision matrix</div>
+  <table class="t">
+    <tr><th>Signal</th><th>Prompting</th><th>RAG</th><th>Fine-tuning</th></tr>
+    <tr><td>Need to inject updated/private knowledge</td><td>&#10003; partial</td><td>&#10003;</td><td>&#10007; not reliable</td></tr>
+    <tr><td>Need consistent output format at scale</td><td>&#10003; partial</td><td>&#10007;</td><td>&#10003;</td></tr>
+    <tr><td>Need domain-specific tone/style</td><td>&#10003; partial</td><td>&#10007;</td><td>&#10003;</td></tr>
+    <tr><td>Cost too high at current volume</td><td>&#10007;</td><td>&#10007;</td><td>&#10003; (smaller model)</td></tr>
+    <tr><td>Latency too high at current volume</td><td>&#10007;</td><td>&#10007;</td><td>&#10003; (smaller model)</td></tr>
+    <tr><td>Task is narrow and well-defined</td><td>&#10007;</td><td>&#10007;</td><td>&#10003;</td></tr>
+    <tr><td>Task is broad and general</td><td>&#10003;</td><td>&#10003;</td><td>&#10007; risky</td></tr>
+    <tr><td>Data is fresh / changes frequently</td><td>&#10003;</td><td>&#10003;</td><td>&#10007; requires retraining</td></tr>
+    <tr><td>Need full behaviour change (new task type)</td><td>&#10007;</td><td>&#10007;</td><td>&#10003;</td></tr>
+    <tr><td>Have &lt; 100 high-quality examples</td><td>&#10003; few-shot</td><td>&#10003;</td><td>&#10007; insufficient data</td></tr>
+    <tr><td>Have 500+ high-quality examples</td><td>—</td><td>—</td><td>&#10003; ready to fine-tune</td></tr>
+  </table>
+  <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+    <strong>The combination pattern:</strong> in production, most mature AI systems use all three — a fine-tuned model for task-specific behaviour, RAG for knowledge, and system prompts for context and constraints. They are not mutually exclusive.
+  </div>
+</div>
+
+<div class="sh2">4.2 The 2026 Post-Training Stack</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Modern LLMs don't go straight from "read all the internet" to "ready to use." They go through a finishing school. First, supervised fine-tuning (SFT) teaches them to follow instructions — like training a new hire on the job spec. Then, preference optimisation teaches them to produce <em>better</em> outputs — like a performance review where a manager says "this report is good, that one is better." Think of it as: pre-training = university; SFT = job training; preference optimisation = performance coaching.
+</div>
+
+<div class="ibox">Modern LLMs go through a multi-stage post-training pipeline:</div>
+<div class="code">Pre-training
+  (Billions of tokens, general language understanding)
+  │
+  ▼
+Supervised Fine-tuning (SFT)
+  (Thousands of examples: prompt → ideal response)
+  (Teaches: format, task type, basic instruction following)
+  │
+  ▼
+Preference Optimisation  [optional but common]
+  (RLHF / DPO / GRPO — pairs of good/bad responses, human or AI labelled)
+  (Teaches: alignment with human preferences, helpfulness, harmlessness)
+  │
+  ▼
+Evaluation Gate  [mandatory — skipping is not optional]
+  (Automated metrics + human eval + regression tests)
+  │
+  ▼
+Production Model</div>
+<div class="ibox" style="border-left-color:#2563eb">
+  For most enterprise fine-tuning projects: <strong>SFT only</strong> is the starting point. Preference optimisation is complex, requires preference pairs (not just examples), and is often unnecessary for narrow task fine-tuning.
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect — Instruction tuning:</strong> Instruction tuning is a specific form of SFT. It doesn't teach the model new facts — it teaches it HOW to respond. Before instruction tuning, early GPT models would "complete" text (you write "The capital of France is…" and they say "Paris, which is famous for…"). Instruction tuning teaches them to respond to commands: "What is the capital of France?" → "The capital of France is Paris." It's the difference between a model that predicts the next word and one that follows instructions. Every commercially deployed assistant has been instruction-tuned.
+</div>
+
+<div class="sh2">4.3 LoRA: What It Is and Why It Dominates</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine you have a textbook — enormous, expensive, took years to write. You want to customise it for a specific course. Option 1: reprint the entire textbook with edits on every page. Option 2: write sticky notes that slip into the relevant pages — the book is unchanged, only the notes are new. LoRA is option 2. The enormous base model weights are never touched (frozen). Instead, you train two tiny "sticky note" matrices per layer that adjust how the model behaves. When you're done, the adapter (your sticky notes) is roughly 1% of the model's size. You can swap them in and out without reprinting the textbook.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">The problem with full fine-tuning</div>
+  A standard fine-tuning run updates all model parameters. For a 7B model at FP16, that's 7 billion × 2 bytes = 14 GB of weights that must be loaded into GPU VRAM, forward-passed, and then updated via backpropagation. The gradient computation and optimiser states (Adam requires 2 copies of the gradients) add another 3–4× the weight size.<br><br>
+  Full fine-tuning a 7B model requires ~80 GB GPU VRAM — a single H100. Full fine-tuning a 70B model requires ~800 GB VRAM — 10× H100s. Prohibitively expensive for most teams.
+</div>
+
+<div class="alayer al2">
+  <div class="ln">LoRA (Low-Rank Adaptation) solves this</div>
+  The key insight: you don't need to change all the model's weights. Most of the meaningful change during fine-tuning happens along a small number of directions in the weight space — LoRA exploits this by training only a compact pair of matrices that approximate those directions. Think of it as editing margin notes in a book rather than rewriting the book.<br><br>
+  <div class="code">Original weight update:   W + ΔW   (ΔW is a huge matrix)
+LoRA approximation:       W + A × B (A and B are tiny matrices)
+
+Where:
+  W has shape [d_model × d_model] — e.g., [4096 × 4096] = 16.7M parameters
+  A has shape [d_model × r]       — e.g., [4096 × 16]   = 65K parameters  (r = "rank", typically 4–64)
+  B has shape [r × d_model]       — e.g., [16 × 4096]   = 65K parameters
+
+Total LoRA parameters: 130K  vs  16.7M  =  0.8% of original</div>
+  During fine-tuning:
+  <ul class="dl">
+    <li><strong>Frozen base:</strong> the original weights W are frozen (no gradients, no updates, no memory needed)</li>
+    <li><strong>Tiny adapters only:</strong> only the A and B matrices are trained</li>
+    <li><strong>Portable adapter:</strong> after training, the LoRA adapter (A and B matrices) is saved separately — ~0.8% of model size</li>
+  </ul>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">QLoRA — making it accessible on modest hardware</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> QLoRA adds one more trick on top of LoRA: it compresses the base model before training begins, the same way JPEG compresses an image. The model is quantised — its weights are stored in 4-bit format instead of 16-bit, cutting memory by 75%. The resulting model is slightly less precise (like a JPEG vs a RAW photo), but for fine-tuning a narrow task, this difference is negligible. The practical result: a model that would require a £30,000 H100 server can now be fine-tuned on a £2,000 gaming GPU.
+  </div>
+
+  Combine 4-bit quantisation of the base model (reducing its memory from 14 GB to 3.5 GB for 7B) with LoRA adapters. This enables fine-tuning a 7B model on a single 16 GB consumer GPU, or a 70B model on 2× 48 GB GPUs — hardware that most teams already have access to.
+</div>
+
+<div class="alayer al4">
+  <div class="ln">LoRA parameters to set</div>
+  <table class="t">
+    <tr><th>Parameter</th><th>What it controls</th><th>Typical value</th></tr>
+    <tr><td><strong>rank (r)</strong></td><td>Adapter expressiveness; higher = more parameters = more memory</td><td>8–64 (start with 16)</td></tr>
+    <tr><td><strong>alpha (α)</strong></td><td>Scaling factor for the adapter's contribution; often set to 2×r</td><td>32 (if r=16)</td></tr>
+    <tr><td><strong>target modules</strong></td><td>Which weight matrices to adapt</td><td>query, key, value, output, feed-forward</td></tr>
+    <tr><td><strong>dropout</strong></td><td>Regularisation for the adapter</td><td>0.05–0.1</td></tr>
+    <tr><td><strong>learning rate</strong></td><td>How fast the adapter learns</td><td>1e-4 to 3e-4 (higher than full fine-tuning)</td></tr>
+  </table>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">LoRA vs Full Fine-tuning: practical comparison</div>
+  <table class="t">
+    <tr><th>Dimension</th><th>Full Fine-tuning</th><th>LoRA</th><th>QLoRA</th></tr>
+    <tr><td>GPU VRAM (7B model)</td><td>~80 GB</td><td>~30 GB</td><td>~10 GB</td></tr>
+    <tr><td>Trainable parameters</td><td>100%</td><td>0.1–1%</td><td>0.1–1%</td></tr>
+    <tr><td>Training time</td><td>Baseline</td><td>~1.5× longer per step</td><td>~2× longer (quant overhead)</td></tr>
+    <tr><td>Quality vs full fine-tune</td><td>100%</td><td>95–99%</td><td>90–97%</td></tr>
+    <tr><td>Hardware requirement</td><td>Multiple A100/H100</td><td>1–2 A100</td><td>Consumer GPU (RTX 4090)</td></tr>
+    <tr><td>Catastrophic forgetting risk</td><td>High</td><td>Low (base weights frozen)</td><td>Low</td></tr>
+  </table>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect — Catastrophic forgetting:</strong> Imagine you hire a brilliant generalist architect and put them through an intensive six-month programme training them only on SAP implementation. They become the best SAP architect in the company — but by month three you notice they've forgotten how to read a network diagram. The specialist training overwrote general knowledge. That's catastrophic forgetting. Full fine-tuning risks this because all model weights are updated, and the general-purpose patterns that weren't relevant to your training data can be eroded. LoRA avoids this because the base weights are never touched — only the small adapters change.
+  </div>
+
+  <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-top:8px">
+    <strong>Catastrophic forgetting</strong> is real for full fine-tuning: the model learns your task but forgets general capabilities. A model full-fine-tuned on customer service queries may struggle with arithmetic it could previously handle. LoRA largely avoids this because the base weights are frozen.
+  </div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "We fine-tuned the model, so now it's better at everything." — A fine-tuned model is better at the specific task it was fine-tuned for, and potentially worse at everything else (especially with full fine-tuning). Always run regression tests against tasks you didn't train for before deploying. Narrow improvement + broad regression is a common and silent outcome.</div>
+</div>
+
+<div class="alayer al6">
+  <div class="ln">The PEFT Landscape Beyond LoRA (2026)</div>
+  <table class="t">
+    <tr><th>Technique</th><th>How it differs from LoRA</th><th>When to prefer</th></tr>
+    <tr><td><strong>LoRA</strong></td><td>Low-rank decomposition of weight updates</td><td>Standard choice for most SFT</td></tr>
+    <tr><td><strong>LoRA+</strong></td><td>Asymmetric learning rates for A and B matrices</td><td>Slightly better convergence</td></tr>
+    <tr><td><strong>DoRA</strong></td><td>Decomposes into magnitude + direction updates</td><td>Better generalisation on some tasks</td></tr>
+    <tr><td><strong>IA³</strong></td><td>Learns scaling vectors, not matrices; fewer parameters than LoRA</td><td>Extremely parameter-efficient; simpler</td></tr>
+    <tr><td><strong>Prefix tuning</strong></td><td>Adds learnable tokens to the input; no weight changes</td><td>When base model cannot be modified</td></tr>
+    <tr><td><strong>Adapters</strong></td><td>Adds small dense layers between existing layers</td><td>Architecture-agnostic; legacy</td></tr>
+  </table>
+  <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+    For enterprise projects: <strong>LoRA or QLoRA</strong> is the right choice in nearly all cases. The differences between variants are marginal for narrow task fine-tuning.
+  </div>
+</div>
+
+<div class="sh2">4.4 Dataset Preparation: The Quality Gate</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> The model learns to do exactly what your training examples show — the good and the bad. If 10% of your training examples have inconsistent formatting, the model will be inconsistent 10% of the time. If 5% have wrong answers, the model will be wrong 5% of the time in that pattern. Training data is like onboarding materials: hand a new employee a policy manual full of typos and contradictions, and they'll internalise those contradictions as the way things are done. Data curation is not a task to delegate to a junior — it is where 80% of the real work (and the real quality) lives.
+</div>
+
+<div class="ibox" style="border-left-color:#dc2626;background:#fef2f2">
+  <strong>The most common fine-tuning failure is poor data, not the training technique.</strong> A fine-tuned model learns to replicate the patterns in your training data. Inconsistent output formats, wrong answers, ambiguous instructions, or biased examples are all directly learned.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "More training data is always better." — Quality beats quantity every time. 500 carefully curated, expert-reviewed examples that precisely demonstrate the target behaviour will outperform 5,000 quickly scraped, inconsistently formatted examples. The model learns from every example, including the bad ones. A dataset full of mediocre examples trains a mediocre model — consistently.</div>
+
+<div class="alayer al1">
+  <div class="ln">Dataset size as a starting point</div>
+  <table class="t">
+    <tr><th>Task type</th><th>Minimum viable examples</th><th>Production quality</th></tr>
+    <tr><td>Format/style consistency</td><td>100–200</td><td>500–1,000</td></tr>
+    <tr><td>Domain classification</td><td>200–500 per class</td><td>1,000+ per class</td></tr>
+    <tr><td>Domain-specific generation</td><td>500–1,000</td><td>2,000–5,000</td></tr>
+    <tr><td>Instruction following (general domain shift)</td><td>1,000–3,000</td><td>5,000–10,000</td></tr>
+    <tr><td>Behaviour alignment (preference optimisation)</td><td>1,000 preference pairs</td><td>5,000–10,000 pairs</td></tr>
+  </table>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">The data format (SFT)</div>
+  Training data is structured as (prompt, completion) pairs in JSONL format:
+  <div class="code-label">JSON</div>
+  <div class="code">{"messages": [
+  {"role": "system", "content": "You are a supply chain assistant..."},
+  {"role": "user", "content": "Summarise this purchase order."},
+  {"role": "assistant", "content": "PO-2024-0891 | Supplier: Flex Ltd | Items: 500 units SKU-4421..."}
+]}</div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Data quality checklist</div>
+  <ul class="dl">
+    <li><strong>Exact behaviour:</strong> each example demonstrates the exact behaviour you want, not approximate</li>
+    <li><strong>Format consistency:</strong> output format is consistent across all examples (field names, casing, punctuation)</li>
+    <li><strong>Edge case coverage:</strong> examples cover edge cases, not just easy/typical cases</li>
+    <li><strong>No PII:</strong> check with automated scanners</li>
+    <li><strong>Data rights:</strong> data is licensed / owned / sourced with appropriate rights</li>
+    <li><strong>Stratified split:</strong> train/validation split is stratified; at least 10% held out as evaluation set</li>
+    <li><strong>Expert review:</strong> examples reviewed by domain experts, not just engineers</li>
+  </ul>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">The synthetic data trap</div>
+  LLMs can generate training data cheaply — but models trained exclusively on synthetic data risk <strong>model collapse</strong>: the distribution narrows, diversity decreases, and the model becomes confidently wrong on edge cases.<br><br>
+  Synthetic data is acceptable for <em>augmenting</em> real data (80% real, 20% synthetic), not for replacing it.
+</div>
+
+<div class="sh2">4.5 Overfitting: When the Model Parrots Instead of Generalising</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine training a new analyst using 50 past reports. There are two outcomes: (1) they understand the <em>principles</em> and can apply them to any new report — that's generalisation. (2) They memorise the 50 reports almost word-for-word and when given a new report, they just copy the closest past one — that's overfitting. An overfitting model aces your test set (because it's seen those patterns) but fails on new, slightly different real-world inputs. You can spot it when the model's training accuracy is 99% but production quality is mediocre — the model learned your examples, not your intent.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "If the model scores 98% on our evaluation set, it's ready for production." — High evaluation accuracy can mean overfitting, not quality. If your evaluation set overlaps heavily with your training set, or your eval examples are "easy" versions of production inputs, a model can look excellent in testing and fail in production. Always test on genuinely unseen, representative production-like inputs, and monitor accuracy once live.</div>
+
+<div class="sh2">4.6 Evaluation: How You Know the Model is Better</div>
+<div class="ibox">Never deploy a fine-tuned model without an evaluation gate. The gate must include all four layers below.</div>
+
+<div class="alayer al1">
+  <div class="ln">Automated metrics (fast, cheap, every training run)</div>
+  <ul class="dl">
+    <li><strong>Task accuracy:</strong> classification: F1, precision, recall; extraction: exact match; generation: ROUGE, BLEU</li>
+    <li><strong>Format compliance rate:</strong> does the output match the expected schema 100% of the time?</li>
+    <li><strong>Length distribution:</strong> is output length within expected bounds?</li>
+  </ul>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">LLM-as-judge (medium cost, catches quality issues automated metrics miss)</div>
+  Use a strong model (GPT-4o or Claude Opus) to score your fine-tuned model's outputs against reference responses. Score on: relevance, correctness, format, tone. Compare fine-tuned model vs baseline model on same evaluation set.
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Regression testing (non-negotiable)</div>
+  Test on capabilities you didn't fine-tune for — arithmetic, general Q&amp;A, reasoning tasks. Catastrophic forgetting in fine-tuning can silently degrade capabilities you depend on but didn't measure.
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Human evaluation (required before first production deployment)</div>
+  Domain experts evaluate a sample of outputs (100–200) across the full range of expected inputs. Use a structured rubric. Record results — they become your baseline for future fine-tuning iterations.
+</div>
+
+<!-- S5 -->
+<div class="sh">Enterprise Example</div>
+<div class="card a">
+  <div class="ch a">Scenario: Fine-tuning for Supply Chain Exception Handling Reports</div>
+  A logistics company produces daily exception reports from their supply chain monitoring system. Current state:
+  <ul class="dl">
+    <li><strong>System:</strong> GPT-4o-based report generation from raw event data</li>
+    <li><strong>Cost:</strong> £18,000/month (high volume, complex prompts with 3,000-token context)</li>
+    <li><strong>Quality issue:</strong> 12% of reports use incorrect supplier terminology, require manual correction</li>
+    <li><strong>Latency issue:</strong> reports must be ready within 45 seconds; GPT-4o averages 38 seconds</li>
+  </ul>
+
+  <strong>Analysis: Fine-tune or prompt engineer?</strong>
+  <table class="t">
+    <tr><th>Problem</th><th>Root cause</th><th>Right solution</th></tr>
+    <tr><td>Incorrect supplier terminology</td><td>Behaviour (model doesn't know custom codes)</td><td>Fine-tuning</td></tr>
+    <tr><td>Manual correction overhead</td><td>Behaviour (inconsistent output format)</td><td>Fine-tuning</td></tr>
+    <tr><td>High cost at volume</td><td>General model expensive for narrow task</td><td>Fine-tune + downsize</td></tr>
+    <tr><td>Near-SLA latency</td><td>Large model is slow</td><td>Fine-tune a smaller model</td></tr>
+  </table>
+  <em>Verdict: Fine-tuning is warranted — behaviour problem + cost + latency all point the same direction.</em>
+
+  <br><br><strong>Implementation steps:</strong>
+  <ol>
+    <li><strong>Dataset creation:</strong> extract 1,400 existing (event data, approved report) pairs from the last 6 months. Domain experts review 150 edge case examples. Final: 1,250 training + 150 validation.</li>
+    <li><strong>Model selection:</strong> Llama-3 8B Instruct as the base model. With QLoRA 4-bit quantisation, fits on a single A10G GPU for training; serves at ~200ms/report.</li>
+    <li><strong>Training:</strong> QLoRA (r=32, α=64, all attention + MLP layers), 3 epochs, learning rate 2e-4 with cosine warmup. Training time: 4 hours on 1× A10G. Cost: £3.20.</li>
+    <li><strong>Evaluation results:</strong>
+      <table class="t">
+        <tr><th>Metric</th><th>Fine-tuned Llama-3 8B</th><th>Baseline GPT-4o</th></tr>
+        <tr><td>Supplier terminology accuracy</td><td>97.8%</td><td>88%</td></tr>
+        <tr><td>Format compliance</td><td>99.4%</td><td>92.3%</td></tr>
+        <tr><td>Report quality (LLM judge, 1–5)</td><td>4.1</td><td>4.4</td></tr>
+        <tr><td>Latency (average)</td><td>180ms</td><td>38,000ms</td></tr>
+      </table>
+    </li>
+    <li><strong>Production decision:</strong> self-host on 2× A10G: £1,168/month vs GPT-4o £18,000/month. <strong>Saving: £16,832/month.</strong> Payback on dataset + training: &lt; 15 days.</li>
+    <li><strong>Maintenance cost (often overlooked):</strong> quarterly retraining ~8 hours, evaluation pipeline maintenance ongoing, model versioning and deployment ~1 day/quarter, Llama-3 base model deprecation cycle ~18 months.</li>
+  </ol>
+
+  <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:8px">
+    <strong>Total annual cost:</strong> £14,016 (serving) + ~£12,000 (ops overhead) = £26,016<br>
+    vs GPT-4o: £216,000/year<br>
+    <strong>Net saving: ~£190,000/year.</strong> The ops overhead is real and often forgotten in the initial business case.
+  </div>
+</div>
+
+<!-- S6 -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">Fine-tuning in the System Lifecycle</div>
+<div class="ibox">Fine-tuning is not a one-time event — it introduces a <strong>model training and evaluation pipeline</strong> into your system. Architects should design for this from day one.</div>
+<div class="code">Data Pipeline
+  (collect examples → curate → label → version)
+        │
+        ▼
+Training Pipeline
+  (QLoRA / LoRA → evaluation gate → model registry)
+        │
+        ▼
+Deployment Pipeline
+  (canary → A/B test against baseline → full rollout)
+        │
+        ▼
+Monitoring
+  (format compliance, output distribution, regression metrics)
+        │
+        ▼
+Trigger: drift detected / new training data available → loop back</div>
+<div class="ibox" style="border-left-color:#dc2626;background:#fef2f2">
+  Teams that build only the training step and skip the evaluation gate and monitoring pipeline are building a system that degrades silently in production.
+</div>
+
+<div class="sh2">Preference Optimisation: When You Go Beyond SFT</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> SFT teaches the model to follow instructions. Preference optimisation teaches it to <em>prefer better answers</em>. The analogy is a performance review: you show the model two answers to the same question and say "this one is better than that one." Over thousands of these comparisons, the model learns the pattern of what "better" looks like — more concise, more cautious, more accurate. RLHF uses human raters to do the comparison. DPO simplifies this with a mathematical shortcut: instead of training a separate reward model, you directly encode the preference pairs into the training loss. Think of DPO as a faster, cheaper version of the same performance review process.
+</div>
+
+<div class="ibox">
+  SFT teaches the model to produce the right output format. It doesn't teach it to <em>prefer better outputs over worse ones</em> — it just trains it to imitate examples. When you need the model to make quality judgements (prefer more concise responses, prefer more cautious phrasing), preference optimisation adds this.
+</div>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Scope note:</strong> most enterprise fine-tuning projects in year one will use SFT or DPO. Read this section to understand what your ML engineers are referring to, not to implement it yourself.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">RLHF</div>
+    Human raters rank outputs; reward model trained on rankings; RL optimises the policy toward higher reward.<br><br>
+    <em>Use when:</em> complex alignment; original ChatGPT approach; expensive.
+  </div>
+  <div class="card b">
+    <div class="ch b">DPO — Direct Preference Optimisation</div>
+    Trains directly on (chosen, rejected) pairs without a separate reward model. Simpler, stable, now standard for preference training.<br><br>
+    <em>Use when:</em> SFT alone doesn't achieve alignment goals. The practical enterprise choice.
+  </div>
+</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">ORPO</div>
+    Combines SFT and preference optimisation into a single loss.<br><br>
+    <em>Use when:</em> single-stage training; efficient.
+  </div>
+  <div class="card b">
+    <div class="ch b">GRPO / RLVR</div>
+    <strong>GRPO:</strong> Group Relative Policy Optimisation; reward from comparing multiple outputs from same prompt. Used by DeepSeek-R1.<br>
+    <strong>RLVR:</strong> RL with Verifiable Rewards; reward from an external verifier (code executes, math answer is correct).<br><br>
+    <em>Use when:</em> building a reasoning-specialised model — a significant undertaking, not a typical enterprise project.
+  </div>
+</div>
+
+<!-- S7 -->
+<div class="sh">Check Yourself</div>
+<div class="card g">
+  <div class="ch g">Self-Check Questions</div>
+  <ol class="sl">
+    <li>A product manager says the team's customer service chatbot "doesn't sound like us — it's too generic" and requests a fine-tuning project. Is fine-tuning the right solution, and how would you validate this before committing?
+      <details><summary>Expected answer</summary><p>Possibly, but first validate through prompting. "Doesn't sound like us" is a tone/style problem — which can often be solved with a well-crafted system prompt and 5–10 few-shot examples. First experiment: rewrite the system prompt with explicit brand voice guidelines and add 5 examples of ideal responses; test with 50 representative queries. If 90%+ now sound correct: prompting solved it. If the problem persists: fine-tuning is warranted — especially when the prompting solution requires a system prompt so long that it consumes significant context budget, or when tone consistency at high volume requires more stability than few-shot prompting provides. Also evaluate: do you have 500+ examples of "this is our voice, not this"? Without training data, fine-tuning cannot proceed. The PM's request may be a dataset creation project before it's a training project.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Validate through prompting first. Write an explicit brand voice system prompt with 5–10 example response pairs and test with 50 real queries. If prompting solves it: done. If not, and you have 500+ labelled voice examples: proceed to fine-tuning.<br>
+        <strong>Simple explanation:</strong> Try the cheap option first — if a good briefing document fixes the consultant's tone, you don't need to run them through a two-week induction.<br>
+        <strong>Architecture takeaway:</strong> Never approve a fine-tuning project without first confirming that prompting has been exhausted. Require evidence from a structured prompting experiment before green-lighting training infrastructure investment.
+      </div>
+    </li>
+    <li>Your team wants to fine-tune a Llama-3 70B model but has a budget of 2× A100 80 GB GPUs. Is this feasible, and what technique would you recommend?
+      <details><summary>Expected answer</summary><p>Feasible with the right technique. Full fine-tuning of Llama-3 70B requires ~700 GB VRAM — far beyond 2× A100 80 GB (160 GB total). QLoRA: quantise the base model to 4-bit (reduces weights from ~140 GB to ~35 GB), then apply LoRA adapters. The 4-bit model fits on 1× A100 80 GB; LoRA adapters add ~1 GB. With 2× A100 you can run larger batch sizes. Also consider whether Llama-3 8B suffices — a fine-tuned 8B often matches 70B on a narrow task while being far cheaper. Start with QLoRA on Llama-3 8B; upgrade to 70B only if evaluation shows a meaningful quality gap for your specific task.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Full fine-tuning is not feasible (requires ~700 GB VRAM vs 160 GB available). QLoRA is the solution: 4-bit quantisation reduces the 70B model to ~35 GB, making it trainable on 1× A100. Also question whether 8B is sufficient — a fine-tuned 8B model often matches 70B on narrow tasks at a fraction of the cost.<br>
+        <strong>Simple explanation:</strong> Use the JPEG compression trick (QLoRA) to shrink the model so it fits the available hardware, while accepting a small quality trade-off that is usually irrelevant for focused tasks.<br>
+        <strong>Architecture takeaway:</strong> Hardware budget determines which fine-tuning technique is feasible. Always challenge whether the largest model is necessary — evaluate a fine-tuned smaller model before committing to larger infrastructure.
+      </div>
+    </li>
+    <li>You've fine-tuned a model for a classification task and it achieves 96% accuracy on your evaluation set. Is it ready for production?
+      <details><summary>Expected answer</summary><p>Not yet. 96% accuracy on a held-out eval set is necessary but not sufficient. Missing checks: (1) Is the eval set representative — same time period, same distribution as production? (2) Regression testing — does the fine-tuned model perform comparably on tasks you didn't fine-tune for? (3) Error analysis — what is the model getting wrong in the 4%? Are failures concentrated in a specific category? (4) Production distribution — does your eval set reflect real production inputs? (5) Serving infrastructure — 96% accuracy doesn't test latency or load behaviour.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Not yet. You still need: regression testing (did general capabilities degrade?), error analysis (are the 4% failures concentrated in a dangerous category?), confirmation that the eval set is representative of production inputs, and latency/load testing on the serving infrastructure.<br>
+        <strong>Simple explanation:</strong> Passing an exam on practice questions doesn't guarantee the same score on the real exam — especially if the practice questions were easier, more uniform, or drawn from the same pool as your revision notes.<br>
+        <strong>Architecture takeaway:</strong> Define the full evaluation gate before training begins, not after. Specify what "production ready" means: accuracy threshold, regression tests, error categories that are blockers, and load test results. Otherwise "96% looks good" becomes your only gate.
+      </div>
+    </li>
+    <li>Your data science team proposes generating synthetic training data using GPT-4o to reduce labelling cost. What are the risks and when is this acceptable?
+      <details><summary>Expected answer</summary><p>Acceptable as a supplement, not a replacement. Key risk: model collapse — training exclusively on GPT-4o-generated data makes your model learn GPT-4o's systematic errors and narrows the training distribution. Acceptable uses: 20–30% of the training set mixed with real examples; augmenting underrepresented classes; paraphrase augmentation. Not acceptable: replacing human-labelled examples entirely; tasks requiring ground-truth correctness (legal, medical, financial) where GPT-4o can hallucinate ground truth.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Acceptable as augmentation (up to ~20–30% of the training set) but not as a replacement for real data. Risks: the model learns GPT-4o's errors and blind spots; training distribution narrows; model collapse. Never acceptable for high-stakes domains (legal, medical, financial) where GPT-4o can fabricate plausible-looking but incorrect ground truth.<br>
+        <strong>Simple explanation:</strong> Teaching a new hire using materials written entirely by another junior employee means they'll inherit all of that employee's misunderstandings as well as their knowledge.<br>
+        <strong>Architecture takeaway:</strong> Require the data science team to document what percentage of training data is synthetic and from which source. Establish a policy ceiling (e.g., 20% synthetic max) and mandate domain expert review of any synthetic examples used in regulated or high-risk scenarios.
+      </div>
+    </li>
+    <li>A fine-tuned model that performed excellently in month 1 has gradually degraded to 82% accuracy by month 4. What is happening and what does the architecture need?
+      <details><summary>Expected answer</summary><p>This is likely data drift — the production distribution has changed relative to the training distribution. Common enterprise causes: new products (new terminology, new SKU patterns), policy changes, seasonal patterns, user behaviour evolution. The architecture is missing: (1) continuous monitoring — a metric pipeline should have surfaced degradation early; (2) drift detection — automated comparison of input distribution at training time vs now; (3) a retraining trigger threshold; (4) a data collection pipeline capturing production inputs and corrected outputs for the next training cycle. Fix: retrain with recent production examples. Process fix: build monitoring and data collection infrastructure before deploying, not after degradation is noticed.</p></details>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> This is data drift — the real world has changed (new products, new terminology, new patterns) but the model was frozen at month 1. The architecture is missing: continuous accuracy monitoring, drift detection, a retraining trigger threshold, and a pipeline to collect and label production examples for the next training cycle.<br>
+        <strong>Simple explanation:</strong> The new hire was brilliant after their two-week induction — but the company introduced 200 new products and changed three processes in the following three months. Without a refresh, their knowledge is now stale.<br>
+        <strong>Architecture takeaway:</strong> A fine-tuned model is not a one-time deployment — it is a living artifact. Before going live, design and budget for the monitoring pipeline, drift detection, and quarterly retraining cycle. If you cannot afford the ongoing maintenance, a managed API with prompting may be the more sustainable choice.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- S8 -->
+<div class="sh">Advanced Deep Dive</div>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> This section covers LoRA mathematics and advanced alignment methods (GRPO/RLVR). Safe to skip on a first pass; return here when your team is ready to implement fine-tuning rather than just commission it.</div>
+
+<div class="sh2">8.1 The Complete LoRA Math</div>
+<div class="ibox">LoRA modifies the forward pass of a weight matrix W:</div>
+<div class="code">Standard forward: h = Wx
+LoRA forward:     h = Wx + (BA)x × (α/r)
+
+Where:
+  W ∈ R^{d × k}   — frozen pre-trained weights
+  B ∈ R^{d × r}   — initialised to zeros (so adapter starts at identity)
+  A ∈ R^{r × k}   — initialised with Gaussian noise
+  r               — rank (hyperparameter, &lt;&lt; d and k)
+  α               — scaling factor (hyperparameter)</div>
+<div class="ibox">
+  B is initialised to zero so that at the start of training, the LoRA term is zero — the model begins from exactly the pre-trained weights. This is important for training stability.<br><br>
+  The scaling factor α/r normalises the adapter's contribution independent of the rank chosen. Setting α = 2r is common practice.<br><br>
+  <strong>Why does low-rank work?</strong> The empirical finding is that meaningful weight updates during fine-tuning are intrinsically low-dimensional — the high-dimensional weight matrices change along only a few principal directions. Even though W is enormous, ∆W = BA can be well-approximated with a small r.
+</div>
+
+<div class="sh2">8.2 GRPO and RLVR: Reasoning Model Training</div>
+<div class="ibox">
+  <strong>GRPO (Group Relative Policy Optimisation)</strong> is the training technique behind DeepSeek-R1. Instead of training a separate reward model (complex, expensive), generate N responses to the same prompt, score all N, and use relative rankings as the reward signal.
+</div>
+<div class="code">For a math problem P:
+  1. Sample N=8 responses from the current policy model
+  2. Score each response (0 or 1: correct/incorrect answer)
+  3. Compute group-relative advantage: A_i = (score_i - mean_score) / std_score
+  4. Update the policy to increase probability of responses with positive advantage
+  5. KL penalty: keep the policy from drifting too far from the reference model</div>
+<div class="ibox">
+  <strong>RLVR (RL with Verifiable Rewards)</strong> is the broader category: instead of human ratings, use a verifier — a function that checks if the answer is correct. For maths: check if the final numerical answer matches. For code: run the code and check if tests pass. For structured output: validate against a schema.<br><br>
+  <strong>Why this matters for enterprise:</strong> RLVR-style training can be applied to any task with verifiable outputs — code generation with passing tests, supply chain exception classification, legal clause extraction with F1 against expert annotations. The technique is accessible if you have a reliable verifier.
+</div>
+
+<div class="sh2">8.3 Hyperparameter Reference</div>
+<table class="t">
+  <tr><th>Hyperparameter</th><th>What it controls</th><th>Typical range</th></tr>
+  <tr><td>Learning rate</td><td>Step size during optimisation</td><td>1e-5 to 3e-4</td></tr>
+  <tr><td>LR schedule</td><td>How LR changes during training</td><td>Cosine with warmup (standard)</td></tr>
+  <tr><td>Warmup steps</td><td>Steps before LR reaches peak</td><td>5–10% of total steps</td></tr>
+  <tr><td>Batch size</td><td>Samples per gradient update</td><td>4–32 (effective, via gradient accumulation)</td></tr>
+  <tr><td>Gradient accumulation</td><td>Steps before actual weight update</td><td>4–16 (to simulate larger batch)</td></tr>
+  <tr><td>Epochs</td><td>Full passes through training data</td><td>1–5 (overfitting risk beyond 3)</td></tr>
+  <tr><td>Max sequence length</td><td>Token limit per training example</td><td>Match your expected production context</td></tr>
+  <tr><td>Weight decay</td><td>L2 regularisation</td><td>0.01–0.1</td></tr>
+  <tr><td>Gradient clipping</td><td>Prevents gradient explosion</td><td>0.3–1.0 (clip by norm)</td></tr>
+</table>
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb">
+  <strong>Early stopping:</strong> monitor validation loss at the end of each epoch. If validation loss increases while training loss continues to decrease: the model is overfitting — stop training. This is the most common cause of a model that performs well on your eval set but poorly in production.
+</div>
+
+<!-- S9 -->
+<div class="sh">Key Takeaways</div>
+<ul class="dl">
+  <li><strong>Fine-tuning solves behaviour problems, not knowledge problems — use RAG for the latter.</strong> If the model gives wrong answers because it lacks facts, fine-tuning won't reliably fix it. Fine-tuning is the right tool when the model has the underlying capability but doesn't apply it consistently in the right format, style, or scope for your domain.</li>
+  <li><strong>Try prompting first, then RAG, then fine-tuning — in that order.</strong> Most teams reach for fine-tuning too early. A well-engineered system prompt with 5–10 few-shot examples solves the majority of style and format consistency problems without the training data investment or maintenance overhead.</li>
+  <li><strong>LoRA / QLoRA is the practical standard — full fine-tuning is rarely necessary.</strong> QLoRA reduces GPU VRAM requirements by 4–8×, making fine-tuning of 7B–70B models accessible on modest hardware, with 1–10% quality degradation on most tasks. The base model weights remain frozen, avoiding catastrophic forgetting.</li>
+  <li><strong>Data quality determines fine-tuning quality — 500 excellent examples outperform 5,000 mediocre ones.</strong> The model learns to replicate the patterns in your training data exactly. Inconsistent labelling, format drift, or wrong answers in the training set are directly learned. Invest in data curation and domain expert review.</li>
+  <li><strong>Fine-tuning creates a model lifecycle that must be managed.</strong> A fine-tuned model requires versioning, regression testing on every update, drift monitoring in production, and periodic retraining. These operational costs are real and often underestimated at project initiation — budget for them explicitly before committing to fine-tuning over a managed API.</li>
+</ul>

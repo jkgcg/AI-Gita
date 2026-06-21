@@ -1,0 +1,256 @@
+<div class="ibox">This module covers the core concepts of machine learning that every AI architect needs to understand: what ML actually is, the supervised/unsupervised/reinforcement learning distinction, train/val/test split as a governance mechanism, overfitting as a deployment risk, the bias-variance tradeoff, model selection by data size, and evaluation metric selection. It also explains when classical ML (XGBoost) is the right choice over deep learning — which is most of the time for structured enterprise data.</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro above, you're done with this topic at a conceptual level.<br>
+  <strong>&#128993; Keep going for the full architect-level detail.</strong> The structured content below builds a complete mental model.
+</div>
+
+<div class="sh">1. What Is It</div>
+
+<p>Machine learning is the practice of building systems that learn patterns from data rather than following rules you write by hand. Instead of a programmer encoding "if the order value is above £500 and the shipping address differs from the billing address, flag as suspicious", you show the system thousands of examples of legitimate and fraudulent orders and let it discover the patterns itself.</p>
+
+<p>That shift — from rules to patterns — is the conceptual core of ML. Everything else follows from it: the need for training data (to learn from), the risk of overfitting (learning the wrong patterns), the importance of evaluation (checking whether what was learned actually generalises), and the economics of deployment (patterns learned from last year's data may not hold this year).</p>
+
+<p>There are three broad categories of ML problems:</p>
+
+<ul class="dl">
+  <li><strong>Supervised learning:</strong> you have labelled examples — inputs paired with correct outputs. You train the model to predict the output from the input. Classification (predicting a category) and regression (predicting a number) both fall here.</li>
+  <li><strong>Unsupervised learning:</strong> you have inputs but no labels. The model finds structure — clusters, patterns, compressed representations — without being told what to look for.</li>
+  <li><strong>Reinforcement learning:</strong> an agent takes actions in an environment, receives rewards or penalties, and learns a policy that maximises cumulative reward over time. This is the mechanism behind RLHF (Reinforcement Learning from Human Feedback — the training process that aligns LLM behaviour) in LLM training and behind robotics/game-playing systems.</li>
+</ul>
+
+<p>Classical ML (decision trees, gradient boosting, logistic regression, SVMs — Support Vector Machines, a classical ML algorithm for classification) is not obsolete. For tabular data with fewer than a few million rows, classical ML — particularly gradient-boosted trees — consistently outperforms deep learning. Knowing when to reach for classical ML instead of an LLM or neural network is one of the most valuable judgement calls an AI architect can develop.</p>
+
+<div class="sh">2. Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    <p>You are the person who decides what gets built and roughly how. When a business comes to you with a prediction problem — "can we predict which customers will cancel within 90 days?" — you need to know whether this is a task for a large language model, a fine-tuned classification model, a gradient-boosted tree, or a simple lookup table with business rules.</p>
+    <p>Getting that wrong is expensive. An LLM used for a structured tabular prediction task is slower, costlier, harder to explain, and often less accurate than a well-tuned XGBoost model on the same problem. Conversely, a decision tree used for a semantic matching task will fail because it cannot represent the continuous meaning-space that embeddings capture.</p>
+    <p>Understanding train/val/test split matters to you because it maps directly to deployment risk. A model evaluated only on its training data looks excellent right up to the moment it fails in production. The evaluation framework you specify during design directly determines how much you can trust the model metrics your data science team reports to you.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    <p>Model quality is a governance question. The concepts of bias-variance tradeoff, overfitting, and distributional shift are not academic — they are the failure modes that show up as regulatory incidents, customer complaints, and reputational damage when AI systems behave inconsistently.</p>
+    <p>The train/val/test split discipline is also a data governance discipline. What data was the model trained on? What was it evaluated on? Are the evaluation data and training data from the same distribution? Were they collected at the same time? If an AI vendor cannot answer these questions clearly, that is a governance red flag.</p>
+    <p>Model selection — which algorithm family to use — has implications for explainability (a requirement in many regulated industries), latency (tree models are fast to serve; neural networks may require GPU inference), and maintainability (when the model degrades over time, how do you retrain it?).</p>
+  </div>
+</div>
+
+<div class="sh">3. Think About It Like This</div>
+
+<div class="ibox">
+  <p>Think of training a machine learning model as apprentice training in a traditional craft — say, a pottery apprentice learning to judge whether a pot is fired correctly.</p>
+  <p>At first, the apprentice watches the master reject some pots and accept others, without knowing why. Over thousands of examples, the apprentice starts to notice patterns: certain colours, certain sounds when tapped, certain weight-to-size ratios correlate with quality. The apprentice builds internal rules — not written down anywhere, just encoded in their hands and eyes.</p>
+  <p>Now think about three failure modes:</p>
+  <ol>
+    <li><strong>Overfitting:</strong> the apprentice memorised specific pots from training ("the green pot with the chipped handle from Tuesday was good") rather than learning general rules. They perform perfectly on pots they have seen, but fail on new ones. This is exactly what overfitting is.</li>
+    <li><strong>Underfitting:</strong> the apprentice learned too simple a rule ("if it is heavy, it is good") that does not capture the real complexity of quality. They are consistently wrong across all pots. This is underfitting — or high bias.</li>
+    <li><strong>The right generalisation:</strong> the apprentice learned real, transferable quality signals that work on pots they have never seen before. The test set is the unseen pots. If you have been sneaking the apprentice a look at those pots during training ("let me look at the test answers"), you have contaminated the evaluation — and you will not discover the failure until the apprentice is in a real workshop.</li>
+  </ol>
+</div>
+
+<div class="sh">4. Step-by-Step Walkthrough</div>
+
+<div class="alayer al1">
+  <div class="ln">4.1 The Train/Val/Test Split — Why It Matters for Governance</div>
+  <p>When you train a model, you need to use data for three distinct purposes:</p>
+  <ul class="dl">
+    <li><strong>Training set (~70–80% of data):</strong> the examples the model learns from. The model sees these repeatedly and adjusts its weights/parameters to fit them.</li>
+    <li><strong>Validation set (~10–15% of data):</strong> examples used to tune hyperparameters (learning rate, tree depth, number of layers) and decide when to stop training. The model does not train on these, but training decisions are influenced by them.</li>
+    <li><strong>Test set (~10–15% of data):</strong> examples that the model and the model builder have never seen. Used once, at the end, to report final performance.</li>
+  </ul>
+  <p>The governance principle: <strong>the test set is sacred</strong>. If it is used more than once — to compare models, to tune thresholds, to debug failures — it becomes part of the training process and its results are no longer an unbiased estimate of real-world performance.</p>
+  <p>In practice, architects need to ensure:</p>
+  <ul class="dl">
+    <li><strong>Test data is held out</strong> before any modelling begins</li>
+    <li><strong>Test data is from the same time period and distribution</strong> as the intended deployment context (or deliberately from a later time period, to simulate temporal shift)</li>
+    <li><strong>The reported performance metric is from the test set,</strong> not the validation set</li>
+    <li><strong>If you retrain the model after seeing the test results,</strong> the test is contaminated — you need a new held-out set before redeployment</li>
+  </ul>
+  <p>For enterprise AI systems, this is equivalent to financial audit independence. The test set is your independent auditor.</p>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">4.2 Overfitting as a Deployment Risk</div>
+  <p>Overfitting occurs when a model learns the training data so well that it has effectively memorised it rather than generalised from it. The model performs very well on training data and poorly on new data.</p>
+  <p><strong>Signs of overfitting:</strong></p>
+  <ul class="dl">
+    <li>Large gap between training accuracy and validation accuracy</li>
+    <li>Model performance degrades rapidly in production compared to evaluation</li>
+    <li>The model is sensitive to small changes in input that should not matter</li>
+  </ul>
+  <p>Why it matters in production: a model that was evaluated with high accuracy during development but overfits will degrade over time as new data flows in that does not match the training distribution. This is often confused with "model drift" (the world has changed) when the real problem is that the model never generalised properly in the first place.</p>
+  <p><strong>Architectural mitigations:</strong></p>
+  <ul class="dl">
+    <li><strong>Regularisation:</strong> adding penalties during training for model complexity (L1/L2 regularisation, dropout in neural networks)</li>
+    <li><strong>Early stopping:</strong> stopping training when validation loss stops improving</li>
+    <li><strong>Cross-validation:</strong> instead of a single train/val split, train on multiple folds of the data and average results — reduces the risk that your evaluation was lucky</li>
+    <li><strong>More training data:</strong> the most reliable fix for overfitting; more data makes it harder to memorise and forces generalisation</li>
+  </ul>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">4.3 The Bias-Variance Tradeoff — One Unified Mental Model</div>
+  <p>Every model's prediction error can be decomposed into three components. Recall the pottery apprentice from the analogy: the one who memorised every flaw in the practice pots produced beautiful practice results but failed on new clay — that's high variance (overfitting). The one who learned only 'bowls are round' couldn't produce complex shapes — that's high bias (underfitting). Formally:</p>
+  <ul class="dl">
+    <li><strong>Bias:</strong> error from wrong assumptions in the model. A linear model applied to a non-linear relationship has high bias — it will consistently be wrong, even with infinite training data.</li>
+    <li><strong>Variance:</strong> error from sensitivity to small fluctuations in the training data. A very deep decision tree has high variance — small changes in training data produce very different trees.</li>
+    <li><strong>Irreducible noise:</strong> error that cannot be reduced by any model, because the data itself has inherent randomness.</li>
+  </ul>
+  <p>The tradeoff: reducing bias often increases variance and vice versa. A simple model (like logistic regression) has low variance but may have high bias. A complex model (like a deep neural network) can have low bias but high variance.</p>
+  <p><strong>As a mental model for production ML quality problems:</strong></p>
+  <table class="t">
+    <tr><th>Symptom</th><th>Likely cause</th><th>Action</th></tr>
+    <tr><td>Model performs consistently poorly in production and training</td><td>High bias (underfitting)</td><td>Use a more complex model, add features, reduce regularisation</td></tr>
+    <tr><td>Model performs well in training/evaluation but poorly in production</td><td>High variance (overfitting)</td><td>Get more data, regularise, reduce model complexity</td></tr>
+    <tr><td>Model was good, then degraded gradually</td><td>Distributional shift</td><td>Retrain on recent data, add monitoring</td></tr>
+    <tr><td>Model was good, then degraded suddenly</td><td>Data pipeline failure or upstream schema change</td><td>Check data quality, not model</td></tr>
+  </table>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">4.4 Model Selection: Small Data vs Large Data</div>
+  <p><strong>When data is limited (fewer than ~100K labelled examples):</strong></p>
+  <p>Classical ML almost always wins. Specifically:</p>
+  <ul class="dl">
+    <li><strong>XGBoost / LightGBM / CatBoost</strong> for tabular data — these are gradient-boosted tree ensembles that regularly win Kaggle competitions on structured data</li>
+    <li><strong>Logistic regression</strong> as a baseline (fast, interpretable, well-understood)</li>
+    <li><strong>Random forests</strong> as a robust alternative with less hyperparameter sensitivity</li>
+  </ul>
+  <p>Neural networks need large amounts of data to learn good representations from scratch. With small data, they overfit and their complexity is a liability, not an asset. The exception is transfer learning — if you can use a pre-trained foundation model and fine-tune it on a small dataset, you effectively bring in the large-data representations.</p>
+  <p><strong>When data is large (millions to billions of labelled examples):</strong></p>
+  <p>Deep learning models can surpass classical ML because they can learn hierarchical representations directly from raw inputs (text, images, audio) without hand-engineered features. This is where transformer models, CNNs, and LSTMs earn their keep.</p>
+  <p><strong>XGBoost as the default for tabular data:</strong> across benchmark studies comparing models on tabular datasets, gradient-boosted trees (particularly XGBoost and LightGBM) consistently match or beat neural networks on structured data. They train faster, require less hyperparameter tuning, are more interpretable (feature importance is built-in), and do not require feature scaling. For the vast majority of enterprise prediction tasks — churn, propensity to buy, fraud, demand forecasting on structured data — start with XGBoost before considering more complex approaches.</p>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">4.5 Evaluation Metrics — Which to Use When</div>
+  <p>Not all metrics are created equal. The choice of evaluation metric should be driven by the business problem, not by what is easiest to compute.</p>
+  <ul class="dl">
+    <li><strong>Accuracy:</strong> the fraction of predictions that are correct. Use only when classes are balanced and false positives and false negatives have equal costs. Almost never the right primary metric for enterprise AI.</li>
+    <li><strong>Precision:</strong> of all instances the model predicted as positive, what fraction actually are? Use when false positives are costly. Example: a document processing system that flags items for human review — you want flagged items to actually need review (high precision), even if some items that need review are missed.</li>
+    <li><strong>Recall:</strong> of all actual positive instances, what fraction did the model find? Use when false negatives are costly. Example: a safety system detecting defective products — you want to catch all defective products (high recall), even if some non-defective ones are incorrectly flagged.</li>
+    <li><strong>F1 score:</strong> the harmonic mean of precision and recall. Use when you need to balance both. The harmonic mean penalises extreme imbalances — a model with 100% precision but 1% recall gets an F1 of ~2%, not 50%.</li>
+    <li><strong>AUC-ROC:</strong> the area under the receiver operating characteristic curve. Measures how well the model separates classes across all possible thresholds. Use for comparing models when you have not yet decided on an operating threshold. A random model scores 0.5; a perfect model scores 1.0.</li>
+    <li><strong>RMSE / MAE:</strong> for regression problems (predicting a number). RMSE penalises large errors more (due to squaring). MAE treats all errors linearly. Use RMSE when large errors are particularly costly; MAE when all errors are roughly equally bad.</li>
+  </ul>
+  <p><strong>The governance principle:</strong> decide your evaluation metric before you train your model. Choosing the metric after seeing results is a form of p-hacking — you will naturally gravitate toward the metric that makes your model look best.</p>
+</div>
+
+<div class="sh">5. Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Enterprise Example: Customer Churn Prediction for a Retail Loyalty Programme</div>
+  <p><strong>Scenario:</strong> A European retail group operates a loyalty programme with 8.4 million active members. On average, 12% of members disengage annually — they stop purchasing, their points expire, and they do not respond to reactivation campaigns. The business wants to predict which members are likely to disengage in the next 90 days so that retention campaigns can be targeted.</p>
+  <p><strong>Why not an LLM:</strong> The data is entirely structured — transaction history, login frequency, email open rates, discount usage, category preference changes, last purchase recency. There is no unstructured text to interpret. The prediction task is binary classification (will disengage in 90 days: yes/no). XGBoost is the right tool.</p>
+  <p><strong>Feature engineering:</strong> The data science team engineers 47 features from the raw data. Key features include: days since last purchase, change in purchase frequency over the last 90 days vs the prior 90 days, ratio of discount-driven purchases to full-price purchases, email engagement score, number of distinct categories purchased in the last year, net promoter score from the last survey response.</p>
+  <p><strong>Train/val/test split:</strong> The team uses a time-based split rather than a random split. Training data: all member activity up to 12 months ago. Validation data: activity from 12 to 6 months ago. Test data: activity from 6 months ago to 3 months ago, with churn label determined by actual behaviour in the following 3 months. This prevents data leakage from future-to-past and ensures the evaluation reflects genuine temporal generalisation.</p>
+  <p><strong>Model:</strong> XGBoost with 500 trees, max depth 6, learning rate 0.05, L2 regularisation weight 1.0. Hyperparameters tuned on the validation set using Bayesian optimisation (50 trials).</p>
+  <p><strong>Evaluation metric:</strong> Recall at 70% precision (the business requires that at least 70% of members flagged for the campaign are genuinely at-risk, and wants to catch as many at-risk members as possible within that constraint). At this operating point, the model achieves 71% precision and 58% recall on the test set — catching 58% of all members who will actually churn within 90 days.</p>
+  <p><strong>Bias-variance in practice:</strong> The initial model with max depth 12 and no regularisation achieved 94% accuracy on training data but only 61% on validation — clear overfitting. Reducing tree depth and adding L2 regularisation brought training accuracy to 81% and validation accuracy to 79% — much better generalisation. This is the bias-variance tradeoff in action.</p>
+  <p><strong>Deployment:</strong> The model is retrained monthly on a rolling 18-month window. Feature distributions are monitored weekly. When feature drift exceeds two standard deviations from the training distribution baseline, an alert is raised and the model is scheduled for early retraining.</p>
+</div>
+
+<div class="sh">6. Architecture Perspective</div>
+
+<div class="kv">
+  <div class="kvr">
+    <span class="kvk">Classical ML + tabular data is a solved problem with known best practices</span>
+    <span class="kvv">An XGBoost pipeline for a classification task can be built, evaluated, and deployed in weeks. The architecture is straightforward: feature engineering → training → evaluation → serving via a low-latency prediction API. The operational complexity is in the monitoring and retraining pipeline, not the model itself.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">The most common failure mode is data quality, not model quality</span>
+    <span class="kvv">Garbage in, garbage out applies more to ML than anywhere else. A model trained on data with silent errors — duplicated records, mislabelled outcomes, features that inadvertently encode the outcome (data leakage) — will produce misleading evaluation scores and unpredictable production behaviour. Invest disproportionately in data validation at every stage of the pipeline.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Train/val/test split is an architecture pattern, not just a data science best practice</span>
+    <span class="kvv">In enterprise ML systems, the separation of training, validation, and test data must be enforced at the infrastructure level — separate data stores, access controls that prevent the model training job from reading the test set, and audit logs that confirm the test set was only evaluated against once. If your ML platform does not enforce this, your model governance claims cannot be verified.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Model serving latency varies by algorithm family</span>
+    <span class="kvv">Decision tree ensemble models (XGBoost, LightGBM) can serve predictions in microseconds to low milliseconds on CPU — no GPU required. Logistic regression is even faster. Neural networks, particularly transformer-based models, typically require GPU inference for real-time SLAs. This matters for the cost model and the deployment platform decision.</span>
+  </div>
+  <div class="kvr">
+    <span class="kvk">Feature stores prevent training-serving skew</span>
+    <span class="kvv">The most common cause of model degradation in production that is not actual distributional shift is training-serving skew — the features computed during training are computed differently than the features computed at serving time. A feature store enforces feature computation consistency and version-controls feature logic alongside the model.</span>
+  </div>
+</div>
+
+<div class="sh">7. Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">&#10003; Check Yourself</div>
+  <ol class="sl">
+    <li>
+      <strong>Q:</strong> A data scientist shows you model evaluation results: 94% accuracy on the training set, 93% accuracy on the test set. They are enthusiastic. Should you be concerned about anything?<br>
+      <strong>Expected answer:</strong> Yes — and the concern is the process, not the numbers. You should ask: Was the test set held out before any modelling began, or was it used to select between models? Was the test set used only once? Is the data split random or time-based — and if random, could future information have leaked into the training set for a temporal problem? High test accuracy that matches training accuracy is actually a sign of good generalisation, but only if the test set was genuinely not touched until the final evaluation. The governance question is about process integrity, not just the numbers.
+    </li>
+    <li>
+      <strong>Q:</strong> Your team is building a product recommendation model. A data scientist suggests using a deep neural network because "it will learn better representations." You have 50,000 labelled interaction examples. What is your response?<br>
+      <strong>Expected answer:</strong> With 50,000 examples, a deep neural network is unlikely to outperform gradient-boosted trees unless you are using transfer learning from a pre-trained foundation model. Neural networks require large data to learn good representations from scratch — with 50K examples, they are likely to overfit. The recommendation should be to start with XGBoost or LightGBM as the baseline, evaluate performance thoroughly, and only escalate to a neural approach if the baseline does not meet the business requirements. Transfer learning with a pre-trained embedding model for item and user representations is worth evaluating as a middle path.
+    </li>
+    <li>
+      <strong>Q:</strong> Your deployed churn prediction model is degrading — it was catching 60% of churners when deployed 8 months ago, and now catches only 40%. A team member says the model is "drifting" and needs retraining. What questions do you need to answer before deciding whether to retrain?<br>
+      <strong>Expected answer:</strong> You need to determine the root cause before prescribing retraining. First: has the data pipeline changed? Check whether any feature computation logic, data sources, or upstream schema have changed — training-serving skew can look like drift. Second: has the customer behaviour distribution actually shifted (e.g., a change in loyalty programme terms, a major promotional campaign, or a market event)? Third: is the model's calibration off (its probability scores no longer correspond to actual churn rates), or is it making the wrong classifications? Retraining on recent data fixes distributional shift. A data pipeline bug requires engineering, not retraining. Calibration issues can sometimes be fixed with recalibration (Platt scaling) without full retraining.
+    </li>
+    <li>
+      <strong>Q:</strong> The business wants a fraud detection model. They say: "We want maximum accuracy." You say accuracy is the wrong metric. Explain your reasoning and propose the right metric.<br>
+      <strong>Expected answer:</strong> Fraud is rare — typically less than 1% of transactions. A model that predicts "not fraud" for every transaction achieves 99%+ accuracy with zero fraud detection. Accuracy is a misleading metric for imbalanced classification problems. The right metric depends on the business cost structure. If the cost of missing a fraud case is much higher than the cost of a false positive (manual review), optimise for recall. If the cost of false positives is high (customer friction, blocked legitimate transactions), balance precision and recall using F1 or F-beta. The AUC-ROC is useful for comparing models before setting a threshold. The final operating threshold should be set by optimising the metric that reflects actual business costs — not the one that makes the model look best in isolation.
+    </li>
+    <li>
+      <strong>Q:</strong> Explain the bias-variance tradeoff using a specific model type example, and describe one practical symptom you would see in production for each side of the tradeoff.<br>
+      <strong>Expected answer:</strong> Bias is the error from a model that is too simple to capture the real pattern. A linear model applied to a task with complex non-linear interactions has high bias. In production, you see this as consistent underperformance — the model performs similarly poorly on training data and production data, never approaching the accuracy the business needs. Variance is the error from a model that has overfit to training noise. A very deep decision tree trained without regularisation has high variance. In production, you see this as a gap: excellent performance during evaluation but rapid degradation when production data differs slightly from training data (e.g., seasonal patterns, new product categories, changing customer behaviour). The fix for high bias is more model complexity or better features. The fix for high variance is more training data, regularisation, or reducing model complexity.
+    </li>
+  </ol>
+</div>
+
+<div class="sh">8. Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin:10px 0">
+  <strong>&#128993; Optional depth —</strong> This section covers XGBoost internals, unsupervised learning techniques, and cross-validation in depth. It is safe to skip on a first pass and return here when evaluating specific model architectures.
+</div>
+
+<div class="g3">
+  <div class="card ai">
+    <div class="ch ai">8.1 XGBoost: What Is Actually Happening</div>
+    <p>XGBoost is a gradient-boosted decision tree ensemble. Understanding the mechanics clarifies why it is so powerful for tabular data.</p>
+    <p><strong>Gradient boosting:</strong> instead of training one strong model, train many weak models sequentially. Each model is trained to correct the errors of the previous models. The "gradient" refers to the fact that each new model fits the gradient of the loss with respect to the current ensemble's predictions — it learns to predict where the current ensemble is most wrong.</p>
+    <p><strong>Decision trees as weak learners:</strong> each individual tree is shallow (typically depth 3–8) and performs only slightly better than random. The ensemble of 100–500 such trees, each correcting the last, produces a powerful and flexible model.</p>
+    <p><strong>Why XGBoost specifically — improvements over vanilla gradient boosting:</strong></p>
+    <ul class="dl">
+      <li><strong>Regularisation (L1 and L2)</strong> on leaf weights prevents overfitting</li>
+      <li><strong>Second-order gradient information</strong> (Newton's method) for faster, more accurate convergence</li>
+      <li><strong>Approximate tree splitting</strong> for scalability to large datasets</li>
+      <li><strong>Sparse-aware splits</strong> that handle missing values natively</li>
+      <li><strong>Column and row subsampling</strong> per tree (like random forests), which reduces variance</li>
+    </ul>
+    <p><strong>Feature importance:</strong> XGBoost provides multiple measures — gain (how much a feature improves predictions when used for splitting), cover (how many samples are affected by splits on this feature), and frequency (how often the feature is used in splits). Gain is usually the most useful for understanding which features drive model decisions.</p>
+  </div>
+
+  <div class="card b">
+    <div class="ch b">8.2 Unsupervised Learning in Enterprise Architecture</div>
+    <p>Three unsupervised techniques that appear frequently in enterprise AI systems:</p>
+    <p><strong>K-means clustering:</strong> partition data points into K clusters such that each point belongs to the cluster with the nearest centroid. Used for customer segmentation, product grouping, anomaly detection (outliers do not fit well into any cluster). The main challenge is choosing K — the elbow method and silhouette score are standard approaches.</p>
+    <p><strong>Principal Component Analysis (PCA):</strong> reduce high-dimensional data to a lower-dimensional representation while preserving as much variance as possible. Used for visualising embeddings, removing correlated features before feeding tabular data into ML models, and compressing large feature spaces. PCA is a linear technique — it finds the directions of maximum variance in the data and projects onto them.</p>
+    <p><strong>Autoencoders:</strong> neural networks trained to compress data into a lower-dimensional latent space and then reconstruct it. The compressed representation captures the most important structure. Used for anomaly detection (reconstruction error is high for anomalies that differ from the training distribution) and as a feature learning step before supervised tasks.</p>
+  </div>
+
+  <div class="card t">
+    <div class="ch t">8.3 Cross-Validation and Temporal Splits</div>
+    <p><strong>K-fold cross-validation:</strong> split data into K equal folds. Train on K-1 folds, evaluate on the remaining fold. Repeat K times, each time using a different fold as validation. Average the K evaluation scores. This gives a lower-variance estimate of model performance than a single train/val split, at the cost of K times the training compute.</p>
+    <p><strong>Temporal cross-validation (time series split):</strong> for time-series and sequential data, random cross-validation is invalid because future data would contaminate past training. Use a walk-forward validation: train on months 1–6, validate on month 7; then train on months 1–7, validate on month 8; and so on. This simulates real deployment conditions where the model is always being evaluated on data from the future relative to its training period.</p>
+    <p><strong>Stratified cross-validation:</strong> ensure each fold has approximately the same class distribution as the overall dataset. Essential for imbalanced classification problems — without stratification, some folds may have very few positive examples and give misleading performance estimates.</p>
+  </div>
+</div>
+
+<div class="sh">9. Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Classical ML (XGBoost / LightGBM) is not obsolete</strong> — for structured tabular data with fewer than a few million labelled examples, it consistently matches or outperforms neural networks and is faster, cheaper, and more interpretable to deploy and maintain.</li>
+  <li><strong>The train/val/test split is a governance mechanism, not just a technical convention</strong> — the test set must be held out before modelling begins, used exactly once, and never used to guide model selection decisions; violating this makes your performance metrics unauditable.</li>
+  <li><strong>Bias-variance tradeoff describes two distinct production failure modes:</strong> a high-bias model is consistently wrong in the same way (too simple, never improving), while a high-variance model looks great in evaluation but degrades rapidly in production when the data distribution shifts slightly.</li>
+  <li><strong>Evaluation metric selection is a business decision, not a technical one</strong> — accuracy is almost never the right metric for enterprise AI because it ignores the asymmetric cost of different error types; choose precision, recall, F1, or AUC-ROC based on which errors your business can tolerate.</li>
+  <li><strong>Feature stores and training-serving skew prevention are the most underinvested part of ML system architecture</strong> — the most common cause of "model drift" in production is not the world changing but rather feature computation changing upstream, making the deployed model's inputs structurally different from what it was trained on.</li>
+</ul>

@@ -1,0 +1,631 @@
+<!-- Prerequisites -->
+<div class="prereq-bar">
+  <span class="prereq-label">Prerequisites:</span>
+  <span class="prereq-item">None — this is a foundational module</span>
+</div>
+
+<!-- Intro summary -->
+<div class="ibox">
+  A <strong>Large Language Model (LLM)</strong> is a software system trained on vast amounts of text that has learned to predict what text should come next. The "large" refers to billions of learned parameters. Surprisingly, a system trained purely to predict the next word develops the ability to reason, follow instructions, write code, and engage in dialogue — capabilities that emerged from scale, not explicit programming. A <strong>Foundation Model</strong> is the base model produced by this training; when further trained for instructions and safety, it becomes a <strong>chat model</strong> (Claude, GPT-4o, Gemini). As an architect, you almost never interact with a raw foundation model — but understanding the foundation is what lets you diagnose failures, choose the right model, configure parameters correctly, and design systems that work with the model's nature rather than against it.
+</div>
+
+<!-- Stop / keep going signal -->
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — you're done at a conceptual level.<br>
+  <strong>&#128993; Keep going for the full architect-level detail.</strong>
+</div>
+
+<!-- S1: What Is It -->
+<div class="sh">What Is It (Plain English)</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine you hired a researcher who read every book, article, and website ever written — billions of documents. After years of reading, they developed an uncanny ability to predict what comes next in any piece of writing, and in doing so absorbed an enormous amount of knowledge, reasoning patterns, and language skills. An LLM is that researcher, but made of mathematics instead of a person. You send it a message, it predicts the most sensible continuation based on all those patterns it absorbed. The remarkable thing: nobody told it to learn to reason or write code — it just emerged from the sheer scale of the task.
+</div>
+
+<div class="ibox">
+  A <strong>Large Language Model (LLM)</strong> is a software system trained on an enormous amount of text — books, websites, code, research papers, conversations — that has learned to predict what text should come next given any input. The "large" refers to the number of parameters (weights): a current mid-range model has 7–70 billion parameters; frontier models have hundreds of billions.
+</div>
+
+<div class="ibox">
+  The surprising result: a system trained purely to predict the next word develops the ability to reason, follow instructions, write code, summarise documents, answer questions, and engage in multi-turn dialogue. Nobody explicitly taught it these capabilities — they emerged from the scale of the training task.
+</div>
+
+<div class="ibox">
+  A <strong>Foundation Model</strong> is the base model that comes out of this training process — a general-purpose capability engine. When a provider like Anthropic or OpenAI applies additional training (instruction tuning, safety alignment, RLHF — Reinforcement Learning from Human Feedback, a training process where human raters score model outputs and those scores are used to shape the model's behaviour toward helpful, harmless responses) to make the model useful in a conversation, it becomes a <strong>chat model</strong> (Claude, GPT-4o, Gemini, etc.).
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of a Foundation Model like a powerful database engine — raw, capable, but not user-friendly on its own. RLHF (instruction tuning + safety alignment) is the application layer built on top: it turns the raw engine into something you can actually talk to. Just as you'd never expose a raw database directly to users, model providers don't expose raw foundation models — they expose the trained, aligned, instruction-following version. When you use Claude or GPT-4o in your systems, you're always talking to the aligned, instruction-tuned layer.
+</div>
+
+<div class="sh2">What this means for architects</div>
+<div class="ibox">
+  You almost never interact with a raw foundation model. You work with instruction-tuned, safety-aligned derivatives. But understanding the foundation — what the model actually is, how it processes text, what its fundamental limits are — is what allows you to:
+  <ul class="dl">
+    <li><strong>Set correct expectations</strong> for what the model can and cannot do</li>
+    <li><strong>Diagnose failures</strong> ("this is a knowledge limit, not a reasoning limit")</li>
+    <li><strong>Choose the right model</strong> for the right task and cost point</li>
+    <li><strong>Configure model parameters</strong> (temperature, context window, sampling) correctly</li>
+    <li><strong>Design systems</strong> that work with the model's nature rather than against it</li>
+  </ul>
+</div>
+
+<!-- S2: Why Should I Care -->
+<div class="sh">Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">For Solution Architects</div>
+    Every LLM-based system you design sits on a model choice. That choice determines:
+    <ul class="dl">
+      <li><strong>Capability ceiling:</strong> what the model can reliably do (complex multi-step reasoning? structured output? long document analysis?)</li>
+      <li><strong>Context window:</strong> how much text you can feed in a single call (8K? 128K? 1M tokens?) — directly determines your RAG architecture and document handling strategy</li>
+      <li><strong>Cost:</strong> from £0.0003/1K tokens (small models) to £0.015/1K tokens (frontier models) — 50× range</li>
+      <li><strong>Latency:</strong> from 200ms to 30+ seconds depending on model size and output length</li>
+      <li><strong>Data residency:</strong> which cloud provider hosts the model — affects compliance posture</li>
+      <li><strong>Availability and rate limits:</strong> what burst capacity the model supports</li>
+    </ul>
+    <p>Choosing the wrong model for a use case is one of the most common and expensive architectural mistakes in AI systems. Choosing GPT-4o for a task that GPT-4o-mini handles equally well costs 15× more. Choosing a small model for complex reasoning produces unreliable outputs regardless of prompt quality.</p>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">For Enterprise Architects</div>
+    Foundation models represent a new category of enterprise software dependency: <strong>opaque, probabilistic, and vendor-controlled</strong>. Unlike a database or a messaging system, an LLM:
+    <ul class="dl">
+      <li>Updates without your consent (model versions change; behaviour changes)</li>
+      <li>Cannot be fully specified in a contract (you cannot guarantee "the model will always output X")</li>
+      <li>Has a knowledge cutoff that creates temporal drift between model capabilities and world state</li>
+      <li>Is subject to vendor pricing decisions that can change your operating cost</li>
+    </ul>
+    <p>Enterprise architects need a model governance strategy: which providers are approved, how model version changes are managed, what evaluation gates exist before a model update reaches production, and what fallback exists if a provider has an outage.</p>
+  </div>
+</div>
+
+<!-- S3: Analogy -->
+<div class="sh">Think About It Like This</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Here is the filing cabinet analogy for the transformer architecture. Imagine a massive filing cabinet with billions of labelled folders. When you ask a question, the model doesn't look things up — instead, it runs a filing operation: "given everything in these folders, what text pattern comes next?" The transformer architecture is the intelligent filing system that decides which folders are relevant to your current question and how much weight to give each one. The "attention" mechanism is literally the model deciding which folders to pull out and read more carefully.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>The Compression Library Analogy</strong><br><br>
+  Imagine an extraordinarily sophisticated compression algorithm that has been trained on the entire written output of human civilisation. It has compressed all that knowledge — not into bits and bytes, but into a 70-billion-parameter mathematical structure that captures the patterns, relationships, and conditional probabilities of human language.<br><br>
+  When you send a prompt, you're not "asking a question" in the way you'd query a database. You're providing a starting context and asking the compression library to "decompress" the most probable continuation, given everything it learned during training.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Why does it hallucinate?</div>
+    A compression algorithm optimises for plausible continuations, not verified facts. If the training data contained patterns where "the capital of X is Y" was followed by confident answers, the model continues that pattern — even if the specific answer wasn't in the training data and the model fills in a plausible-sounding but wrong answer.
+  </div>
+  <div class="card b">
+    <div class="ch b">Why does prompting work?</div>
+    Changing the context changes what "decompress" means. "Continue this story" produces narrative. "Answer this question factually" produces different patterns. "Output valid JSON" constrains the decompression to match JSON-shaped patterns.
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Why do bigger models do more?</div>
+    More parameters = more expressive compression = more nuanced patterns captured = better ability to generalise to novel combinations. A 7B model has captured broad patterns; a 70B model has captured finer-grained structure that enables more reliable multi-step reasoning.
+  </div>
+  <div class="card b">
+    <div class="ch b">Why is the context window a hard limit?</div>
+    The decompression works over the tokens provided. Beyond the context window, the model has no memory of earlier text — it can only continue from what's in the window right now.
+  </div>
+</div>
+
+<div class="ibox">
+  <strong>The instruction-tuned model = a specialised interface.</strong> The foundation model (the raw compression library) is hard to use directly. Instruction tuning applies a layer of fine-tuning that teaches the model to respond to natural language instructions — "answer my question, don't just predict text." The safety alignment layer adds further training to prevent harmful outputs. What you use in production is this layered product, not the raw foundation.
+</div>
+
+<!-- S4: Step-by-Step -->
+<div class="sh">Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="sh2">4.1 How an LLM Processes Text: The Minimal Model</div>
+<div class="ibox">You need enough of a mental model to diagnose failures and make configuration decisions. You don't need to understand backpropagation or attention math.</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Tokens are the atomic unit of text that LLMs work with — not words, not characters, but chunks that are roughly word-sized (sometimes smaller for uncommon words or non-English languages). Think of tokens like postage stamps: everything you send and receive is measured and priced by the stamp, not by the sentence. A 1,000-word document is roughly 1,333 tokens. A model with a 128K context window can hold roughly 96,000 words — a long novel. This matters for your architecture because every API call has a token budget, and every token costs money.
+</div>
+
+<div class="alayer al1">
+  <div class="ln">Step 1 — Tokenisation</div>
+  Your text is broken into tokens. A token is roughly 0.75 words in English — "the quick brown fox" becomes ["the", " quick", " brown", " fox"] — 4 tokens. Non-English languages and code often have larger token-to-character ratios. This matters because:
+  <ul class="dl">
+    <li>The context window limit is in tokens, not words</li>
+    <li>Input and output pricing is per token</li>
+    <li>Unusual encodings (tables, special characters, non-Latin scripts) cost more tokens than you'd expect</li>
+  </ul>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "A 128K context window means I can send 128,000 words." — Wrong. The 128K limit is in <em>tokens</em>, not words. Since one word is roughly 1.3 tokens on average, a 128K context window holds approximately 96,000 English words. For non-English text or heavily structured data (tables, JSON), the token-to-word ratio is even less favourable. Always calculate in tokens, not words, when designing document-handling strategies.</div>
+
+<div class="alayer al2">
+  <div class="ln">Step 2 — Embedding</div>
+  Each token is converted to a vector of numbers (a position in a high-dimensional space where similar concepts are close together). "King" and "Queen" are nearby; "King" and "Tax" are far apart. This vector representation is how meaning is encoded.
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Step 3 — Transformer Layers</div>
+  The vectors pass through N layers (32 layers in Llama-3 8B; 80 layers in Llama-3 70B). Each layer applies <strong>attention</strong> — each token's vector is updated based on all other tokens in the context — and a <strong>feed-forward network</strong>. By layer 80, the original token vectors have been transformed to encode rich contextual meaning: the word "bank" now knows whether it means riverbank or financial institution, based on context.
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Step 4 — Output Prediction</div>
+  The final layer produces a probability distribution over the vocabulary (~32,000–128,000 tokens) for the next token. The model doesn't generate a word — it generates a probability distribution. "The capital of France is ___" might give 98% probability to "Paris", 0.5% to "Lyon", 0.3% to "Bordeaux".
+</div>
+
+<div class="alayer al5">
+  <div class="ln">Step 5 — Sampling</div>
+  The next token is selected from this distribution according to the sampling parameters you configure (temperature, top-p). This is repeated for each output token until the model generates a stop token.
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Key architectural insight:</strong> LLMs are <strong>autoregressive</strong> — each output token is generated one at a time, and each depends on all previous tokens (input + previously generated output). This is why longer outputs take proportionally longer, and why generation can't be trivially parallelised beyond a certain point.
+</div>
+
+<div class="sh2">4.2 The Transformer Architecture: What Architects Need to Know</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine a conference call with 20 people. When one person speaks, each listener naturally pays more attention to some speakers than others based on what's most relevant to what was just said. "Attention" in transformers works the same way: for each word being processed, the model calculates how much attention to pay to every other word in the context. The word "it" in "the supplier said it would deliver on Tuesday" attends strongly to "supplier" — that's how the model figures out that "it" refers to the supplier, not Tuesday. This attention mechanism, applied across billions of parameters and thousands of training examples, is what gives LLMs their ability to understand complex language.
+</div>
+
+<div class="ibox">
+  <strong>Attention</strong> is the mechanism that makes Transformers powerful. For each token, the attention layer asks: "which other tokens in this context are most relevant for predicting the next token?" It computes a weighted combination of all context vectors, where the weights are learned during training.
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Why Attention Matters</div>
+    <ul class="dl">
+      <li>The model can resolve "it" in "the customer called the supplier and asked it to reschedule" — attention connects "it" to "supplier" based on patterns learned during training</li>
+      <li>Performance degrades for very long contexts — with 100K tokens in context, attention must compute relationships between all 100K tokens, which is expensive and can become noisy</li>
+      <li><strong>"Lost in the Middle"</strong> is a real phenomenon — models attend more strongly to tokens near the beginning and end of the context window; information buried in the middle is less reliably accessed</li>
+    </ul>
+  </div>
+  <div class="card g">
+    <div class="ch g">What Architects Don't Need to Know</div>
+    <ul class="dl">
+      <li>The exact attention formula (Q×K<sup>T</sup> / √d<sub>k</sub>)</li>
+      <li>The self-attention vs cross-attention distinction (relevant for encoders, mostly irrelevant for decoder-only LLMs)</li>
+      <li>Implementation details of multi-head attention</li>
+    </ul>
+  </div>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "A larger context window means the model reads all of it equally well." — Not true. Research consistently shows that information placed in the middle of a very long context is retrieved less reliably than information near the start or end. This "Lost in the Middle" effect means that for document analysis tasks, you should place the most important instructions at the start and end of your prompt, and consider RAG to surface only the most relevant chunks rather than blindly filling the context window.</div>
+
+<div class="sh2">4.3 Sampling Parameters: Architect-Relevant Configuration</div>
+
+<div class="ibox">When you call an LLM API, you configure parameters that control how the model selects tokens from the output probability distribution. These directly control the reliability and character of model outputs.</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of temperature like a confidence dial on a decision-making system. At temperature = 0, the model always picks the single most likely next word — maximum predictability, like an autocomplete that never surprises you. At temperature = 1.5, it's like telling a creative writer "ignore the obvious choice, try something unexpected." For enterprise extraction pipelines and classification, you want the model to be a reliable, predictable machine — set temperature near zero. For a chatbot that needs to sound natural and not robotic, you want some variability — temperature around 0.5–0.7. For brainstorming tools, higher temperature generates more diverse ideas.
+</div>
+
+<div class="card a">
+  <div class="ch a">Temperature</div>
+  Temperature scales the probability distribution before sampling:
+  <ul class="dl">
+    <li><strong>Temperature = 0:</strong> always pick the highest probability token (greedy decoding). Maximum consistency, minimum creativity. Same input produces same output every time (approximately).</li>
+    <li><strong>Temperature = 1:</strong> sample from the raw probability distribution. Balanced.</li>
+    <li><strong>Temperature &gt; 1:</strong> flatten the distribution — lower-probability tokens become more likely. More creative, more variable, more prone to error.</li>
+    <li><strong>Temperature &lt; 1:</strong> sharpen the distribution — high-probability tokens become even more likely. More consistent, more conservative.</li>
+  </ul>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Temperature = 0 makes the model fully deterministic." — Almost, but not quite. At temperature = 0 (greedy decoding), the model picks the single highest-probability token at each step, which gives very consistent results. However, due to hardware floating-point non-determinism and batching effects in cloud deployments, you may still see occasional minor variations across runs. For workflows requiring true 100% reproducibility (e.g., audit logs, compliance), your architecture must handle this residual variability — do not assume temperature = 0 is a guarantee of identical outputs.</div>
+
+<table class="t">
+  <tr><th>Task</th><th>Temperature</th><th>Reason</th></tr>
+  <tr><td>Data extraction (fields from documents)</td><td>0.0–0.1</td><td>Consistency is everything; creativity harmful</td></tr>
+  <tr><td>Classification</td><td>0.0–0.1</td><td>Deterministic output required</td></tr>
+  <tr><td>Q&amp;A with factual answers</td><td>0.1–0.3</td><td>Mostly consistent, slight variation acceptable</td></tr>
+  <tr><td>Summarisation</td><td>0.3–0.5</td><td>Some variation acceptable, accuracy important</td></tr>
+  <tr><td>Chatbot / conversation</td><td>0.5–0.8</td><td>Natural variation, engaging</td></tr>
+  <tr><td>Creative writing / brainstorming</td><td>0.8–1.2</td><td>Diversity desired</td></tr>
+</table>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Top-p (nucleus sampling)</div>
+    Restrict sampling to the smallest set of tokens whose cumulative probability exceeds p:
+    <ul class="dl">
+      <li><strong>top-p = 0.9:</strong> consider only tokens that together account for 90% of the probability mass</li>
+      <li>Prevents selecting very low-probability, incoherent tokens</li>
+      <li>Works together with temperature; most production systems set both</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">Top-k</div>
+    Restrict to the top-k highest probability tokens regardless of their probabilities. Less commonly used in production than top-p; top-p is generally preferred.
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Max Tokens</div>
+    Hard limit on output length. Critical for:
+    <ul class="dl">
+      <li><strong>Cost control:</strong> output tokens are often 2–4× more expensive than input tokens</li>
+      <li><strong>Latency control:</strong> output length directly determines generation time</li>
+      <li><strong>Pipeline safety:</strong> unbounded output lengths cause downstream parsing failures</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">Stop Sequences</div>
+    Strings that cause generation to stop when produced. Use for: structured output (stop when you see "}" to prevent over-generation), multi-turn loops (stop when agent outputs a specific marker), safety (stop when specific patterns appear).
+  </div>
+</div>
+
+<div class="card b">
+  <div class="ch b">Frequency and Presence Penalties</div>
+  Reduce the probability of tokens the model has already output:
+  <ul class="dl">
+    <li><strong>Frequency penalty:</strong> scales with how many times a token has appeared — discourages repetitive text</li>
+    <li><strong>Presence penalty:</strong> flat penalty for any token that has appeared — discourages reuse</li>
+  </ul>
+  Use for: long-form generation where repetition is a problem. For structured tasks, leave at zero.
+</div>
+
+<div class="sh2">4.4 Model Selection Framework: The 2026 Landscape</div>
+
+<div class="ibox">The frontier model landscape changes every few months. Rather than memorising specific models (which will be deprecated), learn the selection framework and apply it to current options.</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Model selection is like choosing a consultant for a project. You wouldn't hire a specialist management consultant at £2,000/day to reformat a spreadsheet — you'd use a junior analyst at £200/day who can handle it just as well. Equally, you wouldn't ask a junior analyst to lead a board-level strategy review. LLMs are the same: there are cheap, fast models that handle well-defined tasks brilliantly, and expensive, powerful models for genuine complexity. The 50× cost difference between tiers means getting this selection right is a significant architectural decision, not an afterthought.
+</div>
+
+<div class="g2">
+  <div class="card ai">
+    <div class="ch ai">Tier 1 — Frontier Reasoning Models</div>
+    <em>GPT-4o, Claude Opus, Gemini Ultra, o3</em>
+    <ul class="dl">
+      <li>Strongest multi-step reasoning, complex instruction following, code generation</li>
+      <li><strong>Cost:</strong> £10–30/M input tokens, £30–60/M output tokens</li>
+      <li><strong>Latency:</strong> 10–30+ seconds for long outputs</li>
+      <li><strong>Enterprise sweet spot:</strong> high-stakes, low-volume tasks (legal analysis, complex document review, architectural design assistance)</li>
+    </ul>
+  </div>
+  <div class="card b">
+    <div class="ch b">Tier 2 — Capable General Models</div>
+    <em>Claude Sonnet, GPT-4o-mini, Gemini Pro, Llama-3 70B</em>
+    <ul class="dl">
+      <li>Strong reasoning, good instruction following, broad capability</li>
+      <li><strong>Cost:</strong> £1–5/M input tokens, £3–15/M output tokens</li>
+      <li><strong>Latency:</strong> 3–15 seconds for typical outputs</li>
+      <li><strong>Enterprise sweet spot:</strong> customer-facing applications, internal tools, high-volume workflows where frontier quality is unnecessary</li>
+    </ul>
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card g">
+    <div class="ch g">Tier 3 — Efficient Models</div>
+    <em>Claude Haiku, GPT-4o-mini, Gemini Flash, Llama-3 8B</em>
+    <ul class="dl">
+      <li>Good at well-defined, narrow tasks: classification, extraction, summarisation, formatting</li>
+      <li><strong>Cost:</strong> £0.10–0.50/M input tokens, £0.30–1.50/M output tokens</li>
+      <li><strong>Latency:</strong> sub-second to 3 seconds</li>
+      <li><strong>Enterprise sweet spot:</strong> real-time applications, high-volume pipelines, cost-optimised workflows</li>
+    </ul>
+  </div>
+  <div class="card t">
+    <div class="ch t">Tier 4 — Specialised Models</div>
+    <ul class="dl">
+      <li><strong>Embedding models</strong> (text-embedding-3-large, BGE, E5) — vector search, semantic similarity</li>
+      <li><strong>Vision-language models</strong> (GPT-4V, Claude with vision, Gemini Vision) — image/document understanding</li>
+      <li><strong>Code-specialised</strong> (CodeLlama, DeepSeek-Coder) — code generation and review</li>
+      <li><strong>Reasoning-specialised</strong> (o1, o3, DeepSeek-R1) — extended thinking for mathematical/logical tasks</li>
+    </ul>
+  </div>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Bigger, more expensive models are always better — just use the frontier model for everything to be safe." — This is one of the most expensive mistakes in AI architecture. A Tier 3 model on a well-defined classification task will often match Tier 1 quality while costing 50–100× less. The retail example later in this section demonstrates an 85% cost saving purely through model selection. The right model is the <em>cheapest</em> one that passes your quality evaluation for a specific task — not the most powerful one available.</div>
+
+<div class="sh2">Model Selection Decision Framework</div>
+
+<div class="code-label">Framework</div>
+<div class="code">Step 1: What is the task type?
+  Narrow + well-defined (classification, extraction, formatting) → start at Tier 3
+  General + medium complexity (Q&amp;A, summarisation, chat) → start at Tier 2
+  Complex reasoning, code generation, analysis → start at Tier 1 or 2
+
+Step 2: What is the volume and cost sensitivity?
+  &lt; 10K requests/day, cost not primary → start higher tier, optimise later
+  &gt; 100K requests/day, cost is a constraint → start at lowest tier that meets quality
+
+Step 3: Evaluate on your task before committing
+  Run 100 representative examples through your top 2 model candidates
+  Score with an LLM judge on your task-specific criteria
+  Fail fast: if Tier 3 meets quality bar, don't pay for Tier 2
+
+Step 4: Consider operational constraints
+  Data residency → which cloud providers are approved?
+  Context window → is 128K sufficient or do you need 1M tokens?
+  Rate limits → does the model support your peak throughput?
+  API stability → is the model available with an SLA you can commit to?</div>
+
+<div class="sh2">Context Window as a Model Selection Criterion</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> The context window is the model's working memory — it's everything the model can "see" and reason about in a single interaction. Imagine giving a consultant a stack of documents to review: they can only work with what's on their desk right now, not what they read last week. A 128K context window means roughly 96,000 words — that's one long contract, or several shorter ones. A 1M context window is like giving them an entire filing cabinet. Context window size is therefore a direct architectural constraint: documents larger than the window must be chunked, summarised, or retrieved in pieces. This is why RAG (Retrieval-Augmented Generation) exists — to work around context window limits for large knowledge bases.
+</div>
+
+<table class="t">
+  <tr><th>Use case</th><th>Context window needed</th><th>Suitable models</th></tr>
+  <tr><td>Chat, Q&amp;A, short documents</td><td>8K–32K</td><td>All models</td></tr>
+  <tr><td>Long documents, books, contracts</td><td>128K</td><td>Most current models</td></tr>
+  <tr><td>Full codebases, entire contract libraries</td><td>1M+</td><td>Gemini 1.5 Pro, Llama 3.1 (128K), Claude 3.7 Sonnet</td></tr>
+  <tr><td>Real-time short interactions</td><td>Any</td><td>Latency matters more</td></tr>
+</table>
+
+<div class="sh2">4.5 Understanding Model Limitations: What Never Changes</div>
+
+<div class="ibox">Regardless of which model you choose, four fundamental limitations apply:</div>
+
+<div class="g2">
+  <div class="card a">
+    <div class="ch a">1. Knowledge Cutoff</div>
+    The model's training data has a cutoff date. Events after that date are unknown to the model. For time-sensitive enterprise use cases, this means RAG (or web search tools) are required to ground the model in current information.
+  </div>
+  <div class="card a">
+    <div class="ch a">2. Context Window = Working Memory</div>
+    The model has no persistent memory across calls. Each API call is stateless — the model has only what you put in the context window. This drives RAG architecture, conversation history management, and document handling strategies.
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card a">
+    <div class="ch a">3. Probabilistic, Not Deterministic</div>
+    Even at temperature=0, LLMs are not fully deterministic in production (hardware non-determinism, batching effects). For workflows requiring 100% reproducibility, the architecture must handle this.
+  </div>
+  <div class="card a">
+    <div class="ch a">4. Hallucination Is Inherent, Not a Bug</div>
+    LLMs generate plausible continuations — they don't verify facts. Hallucination is a property of the architecture, not a failure of a specific model. It can be mitigated (RAG, structured prompting, verification steps) but not eliminated. Systems must be designed assuming some fraction of outputs will contain errors.
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Hallucination is the single most misunderstood LLM concept in enterprise settings. An LLM that "hallucinates" is not lying, not malfunctioning, and not being lazy. It is doing exactly what it was designed to do — generating the most statistically plausible continuation of your prompt — and the most plausible continuation sometimes happens to be factually wrong. Think of it like a very confident new hire who has read everything ever written about your industry but has never actually worked there: they will give fluent, authoritative-sounding answers that are sometimes subtly wrong. The architecture response is not to fire them (stop using LLMs) or to trust them completely — it is to build a verification step: RAG for factual grounding, structured output validation, human review for high-stakes outputs.
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Hallucination means the model is broken — a better model won't hallucinate." — Wrong. Hallucination is an inherent property of how LLMs work: they generate statistically plausible text, not verified facts. Even the best frontier models hallucinate on specific topics, especially when the training data was sparse or contradictory. Upgrading to a more powerful model reduces hallucination frequency but does not eliminate it. The correct architectural response is to design systems that do not require hallucination-free outputs — use RAG to ground factual claims, validate structured outputs programmatically, and add human review for high-stakes decisions.</div>
+
+<!-- S5: Enterprise Example -->
+<div class="sh">Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">Scenario: Model Selection for a Retail Group's AI Platform</div>
+  <p>A retail group is building a central AI platform to serve three internal teams. The architecture team must select models for each workload, balancing quality, cost, and operational constraints.</p>
+
+  <div class="sh2">Workload 1: Product Description Enrichment</div>
+  <ul class="dl">
+    <li><strong>Task:</strong> take raw supplier product data and generate structured, customer-facing descriptions in brand voice</li>
+    <li><strong>Volume:</strong> 50,000 products/month (batch)</li>
+    <li><strong>Result:</strong> Claude Haiku scores 4.2/5 vs GPT-4o-mini 4.0/5 on brand voice; both pass format compliance at 99%+</li>
+  </ul>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Claude Haiku cost</span><span class="kvv">£26.25/month</span></div>
+    <div class="kvr"><span class="kvk">Claude Sonnet cost</span><span class="kvv">£315/month</span></div>
+    <div class="kvr"><span class="kvk">Decision</span><span class="kvv">Claude Haiku — 12× cost saving; quality meets the bar</span></div>
+  </div>
+
+  <div class="sh2">Workload 2: Customer Service Email Triage and Draft Response</div>
+  <ul class="dl">
+    <li><strong>Task:</strong> classify incoming emails (10 categories), extract info, draft response for human review</li>
+    <li><strong>Volume:</strong> 8,000 emails/day, real-time (&lt;5s SLA)</li>
+    <li><strong>Data residency:</strong> EU required (contains customer PII)</li>
+    <li><strong>Design:</strong> two-call pattern — Tier 3 for classification, Tier 2 for drafts only</li>
+    <li><strong>Draft quality:</strong> Sonnet drafts rated "minor edits" 71% of time; Haiku 49% — meaningful gap for agent satisfaction</li>
+  </ul>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Classification (Haiku)</span><span class="kvv">£30/month</span></div>
+    <div class="kvr"><span class="kvk">Draft generation (Sonnet)</span><span class="kvv">£1,680/month</span></div>
+    <div class="kvr"><span class="kvk">Decision</span><span class="kvv">Haiku for classification + Sonnet for drafts. Data residency satisfied.</span></div>
+  </div>
+
+  <div class="sh2">Workload 3: Supplier Contract Risk Analysis</div>
+  <ul class="dl">
+    <li><strong>Task:</strong> review supplier contracts (~40 pages), identify non-standard clauses, flag risk areas, summarise obligations</li>
+    <li><strong>Volume:</strong> 200 contracts/month (batch, 24-hour SLA)</li>
+    <li><strong>Quality:</strong> legal team must approve — cannot miss material risks</li>
+    <li><strong>Test:</strong> Claude Opus rated "complete" 94% of time; Claude Sonnet 81% — 19% miss rate on Sonnet is not acceptable</li>
+  </ul>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Claude Opus cost</span><span class="kvv">£81/month (low volume saves this)</span></div>
+    <div class="kvr"><span class="kvk">Decision</span><span class="kvv">Claude Opus. Volume is low enough that the quality premium costs only £81/month.</span></div>
+  </div>
+
+  <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4">
+    <strong>Total platform cost: £1,817/month.</strong> A naive "use GPT-4o for everything" approach would cost £12,400/month. The model selection strategy delivers <strong>85% cost reduction</strong> by matching model capability to task requirements.
+  </div>
+</div>
+
+<!-- S6: Architecture Perspective -->
+<div class="sh">Architecture Perspective</div>
+
+<div class="sh2">Model as a Dependency: What Changes in Your Architecture</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Idempotency Breaks</div>
+    Traditional systems design around idempotent operations — the same input produces the same output. LLMs are not idempotent by default. Design downstream systems to handle variability: validate output schema, don't assume format consistency, build parsing that degrades gracefully.
+  </div>
+  <div class="card b">
+    <div class="ch b">Latency Profiles Change</div>
+    LLM calls range from 500ms to 30+ seconds. This fundamentally changes UI/UX design (streaming is often required), timeout strategy (traditional 5-second HTTP timeouts will fail), and synchronous vs asynchronous architectural patterns.
+  </div>
+</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Token Budget Replaces Data Volume</div>
+    Cost modelling shifts from "compute per request" to "tokens per request × token price." Build token budgets into system design: know the expected input and output token counts for each use case. As a rough anchor: a 2,000-token system prompt at 10,000 API calls/day costs approximately £15–30/day at typical frontier pricing — before any user input or output tokens.
+  </div>
+  <div class="card b">
+    <div class="ch b">Model Versioning Is a Deployment Concern</div>
+    When a provider updates a model (even a minor version), behaviour can change. Production systems need: explicit model version pinning in API calls, evaluation gates triggered by model version changes, and a fallback to the previous version if regressions are detected.
+  </div>
+</div>
+
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Context window = API contract.</strong> The context window is not just a technical constraint — it's an architectural boundary. Systems that need to process documents larger than the context window require chunking, summarisation, or RAG strategies. Design for this explicitly; don't treat the context window as "big enough."
+</div>
+
+<div class="sh2">The Architecture Evolution of LLMs</div>
+
+<table class="t">
+  <tr><th>Architecture</th><th>Era</th><th>Key capability</th><th>Limitation</th></tr>
+  <tr><td>RNNs / LSTMs</td><td>2014–2017</td><td>Sequential text modelling</td><td>Short-range dependencies only; slow training</td></tr>
+  <tr><td>Transformers (BERT/GPT)</td><td>2017–2020</td><td>Long-range attention; parallelisable training</td><td>Fixed context window; quadratic attention cost</td></tr>
+  <tr><td>GPT-3 class (175B)</td><td>2020–2022</td><td>In-context learning; few-shot prompting</td><td>Expensive; limited instruction following</td></tr>
+  <tr><td>InstructGPT / ChatGPT</td><td>2022–2023</td><td>RLHF alignment; instruction following</td><td>Hallucination; limited context</td></tr>
+  <tr><td>GPT-4 / Claude 2</td><td>2023</td><td>Multimodal; 128K context; better reasoning</td><td>Cost</td></tr>
+  <tr><td>2024–2026 frontier</td><td>2024–2026</td><td>1M+ context; tool use; reasoning models; multimodal</td><td>Ongoing</td></tr>
+</table>
+
+<div class="ibox">The key lesson for architects: the pace of capability improvement is high, but the fundamental limitations (hallucination, context window as working memory, knowledge cutoff, probabilistic output) have not changed across generations. Design systems around these constants, not around the capabilities of a specific model at a point in time.</div>
+
+<!-- S7: Check Yourself -->
+<div class="sh">Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">5 Questions to Test Your Understanding</div>
+  <ol class="sl">
+    <li>
+      <strong>A stakeholder asks why the customer service chatbot "doesn't know about the supplier announcement that happened last week." What is the root cause, what does it reveal about how LLMs fundamentally work, and what architectural mechanism resolves it?</strong>
+      <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">Root cause is the model's knowledge cutoff. LLMs are trained on data with a specific end date; events after that date are unknown. This reveals a fundamental characteristic of LLMs: they are a frozen snapshot of knowledge at training time, not a live connected system. The model isn't "forgetting" — it never knew about events after its cutoff in the first place. The architectural mechanism is RAG: connect the model to a knowledge base kept current, and retrieve relevant information to include in the context on each query. Alternatively, use function calling / tool use to query a live database or API at inference time. The model doesn't need retraining; the system needs a live knowledge source the model can access.</div>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Knowledge cutoff — the model was trained on data up to a fixed date and has no awareness of events after that point. RAG or tool use (live API calls) connects the model to current information without retraining.<br>
+        <strong>Simple explanation:</strong> The model's knowledge is frozen at training time — like a very knowledgeable colleague who's been on sabbatical since last year and hasn't read the news.<br>
+        <strong>Architecture takeaway:</strong> Any LLM system handling time-sensitive topics needs a live data layer (RAG, search tools, or API calls). Design this into the architecture from day one, not as an afterthought when stakeholders complain about stale answers.
+      </div>
+    </li>
+    <li>
+      <strong>Your team is designing a document analysis system. Average document is 15,000 tokens. A developer proposes using the full document as context in every API call. Walk through the cost, latency, and quality trade-offs, and identify at least two architectural alternatives with their own trade-offs.</strong>
+      <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">Cost: at 15K input tokens per call (Claude Sonnet, £3/M), each call costs £0.045 on input alone. At 10,000 queries/day = £450/day = £13,500/month in input costs before output tokens. Latency: processing 15K tokens adds significant time-to-first-token. Quality: "Lost in the Middle" — relevant passages buried in the middle of a 15K-token document are accessed less reliably. Alternatives: (1) RAG — chunk, embed, retrieve only the 3–5 most relevant chunks (~2K tokens). 7× cost reduction. (2) Document pre-processing — summarise once, cache, serve queries against the summary. (3) Hybrid: retrieve for most queries; include full document only when a cheap classifier identifies full-document context is needed.</div>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Full-document context at 15K tokens costs ~£0.045 per call in input tokens alone, adds latency, and suffers from "Lost in the Middle" quality degradation. RAG (chunk + retrieve ~2K tokens) cuts cost 7×. Document pre-summarisation amortises cost over many queries.<br>
+        <strong>Simple explanation:</strong> Sending the whole document every time is like photocopying a 100-page manual and faxing it for every single question — expensive, slow, and the answer you need is buried somewhere in the middle.<br>
+        <strong>Architecture takeaway:</strong> Always calculate the token cost of your context strategy before committing to an approach. For document-heavy workloads, RAG or caching strategies are rarely optional — they are the difference between viable and cost-prohibitive.
+      </div>
+    </li>
+    <li>
+      <strong>A developer sets temperature=1.2 for a product data extraction pipeline. What are the likely consequences, why does this setting cause them, and what is the correct configuration?</strong>
+      <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">At temperature &gt; 1.0, the distribution is flattened — lower-probability tokens become more likely. For data extraction, this is harmful: the model may select incorrect field values, output inconsistent formats, or generate plausible-sounding but wrong data. Extraction tasks require consistency and accuracy. The correct setting is temperature = 0 or very close to zero (0.0–0.1). The pipeline likely has elevated error rates (wrong extracted values, format inconsistencies) that correlate with the high temperature. Fix: set temperature = 0 and run an evaluation pass on a sample of recent outputs.</div>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Temperature 1.2 flattens the probability distribution, making lower-probability (incorrect) tokens more likely to be chosen. Extraction pipelines need temperature near 0 to ensure the model consistently picks the most likely (most accurate) answer. The pipeline will have elevated error rates on extracted field values and format inconsistencies.<br>
+        <strong>Simple explanation:</strong> Temperature 1.2 is like telling someone "instead of the obvious answer, give me a random one" — fine for brainstorming, disastrous for filling out a form accurately.<br>
+        <strong>Architecture takeaway:</strong> Temperature is not a "set and forget" value. Every LLM use case has a right temperature. Document the temperature setting, the reason for it, and review it whenever output quality degrades.
+      </div>
+    </li>
+    <li>
+      <strong>Model A costs £0.15/M tokens, achieves 91% accuracy. Model B costs £3/M tokens, achieves 94% accuracy. 500K classifications/day, avg 850 tokens/request. Walk through the cost calculation and explain what additional information you need before making a final recommendation.</strong>
+      <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">Model A: £0.15 × 0.00085 × 500K = £63.75/day = £1,912/month. Model B: £3 × 0.00085 × 500K = £1,275/day = £38,250/month. Difference: £36,338/month. The 3-point quality difference means 15,000 additional correct classifications per day. The decision depends on the cost of an error. If each misclassification costs £1: 15K × £1 = £15K/day savings — doesn't justify £1,275/day premium. If it costs £10: 150K/day savings — Model B is easily justified. The answer is: calculate the cost of errors and compare to the model premium. Also consider: can prompt engineering or a hybrid approach achieve 94% with Model A?</div>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Model A costs £1,912/month; Model B costs £38,250/month — a £36,338/month gap. The key missing information is: what is the business cost of one misclassification? If the cost per error is low, Model A wins. If errors are expensive (e.g., regulatory, customer-facing, financial), Model B may be justified.<br>
+        <strong>Simple explanation:</strong> You can only decide if the expensive model is worth it once you know what each mistake actually costs the business — the quality number alone doesn't tell you.<br>
+        <strong>Architecture takeaway:</strong> Always frame model selection trade-offs in business cost terms, not just accuracy percentages. The conversation with stakeholders should be: "3% accuracy improvement costs £36K/month — what is each misclassification worth to us?"
+      </div>
+    </li>
+    <li>
+      <strong>A colleague says you should always pin to a specific model version rather than using a floating alias. Do you agree? What are the specific risks of each approach, and how does this connect to the fundamental nature of LLMs as probabilistic systems?</strong>
+      <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">Yes — strongly agree for production systems. Using the latest alias means model behaviour can change without any action on your part. LLM outputs are probabilistic; even small model changes can shift output distributions in ways that break downstream parsing or violate format assumptions. Version pinning ensures: (1) behaviour stability; (2) controlled upgrades — model version changes go through your evaluation gate before reaching production; (3) rollback capability. The tradeoff: you must proactively track provider model deprecation schedules and plan upgrade cycles. Most providers give 6–12 months' notice. This manageable operations overhead justifies the stability benefit for production systems.</div>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Yes — strongly agree for production. Floating aliases hand control of your production behaviour to the model provider. Because LLMs are probabilistic, even a minor model update can shift output distributions and silently break downstream parsing or format assumptions. Version pinning means model changes are a deliberate deployment event with an evaluation gate, not a surprise.<br>
+        <strong>Simple explanation:</strong> Using a floating alias is like telling a supplier "just send me whatever version of the product you're shipping today" — fine for experiments, unacceptable for production where your system depends on specific behaviour.<br>
+        <strong>Architecture takeaway:</strong> Treat LLM model version changes the same as you treat a library version upgrade — with a changelog review, an evaluation pass against your test cases, and a planned cutover. Build model version pinning into your API call standards from day one.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<!-- S8: Advanced Deep Dive -->
+<div class="sh">Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> Section 8.1 covers attention mathematics which requires comfort with matrix notation. If you prefer to skip the math, jump directly to <strong>8.2 (Scaling Laws)</strong> and <strong>8.3 (Tokenisation Edge Cases)</strong> which are practical and do not require mathematical background. Safe to skip on a first pass.</div>
+
+<div class="sh2">8.1 Attention Math: A Concrete 3-Token Walkthrough</div>
+
+<div class="ibox">Given input tokens ["The", "cat", "sat"], the attention mechanism computes:</div>
+
+<div class="alayer al1">
+  <div class="ln">Step 1 — Project Q, K, V vectors</div>
+  Each token gets three learned projections:
+  <ul class="dl">
+    <li><strong>Q:</strong> "what am I looking for?"</li>
+    <li><strong>K:</strong> "what do I contain?"</li>
+    <li><strong>V:</strong> "what information do I contribute?"</li>
+  </ul>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">Step 2 — Compute attention scores</div>
+  <div class="code-label">Formula</div>
+  <div class="code">Score(token_i, token_j) = Q_i · K_j / √d_k
+
+For "sat" attending to all tokens:
+  sat→The:  Q_sat · K_The  / √d_k = some score
+  sat→cat:  Q_sat · K_cat  / √d_k = some score
+  sat→sat:  Q_sat · K_sat  / √d_k = some score</div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">Step 3 — Softmax to normalise</div>
+  <div class="code-label">Formula</div>
+  <div class="code">Attention weights = softmax([score_sat→The, score_sat→cat, score_sat→sat])
+                  = e.g., [0.1, 0.7, 0.2]</div>
+  "sat" attends most strongly to "cat" (0.7 weight) — it needs to know who sat.
+</div>
+
+<div class="alayer al4">
+  <div class="ln">Step 4 — Weighted sum of Value vectors</div>
+  <div class="code-label">Formula</div>
+  <div class="code">Output_sat = 0.1 × V_The + 0.7 × V_cat + 0.2 × V_sat</div>
+  The output vector for "sat" now contains information from "cat" — capturing the subject-verb relationship.
+</div>
+
+<div class="ibox">
+  <strong>Multi-head attention</strong> runs this process in parallel with H different Q/K/V projection matrices, each learning to attend to different aspects of the relationship (syntax, semantics, co-reference). The outputs of all heads are concatenated and projected.<br><br>
+  <strong>Why this matters architecturally:</strong> attention is O(n²) in sequence length — doubling the context window quadruples the compute. This is why Flash Attention (a memory-efficient attention implementation) is critical for long contexts, and why very long context windows are expensive.
+</div>
+
+<div class="sh2">8.2 Scaling Laws: What They Tell Architects</div>
+
+<div class="card ai">
+  <div class="ch ai">Scaling Laws (Kaplan 2020; Chinchilla 2022)</div>
+  <ul class="dl">
+    <li><strong>Model quality scales predictably</strong> with the number of parameters, training tokens, and compute budget — roughly as power laws</li>
+    <li><strong>Chinchilla scaling:</strong> for a given compute budget, the optimal model is smaller and trained on more data than previous models. Llama-3 70B outperforms earlier 175B models partly because it was trained on 15 trillion tokens (vs 1T for earlier models)</li>
+    <li><strong>Implication for architects:</strong> "bigger model = better" is not always true. A well-trained 8B model on the right data can outperform a poorly-trained 70B model on specific tasks. Benchmark scores on a <em>specific task</em> matter more than parameter count.</li>
+    <li><strong>What scaling laws don't tell you:</strong> they describe average performance across benchmarks. Your specific task may not follow the average. Always evaluate on your task.</li>
+  </ul>
+</div>
+
+<div class="sh2">8.3 Tokenisation: Practical Edge Cases</div>
+
+<div class="card t">
+  <div class="ch t">Non-Obvious Tokenisation Costs</div>
+  <ul class="dl">
+    <li><strong>Code</strong> tokenises efficiently (keywords and symbols are common tokens)</li>
+    <li><strong>Non-English languages</strong> often tokenise less efficiently — Japanese, Arabic, and Chinese may use 3–5× more tokens per word than English</li>
+    <li><strong>Numbers</strong> tokenise inconsistently — "2024" might be 1 token, "20240921" might be 4 tokens</li>
+    <li><strong>Special characters, emojis, rare symbols</strong> often require multiple tokens per character</li>
+    <li><strong>Repeated whitespace or formatting</strong> consumes tokens without semantic content</li>
+    <li><strong>Tables and structured data</strong> in plain text are often inefficient — each cell, separator, and newline consumes tokens</li>
+  </ul>
+  <div class="ibox">Rule of thumb for cost estimation: 1 token ≈ 0.75 English words ≈ 4 characters. For non-English or technical content, measure empirically with the provider's tokeniser.</div>
+</div>
+
+<!-- S9: Key Takeaways -->
+<div class="sh">Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>An LLM generates plausible continuations, not verified facts — this is architectural, not a defect.</strong> The model predicts what text should come next based on patterns learned during training. Hallucination is an inherent consequence of this design. Systems must be architected to verify, ground, and constrain model outputs rather than trusting them uncritically.</li>
+  <li><strong>Model selection is a cost-quality-latency engineering decision, not a vendor preference.</strong> The 2026 landscape has a 50× cost range from efficient Tier 3 models to frontier Tier 1 models. Match model capability to task requirements: Tier 3 for classification and extraction, Tier 2 for general generation, Tier 1 only when complex reasoning is genuinely required. Always evaluate on your specific task before committing.</li>
+  <li><strong>Context window = working memory — everything the model knows must be in the prompt.</strong> LLMs are stateless between calls. There is no persistent memory, no session state, no background knowledge of your previous interactions unless you put it in the context. This drives RAG architecture, conversation history management, and document handling strategies.</li>
+  <li><strong>Temperature is the single most impactful configuration parameter for output consistency.</strong> Temperature = 0 for extraction, classification, and structured output. Temperature 0.3–0.7 for conversational and generative tasks. Temperature &gt; 1.0 is almost never appropriate for enterprise production systems. Getting this wrong silently degrades output quality at scale.</li>
+  <li><strong>Pin model versions in production — never use a floating alias.</strong> Model providers update aliases to new versions without warning. A provider-side model update can change output distributions, break format assumptions, and introduce silent regressions. Version-pin all production API calls and treat model version changes as a deployment event requiring evaluation gates.</li>
+</ul>

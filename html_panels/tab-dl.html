@@ -1,0 +1,462 @@
+<div class="preq"><span class="preq-lbl">Prereq:</span> <a data-action="switch-tab" data-tab="ml">ML Fundamentals</a></div>
+
+<div class="ibox">Deep learning is how machines learn from examples rather than rules. Stacked layers of neurons adjust millions of numerical weights through a process called backpropagation until their predictions match training data. This is the foundation of every modern AI capability — from ChatGPT to image recognition to code generation. As an architect, you need to understand its failure modes (hallucination, drift, opacity) and why you cannot "edit" a model the way you edit a database.</div>
+
+<div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
+  <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro above — you're done with this topic at a conceptual level.<br>
+  <strong>&#128993; Keep going for the full architect-level detail.</strong> The structured content below builds a complete mental model.
+</div>
+
+<div class="sh">1. What Is It</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Think of traditional software as a rulebook: you write every rule, every condition, every exception. Deep learning is the opposite — you hand the system thousands of worked examples ("here are 100,000 orders, and here is which ones were fraud"), and it figures out the rules itself. The "deep" part just means it stacks many layers of pattern-detection on top of each other, like an assembly line where each station refines the work of the previous one. The end result is a system that can handle situations your rulebook never anticipated — but one that you cannot read, edit, or audit like a piece of code.
+</div>
+
+<div class="ibox">
+  Deep learning is a style of machine learning where the computer learns by example, not by rules. In traditional software, a developer writes explicit logic: "if the order total exceeds $500, flag it for review." In deep learning, you instead show the system thousands of examples of flagged and non-flagged orders, and it figures out the logic itself — by adjusting millions of internal numerical dials until its predictions match the examples.<br><br>
+  The "deep" in deep learning refers to <strong>layers</strong> — the system stacks many of these learning layers on top of each other. Each layer learns to recognize increasingly abstract patterns. Early layers might detect low-level signals ("this email has an unusual sender domain"). Later layers combine those signals into high-level conclusions ("this looks like a phishing attempt").<br><br>
+  This approach unlocked capabilities that rule-based systems could never achieve: recognizing faces in photos, understanding natural language, generating code, producing realistic images. Everything you currently call "AI" — ChatGPT, Gemini, Stable Diffusion — is built on deep learning.<br><br>
+  <strong>For architects:</strong> You don't need to implement a neural network. But you need to understand <em>why</em> deep learning behaves the way it does — why it hallucinates, why it needs massive data, why fine-tuning is different from retraining, and why the architecture choices of the model underneath your product matter.
+</div>
+
+<div class="sh">2. Why Should I Care</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">&#128101; For Solution Architects</div>
+    <p>Every AI capability you're being asked to integrate — whether it's a cloud API, a fine-tuned model, or an open-weight model you're hosting — is a deep learning model at its core. Understanding the basics changes how you evaluate and design:</p>
+    <ul class="dl">
+      <li><strong>Why does this model require a GPU?</strong> Neural networks are fundamentally matrix multiplications at massive scale. GPUs are built for this. A 70B parameter model requires ~140GB of GPU memory at 16-bit precision — this is not a software problem you can solve with better code.</li>
+      <li><strong>Why does the model occasionally produce confident wrong answers?</strong> The model was trained to predict the most likely next token — not to verify facts. Hallucination is a structural property of the architecture, not a bug to be patched.</li>
+      <li><strong>Why does fine-tuning on your domain data improve results?</strong> Because the pre-trained model learned general patterns; fine-tuning adjusts the weights for your specific distribution. It's not magic — it's gradient descent applied to your data.</li>
+    </ul>
+  </div>
+  <div class="card ai">
+    <div class="ch ai">&#127970; For Enterprise Architects</div>
+    <p>Deep learning models introduce <strong>non-determinism</strong> and <strong>opacity</strong> as system properties — two things that enterprise architecture has historically been designed to avoid. Knowing how deep learning works helps you design governance around its failure modes:</p>
+    <ul class="dl">
+      <li><strong>No audit log of reasoning.</strong> Explainability tools (SHAP — shows which input features most influenced a prediction; LIME — a similar local explanation tool; chain-of-thought) are approximations, not ground truth.</li>
+      <li><strong>Silent model drift.</strong> Model behavior can drift as the world changes, even without code changes. A fraud model trained before a new fraud pattern emerged will fail silently.</li>
+      <li><strong>Encoded bias.</strong> Bias is encoded in training data. If your training set reflects historical inequities, the model learns and perpetuates them.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="sh">3. Think About It Like This</div>
+
+<div class="ibox">
+  <strong>The New Hire Analogy</strong><br><br>
+  Imagine you're onboarding a new hire to review customer returns at a retail company. You have two approaches:<br><br>
+  <strong>Option A — Rules-based (traditional software):</strong> You write a 200-page policy manual. "If the item was purchased more than 30 days ago, deny the return. If the item is in original packaging AND the receipt is present, approve. If the customer is Tier 1 loyalty AND the item is under $50…" The manual covers every case you can think of. But the first time a case falls outside the manual, the employee is stuck.<br><br>
+  <strong>Option B — Deep learning:</strong> Instead of the manual, you sit the new hire down with 100,000 historical return decisions and their outcomes. "Here's what happened in each case. Figure out the pattern." After going through enough examples, the hire develops an intuition. They handle new cases the manual never covered — but occasionally they confidently get one wrong in a way the manual never would, because they over-generalized a pattern from their examples.<br><br>
+  <strong>The layers</strong> are like the new hire's internal reasoning steps: first they notice surface signals (packaging condition, receipt present), then product-level signals (category, price point), then customer-level signals (history, loyalty tier), then they combine all of these into a decision. Each "layer" of reasoning feeds the next.<br><br>
+  <strong>Backpropagation</strong> — the technical term for how the model learns — is what happens when you tell the new hire "that decision was wrong." They mentally trace back through their reasoning ("I weighted loyalty tier too heavily for high-value items…") and adjust their internal rules. They do this for all 100,000 examples, iteratively, until their decisions are reliably correct.
+</div>
+
+<div class="sh">4. Step-by-Step Walkthrough — The Core Concepts</div>
+
+<div class="alayer al1">
+  <div class="ln">4.1 Neurons and Layers</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> A single neuron is nothing more than a weighted vote counter. Imagine a committee where each member (input) gets a say, but some members carry more influence than others (weights). The neuron tallies the weighted votes and passes a single result to the next committee. A layer is a whole room full of these committees, each looking at the same evidence but weighting it differently. Stack enough rooms together, and you get a building — a deep network. The first room notices raw signals ("high order value"), the last room makes high-level judgements ("likely fraud"). The magic is that nobody designed those rooms — the weights were learned by showing the network millions of examples and correcting its mistakes.
+  </div>
+
+  <p>A single <strong>neuron</strong> does one thing: it takes a list of numbers as input, multiplies each by a weight (its learned importance), adds them up, and outputs a single number.</p>
+  <div class="code-label">Concept</div>
+  <div class="code">Input: [order_value, customer_age_days, return_count]
+Weights: [0.3, -0.1, 0.8]
+Output: (order_value × 0.3) + (customer_age_days × -0.1) + (return_count × 0.8) → single number</div>
+  <p>A <strong>layer</strong> is many neurons running in parallel — each looking at the same inputs but with different weights, producing different signals. A <strong>deep network</strong> stacks these layers: the outputs of layer 1 become the inputs of layer 2, which feed layer 3, and so on.</p>
+  <p>The insight that made deep learning work: with enough layers and the right training, these stacked transformations can learn arbitrarily complex functions. Not because anyone programmed the logic — because the weights were tuned by example.</p>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; What "layers" actually do — the progressive abstraction analogy:</strong> Think of an image of a face. Layer 1 detects raw pixels and edges. Layer 2 combines edges into shapes (circles, lines). Layer 3 combines shapes into facial features (eyes, nose). Layer 4 combines features into an identity. No one programmed this hierarchy — the network discovered it because it was the most efficient way to correctly classify millions of training photos. In a text model, early layers detect word patterns; middle layers detect grammar and meaning; later layers detect intent and context. Each layer builds on the abstraction below it, like how "business capability" sits on top of "process" which sits on top of "transaction" in an enterprise architecture.
+  </div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "A deeper network is always better." — More layers are only beneficial when the task requires hierarchical abstraction (images, language, complex patterns). For simple tabular data like a CSV of order features, a 4-layer network often beats a 50-layer one. Depth introduces training instability and diminishing returns if the problem doesn't warrant it. Match architecture to task complexity.</div>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">4.2 How Learning Happens: Gradient Descent</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine tuning a complex sound system with thousands of dials, where the only feedback you have is "that sounded better" or "that sounded worse." Gradient descent is a systematic version of this. Before each adjustment, it calculates the exact direction in which to turn every dial to make the sound better — not randomly, but mathematically. It then takes a small step in that direction, checks the result, recalculates, and repeats millions of times. The "gradient" is the mathematical equivalent of knowing exactly which way each dial should turn. "Descent" means you're trying to reach the lowest possible error — the valley floor where the audio is perfect. For a large language model, you're doing this with a trillion dials and billions of songs.
+  </div>
+
+  <p>When the model makes a prediction, you compare it to the correct answer and compute an <strong>error</strong> — how wrong was it? The goal of training is to adjust the weights to make this error smaller.</p>
+  <p><strong>Gradient descent</strong> is the algorithm that does this. Think of it as finding the bottom of a valley in a landscape of possible weight configurations:</p>
+  <ul class="dl">
+    <li><strong>Current position:</strong> Your current weights are a point somewhere on a mountainous landscape.</li>
+    <li><strong>Goal:</strong> The valley floor represents the weights where the model is most accurate.</li>
+    <li><strong>Method:</strong> Gradient descent computes which direction is "downhill" and takes a small step in that direction.</li>
+    <li><strong>Scale:</strong> Repeat millions of times across all training examples. A large language model might run gradient descent over hundreds of billions of examples, adjusting trillions of weight values.</li>
+  </ul>
+  <p><strong>Backpropagation</strong> is the algorithm that efficiently computes "which direction is downhill?" for every weight simultaneously. It works by applying the chain rule from calculus — propagating the error signal backward from the output through each layer. Training <em>is</em> iterated error correction at massive scale.</p>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Backpropagation — the exam-marking analogy:</strong> Imagine you sit an exam and get your marked paper back. You scored badly on question 3, which required knowledge from topic B, which you'd studied in week 2. You trace back: "I misunderstood the concept in week 2, which caused me to apply the wrong formula in topic B, which caused me to get question 3 wrong." You then go back and re-study week 2 more carefully. Backpropagation is exactly this: after the model makes a wrong prediction, you trace back through every layer to find which weights contributed to the error, and nudge each of them slightly in the right direction. The network does this for every training example, millions of times. The result is a model that has effectively "revised" its weights against an enormous exam paper of real-world examples.
+  </div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "Training a model is like programming it with knowledge." — Training is nothing like writing code. You never directly tell the model a fact. You show it examples and it adjusts numerical weights. The "knowledge" is smeared across billions of decimal numbers. This is why you cannot edit a trained model to remove a fact, update a price, or fix a specific wrong answer — there is no fact-shaped record to update. The only way to change a model's behaviour is to retrain it, fine-tune it, or override it at inference time via retrieval (RAG).</div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">4.3 Activation Functions: Why We Need Non-Linearity</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Without activation functions, a neural network — no matter how many layers deep — is just one big multiplication table. It can only learn straight-line relationships. Activation functions are the on/off switches that allow the network to learn curves, corners, and complex non-linear patterns. Think of it like the difference between a linear price list ("every extra item costs £5") and a real business pricing model with volume breaks, loyalty discounts, and category overrides. Real-world patterns are non-linear. Activation functions give the network the mathematical vocabulary to describe them. Without them, a 100-layer network is no more powerful than a 1-layer network.
+  </div>
+
+  <p>If every neuron just multiplied and added, the entire network — no matter how many layers deep — would collapse to a single matrix multiplication. <strong>Activation functions</strong> introduce non-linearity, allowing deep networks to learn complex patterns.</p>
+  <table class="t">
+    <tr><th>Function</th><th>Behavior</th><th>Where You'll See It</th></tr>
+    <tr><td><strong>ReLU</strong></td><td>Zero for negative inputs, linear for positive</td><td>Most neural networks, image models</td></tr>
+    <tr><td><strong>Sigmoid</strong></td><td>Squashes output to 0–1 range</td><td>Binary classifiers, gates in LSTMs</td></tr>
+    <tr><td><strong>Softmax</strong></td><td>Converts a vector to probabilities that sum to 1</td><td>Final layer of classifiers, LLM token prediction</td></tr>
+    <tr><td><strong>SwiGLU</strong></td><td>Smooth gated activation</td><td>Transformer FFN layers (Llama, Gemma, etc.)</td></tr>
+    <tr><td><strong>GeLU</strong></td><td>Smooth approximation of ReLU</td><td>BERT, GPT-style models</td></tr>
+  </table>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> SwiGLU is the standard in modern LLMs. Softmax is what converts the model's internal scores into token probabilities at generation time.
+  </div>
+</div>
+
+<div class="alayer al4">
+  <div class="ln">4.4 The Vanishing Gradient Problem</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine a game of Chinese Whispers across 50 people, where each person passes on only half of the message they received. By the time the message reaches person 50, it is essentially gone. Backpropagation suffers the same problem: the error signal gets multiplied by a fraction at each layer as it travels backward. Multiply 50 small fractions together and you get a number so close to zero that the first few layers of the network receive no meaningful signal — they stop learning entirely. Before 2015, this made it nearly impossible to train networks with more than about 10 layers. Three innovations solved it: skip connections (letting the signal jump over layers), better activation functions (that don't shrink the signal), and normalization (that keeps values in a healthy range). These are not optional extras — they are why modern 100-billion-parameter models can train at all.
+  </div>
+
+  <p>As error signals propagate backward through many layers, they get multiplied together at each step. If each layer's gradient is less than 1 (common), multiplying 50 of them together approaches zero. Early layers stop learning because their error signal has essentially disappeared.</p>
+  <p><strong>Three solutions modern deep learning uses:</strong></p>
+  <ul class="dl">
+    <li><strong>Residual connections (ResNets, 2015):</strong> Add a "skip connection" that routes the signal directly from an earlier layer to a later layer, bypassing layers in between. The gradient can flow back through the shortcut without being multiplied through all those intermediate layers.</li>
+    <li><strong>Layer Normalization:</strong> Normalize activations within each layer to keep them in a reasonable range, preventing gradients from exploding or vanishing.</li>
+    <li><strong>Better activation functions (ReLU, SwiGLU):</strong> ReLU has a constant gradient for positive inputs (gradient = 1, not &lt;1), preventing the compounding shrinkage problem of older sigmoid activations.</li>
+  </ul>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> Residual connections are why modern LLMs are "transformers with residual connections" — those skip connections are not optional, they're what makes training a 100-billion-parameter model possible at all.
+  </div>
+</div>
+
+<div class="alayer al5">
+  <div class="ln">4.5 Normalization Techniques</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Imagine a meeting where one participant speaks at 120 decibels and everyone else at 60. The loud voice drowns out all the others regardless of how important their contributions are. Batch and layer normalisation are the equivalent of asking everyone to speak at the same volume before the meeting starts — no single feature is allowed to dominate just because its numbers happen to be large. In practice, if one input feature is "customer age in days" (thousands) and another is "return count" (2–5), without normalisation the network will disproportionately "hear" the age feature and effectively ignore return count. Normalisation levels the playing field so every feature gets a fair hearing during training.
+  </div>
+
+  <p>Normalization keeps the internal numbers of a neural network from spiraling out of control during training. The three you'll encounter in AI system documentation:</p>
+  <ul class="dl">
+    <li><strong>Batch Normalization (BatchNorm):</strong> Normalizes across a batch of samples at each layer. Works well for image classification with large batches. Problem: doesn't work well with small batches or variable-length sequences like text.</li>
+    <li><strong>Layer Normalization (LayerNorm):</strong> Normalizes across all features within a single sample (not across the batch). This is what Transformers use — works with any batch size and any sequence length.</li>
+    <li><strong>RMSNorm:</strong> A simplified version of LayerNorm that only scales (doesn't shift). Slightly faster, nearly identical in quality. Used in LLaMA, Mistral, and most modern open-weight LLMs.</li>
+  </ul>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> When you see "pre-norm" vs "post-norm" in documentation, it refers to whether LayerNorm is applied before or after the attention/FFN sub-layers. Modern LLMs almost universally use pre-norm — it trains more stably.
+  </div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "Normalisation is just a data preprocessing step done once before training." — Normalisation inside the network (BatchNorm, LayerNorm, RMSNorm) happens at every layer, during every forward pass, throughout training and inference. It is a structural component of the architecture, not a one-time data cleaning step. Removing it from a modern LLM would cause training to collapse within the first few thousand steps.</div>
+</div>
+
+<div class="alayer al6">
+  <div class="ln">4.6 The Transformer: Deep Learning's Dominant Architecture</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect — why RNNs/LSTMs lost and Transformers won:</strong> Before 2017, the standard approach for text was a Recurrent Neural Network (RNN) — imagine a reader who processes one word at a time, left to right, carrying a mental note of everything they have read so far. The problem: by the time the reader reaches word 500, the mental note from word 1 has been overwritten dozens of times. The reader has essentially forgotten the opening sentence. LSTMs (Long Short-Term Memory networks) improved this with a more structured "memory notebook," but still processed words sequentially — meaning they could not be parallelised across a GPU. The Transformer replaced this entirely. Instead of reading sequentially, a Transformer looks at all words in the sentence simultaneously and asks, for each word, "which other words are most relevant to understanding this one?" It is less like a sequential reader and more like a panel of reviewers who all read the document at once and can consult each other directly. This parallel design allowed GPUs to be used at full capacity, enabling training on internet-scale data, and enabling the long-range context understanding that sequential models could never achieve.
+  </div>
+
+  <p>The Transformer (2017) replaced LSTMs/RNNs and is now the foundation of essentially every large AI model. It introduced <strong>self-attention</strong> — a mechanism that lets each token in a sequence directly attend to every other token, regardless of distance.</p>
+  <ul class="dl">
+    <li><strong>Parallelism:</strong> Unlike RNNs that process tokens one at a time, Transformers process all tokens simultaneously — making GPU training efficient.</li>
+    <li><strong>Long-range dependencies:</strong> An RNN connecting a pronoun at token 500 to its noun at token 50 passes the signal through 450 sequential steps. A Transformer connects them directly in a single attention operation.</li>
+    <li><strong>Context window as working memory:</strong> Everything in the context is "visible" to every other token. Everything outside the context doesn't exist to the model.</li>
+  </ul>
+  <p>The Transformer is what LLMs, diffusion models, vision-language models, and code models are all built on. In 2026, "large deep learning model" almost always means Transformer.</p>
+</div>
+
+<div class="alayer al1">
+  <div class="ln">4.7 Specialised Architectures: CNNs</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect:</strong> A Convolutional Neural Network (CNN) is designed for data where nearby values are related — most importantly, images. Think of a CNN as a sliding magnifying glass that passes over an image in a grid pattern. At each position, it looks at a small patch of pixels (say 3×3) and asks "is there an edge here? A corner? A curve?" Then it slides to the next patch and repeats. The first pass finds primitive shapes. The next pass finds combinations of shapes. The third pass finds object parts. Eventually the network has processed the whole image from primitive details to high-level objects. The key insight is weight sharing: the same magnifying glass (same weights) is used everywhere across the image. This makes CNNs dramatically more efficient than a network that had separate weights for every pixel position. Before Transformers, CNNs were the dominant architecture for any image or spatial task. They still appear in vision pipelines, embedded devices, and anywhere low-latency image processing matters.
+  </div>
+
+  <p><strong>Convolutional Neural Networks (CNNs)</strong> were the breakthrough architecture for image recognition (and spatial data more broadly). Rather than connecting every input to every neuron, CNNs use a <strong>convolution operation</strong>: a small filter (kernel) slides across the input, detecting local patterns. This design choice encodes two powerful assumptions:</p>
+  <ul class="dl">
+    <li><strong>Translation invariance:</strong> A cat in the top-left corner and a cat in the bottom-right corner should be recognised as the same object. CNNs learn features that work regardless of position.</li>
+    <li><strong>Local connectivity:</strong> Nearby pixels are related; distant pixels are not. No need to connect every pixel to every neuron.</li>
+  </ul>
+  <p><strong>Architect relevance:</strong> CNNs still appear in computer vision pipelines for product image classification, quality inspection, document scanning, and embedded/edge inference where Transformer-based vision models are too compute-heavy. Many production image APIs (Google Vision, AWS Rekognition) still use CNN-family architectures under the hood for specific tasks due to their inference efficiency.</p>
+</div>
+
+<div class="alayer al2">
+  <div class="ln">4.8 Transfer Learning and Fine-Tuning</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect — the MBA with prior experience analogy:</strong> Imagine you need to hire someone to run your AI-powered customer service desk. You have two options. Option A: hire a fresh graduate and train them from scratch over 18 months. Option B: hire an MBA with 10 years of general business experience — they already understand customers, communication, escalation, and professional norms — and give them a 3-week onboarding specific to your company and products. Transfer learning is Option B. A pre-trained foundation model (like GPT-4 or LLaMA) has already "read" most of the internet — it understands language, context, reasoning, and general knowledge. Fine-tuning takes this already-capable model and gives it a targeted 3-week onboarding on your specific domain, tone, data, and task. The result is dramatically better than training from scratch, at a fraction of the cost. This is why every serious enterprise AI deployment today starts with a pre-trained model and fine-tunes it, rather than training a new model from random initialisation.
+  </div>
+
+  <p><strong>Transfer learning</strong> is the practice of taking a model trained on a large general dataset and adapting it to a specific task, rather than training from scratch. In the deep learning context:</p>
+  <ul class="dl">
+    <li><strong>Pre-training:</strong> A large model is trained on vast general data (the entire internet, for an LLM; ImageNet for a vision model). This is expensive — tens of millions of dollars for frontier LLMs.</li>
+    <li><strong>Fine-tuning:</strong> The pre-trained weights are used as the starting point, and gradient descent continues on a smaller, task-specific dataset. Because the model already has general capabilities, fine-tuning requires orders of magnitude less data and compute.</li>
+    <li><strong>Parameter-efficient fine-tuning (PEFT / LoRA):</strong> Rather than updating all weights, only a small adapter matrix is trained and added to the frozen base model. This makes fine-tuning feasible on a single GPU.</li>
+  </ul>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> When a vendor says "fine-tuned on your data," verify whether it is full fine-tuning (all weights updated), LoRA/PEFT (adapters on frozen base), or just system-prompt engineering (no training at all). These have very different cost, quality, and portability implications.
+  </div>
+
+  <div class="wbox"><strong>&#9888; Common Misconception:</strong> "Fine-tuning teaches the model new facts." — Fine-tuning primarily adjusts style, format, tone, and task-specific behaviour. It is a poor mechanism for injecting factual knowledge — the model may still hallucinate facts it was "fine-tuned on" because facts are not reliably stored at the weight level. For current, correctable, or proprietary factual knowledge, use Retrieval-Augmented Generation (RAG) — the model retrieves documents at inference time rather than trying to memorise facts during training.</div>
+</div>
+
+<div class="alayer al3">
+  <div class="ln">4.9 Regularisation: Dropout and Weight Decay</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+    <strong>&#127919; Explain Like I&#39;m an Architect — the "don't rely on any one employee" analogy:</strong> Imagine a team where one person is brilliant at everything, so everyone stops developing their own skills and just relies on that one expert. When that expert goes on holiday, the team falls apart. This is what overfitting looks like in a neural network: the model learns to rely on a small number of neurons (or a small number of training examples) very heavily, and fails completely on any input that looks slightly different. Dropout is the training technique that prevents this by randomly "switching off" a percentage of neurons during each training step — forcing the rest of the network to compensate and develop independent capabilities. The result is a more robust, generalised model, equivalent to a cross-trained team that performs reliably even when individual members are unavailable.
+  </div>
+
+  <p><strong>Overfitting</strong> occurs when a model learns the training data too precisely — it memorises the noise and specific examples rather than the underlying pattern, and fails to generalise to new data. Two techniques that counteract this:</p>
+  <ul class="dl">
+    <li><strong>Dropout:</strong> During each training step, randomly set a percentage of neurons to zero (typically 10–50%). The network cannot rely on any specific neuron being present, forcing it to develop distributed, redundant representations. At inference time, all neurons are active.</li>
+    <li><strong>Weight decay (L2 regularisation):</strong> Add a penalty to the loss function that increases as weights grow large. This pushes the optimiser to prefer smaller, simpler weight values — equivalent to preferring simpler explanations over complex ones (Occam's Razor for neural networks).</li>
+  </ul>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> Overfitting is a primary failure mode in custom fine-tuned models trained on small datasets. If your fine-tuned model performs perfectly on the training set but poorly on new inputs, overfitting is the first suspect. Mitigations: more data, dropout, weight decay, early stopping (stop training before the model starts memorising).
+  </div>
+</div>
+
+<div class="sh">5. Enterprise Example</div>
+
+<div class="card a">
+  <div class="ch a">&#127970; Enterprise Example: Fraud Detection for an Order Management System</div>
+  <p>Your retail company processes 500,000 orders per day. The fraud team wants an ML-powered system to flag suspicious orders before they ship.</p>
+
+  <div class="sh2">Traditional rule-based system (pre-2018)</div>
+  <div class="code-label">Rules</div>
+  <div class="code">IF order_value > $1000 AND shipping_address != billing_address → flag
+IF first_order AND high_value AND express_shipping → flag
+IF >3 orders in 24 hours from same IP → flag</div>
+  <p><strong>Problem:</strong> Fraudsters learn the rules quickly. The moment you publish a threshold, they work around it. Rule systems also require manual maintenance as fraud patterns evolve.</p>
+
+  <div class="sh2">Deep learning approach</div>
+  <p>Train a neural network on 12 months of historical orders, labeled as fraud or legitimate. The model learns:</p>
+  <ul class="dl">
+    <li>Which combinations of 200+ signals (time of day, device fingerprint, order pattern, product category, shipping method, geographic anomalies) correlate with fraud</li>
+    <li>Non-obvious patterns a human analyst would never articulate as a rule ("orders for electronics in even-dollar amounts shipped to freight forwarders on Tuesday evenings have 8x the fraud rate")</li>
+  </ul>
+
+  <div class="sh2">Model architecture for this use case</div>
+  <div class="kv">
+    <div class="kvr"><span class="kvk">Input</span><span class="kvv">Structured tabular features (not text)</span></div>
+    <div class="kvr"><span class="kvk">Architecture</span><span class="kvv">Multi-layer feedforward network, 4–8 layers, ReLU activations, dropout for regularization</span></div>
+    <div class="kvr"><span class="kvk">Output layer</span><span class="kvv">Softmax converting final layer output to a fraud probability (0–1)</span></div>
+    <div class="kvr"><span class="kvk">Training</span><span class="kvv">Gradient descent over labeled historical orders; backpropagation adjusting weights to minimize prediction error</span></div>
+  </div>
+
+  <div class="sh2">Architecture considerations</div>
+  <ul class="dl">
+    <li><strong>Explainability:</strong> The model doesn't explain <em>why</em> it flagged an order. You need a separate explainability layer (SHAP values) for cases requiring human review — regulatory and operational requirement.</li>
+    <li><strong>Model drift:</strong> Fraud patterns change. A model trained 12 months ago may have degraded on new fraud vectors. MLOps pipeline must retrain on a rolling window.</li>
+    <li><strong>Threshold tuning:</strong> The model outputs a probability. Where you set the "flag" threshold (0.5? 0.7? 0.9?) trades off false positives (legitimate orders incorrectly held) against false negatives (fraud that gets through). This is a business decision, not a model decision.</li>
+  </ul>
+</div>
+
+<div class="sh">6. Architecture Perspective</div>
+
+<div class="sh2">Deep Learning System Properties That Affect Your Architecture</div>
+
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Property 1 — Non-determinism</div>
+    <p>The same input to the same model can produce different outputs (temperature &gt; 0, sampling randomness). Design any downstream system to handle non-deterministic AI outputs — don't treat the model like a deterministic function call.</p>
+  </div>
+  <div class="card b">
+    <div class="ch b">Property 2 — Opacity</div>
+    <p>The model's reasoning is not directly inspectable. Plan for explainability tooling, human-in-the-loop review for high-stakes decisions, and audit logging at the input/output boundary rather than inside the model.</p>
+  </div>
+</div>
+<div class="g2">
+  <div class="card b">
+    <div class="ch b">Property 3 — Data Dependency</div>
+    <p>The model's quality is bounded by its training data. A model trained on English customer service data will perform poorly on German customer queries, regardless of how large it is. Match training data distribution to inference distribution.</p>
+  </div>
+  <div class="card b">
+    <div class="ch b">Property 4 — Gradient-Based Updates Only</div>
+    <p>You cannot "edit" a neural network's knowledge like you edit a database record. If a product is discontinued, you cannot surgically remove it from the model. Options: retrain, fine-tune, or use RAG to override at inference time. This is why RAG is the dominant pattern for knowledge that needs to be current or correctable.</p>
+  </div>
+</div>
+
+<div class="wbox"><strong>&#9888; Common Misconception:</strong> "Once a model is deployed, it keeps learning from user interactions automatically." — A deployed model's weights are frozen. It does not learn from queries made against it in production. The model you deploy in January is functionally identical in December unless you explicitly retrain or fine-tune it. This is why production monitoring and retraining pipelines are an architecture concern, not a model concern — without them, your model silently degrades as the world changes.</div>
+
+<div class="sh2">Reference Architecture: Where Deep Learning Fits</div>
+
+<div class="code-label">Reference Architecture</div>
+<div class="code">Enterprise Data Sources
+       │
+       ▼
+  Training Pipeline
+  (historical labeled data → gradient descent → model weights)
+       │
+       ▼
+  Model Registry (versioned weights artifact)
+       │
+       ▼
+  Inference Service (load weights onto GPU, expose API)
+       │
+       ├── Input preprocessing (tokenization / feature engineering)
+       ├── Forward pass (the actual deep learning computation)
+       ├── Output postprocessing (decoding / threshold application)
+       └── Logging (inputs, outputs, latency, confidence)
+       │
+       ▼
+  Consuming Applications (OMS, CRM, chatbot, recommendations)
+       │
+       ▼
+  Feedback Loop
+  (production outcomes → new labeled data → retrain)</div>
+
+<div class="sh2">What You Own as an Architect</div>
+<ul class="dl">
+  <li><strong>The boundaries:</strong> Input preprocessing, output postprocessing, and the API contract</li>
+  <li><strong>The feedback loop:</strong> Whether production outcomes flow back into retraining (most teams neglect this)</li>
+  <li><strong>The model registry:</strong> Versioning, rollback capability, A/B testing between versions</li>
+  <li><strong>The hardware decision:</strong> GPU type and count, memory per inference request, batching strategy</li>
+</ul>
+
+<div class="sh">7. Check Yourself</div>
+
+<div class="card g">
+  <div class="ch g">&#10003; Check Yourself</div>
+  <ol class="sl">
+    <li>
+      <strong>A product manager asks: "Can we just add a rule to the neural network to stop it recommending discontinued products?" How do you respond, and what do you recommend instead?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Neural networks do not store knowledge as editable rules. Facts and patterns are encoded as distributed numerical weights across millions or billions of parameters — there is no "discontinued products" record to update. You cannot surgically edit one behaviour without risk of unintended effects on others. The three practical options are: (1) <strong>RAG</strong> — maintain a live product catalogue that the model retrieves from at query time; the model never "knows" discontinued products because they are filtered at retrieval; (2) <strong>Post-processing filter</strong> — intercept the model's output and strip any references to discontinued SKUs before returning results to the user; (3) <strong>Fine-tuning</strong> — retrain with updated product data, but this is expensive, slower to update, and still prone to the model generating discontinued references from its base training.<br>
+        <strong>Simple explanation:</strong> You can't edit a neural network like a database — you have to work around it at the edges.<br>
+        <strong>Architecture takeaway:</strong> Any knowledge that changes frequently (product catalogue, pricing, policy, personnel) should be stored in a retrieval layer (RAG), not baked into model weights. Design your AI system so the model handles reasoning and language, while a live data store handles facts.
+      </div>
+    </li>
+    <li>
+      <strong>A model is performing well in testing but degrading in production three months after deployment. No code has changed. What is the most likely explanation, and what architectural components should have caught this earlier?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> The most likely cause is <strong>distribution drift</strong> (also called model drift or data drift) — the real-world data the model now encounters has shifted away from the distribution it was trained on. Examples: new fraud patterns the model was never trained on; seasonal changes in customer behaviour; new product categories introduced after training; macro events (a pandemic, a competitor entering the market) that changed purchasing patterns fundamentally. The model has not changed — the world has. The architectural components that should catch this: (1) a <strong>model performance monitoring pipeline</strong> that tracks prediction accuracy, confidence distribution, and outcome rates against a rolling ground-truth sample; (2) <strong>data drift detectors</strong> that compare incoming feature distributions against the training baseline (statistical tests like KS-test or PSI); (3) <strong>alerting and automated retraining triggers</strong> when drift metrics exceed defined thresholds.<br>
+        <strong>Simple explanation:</strong> The model is fine; the world changed and the model did not notice because no one built the monitoring to catch it.<br>
+        <strong>Architecture takeaway:</strong> A deployed model with no monitoring pipeline will silently degrade. Treat model performance monitoring as a non-negotiable production requirement — equivalent to uptime monitoring for a critical service.
+      </div>
+    </li>
+    <li>
+      <strong>Why do LLMs require GPUs rather than CPUs, and what does this mean for your deployment cost model? When would you choose serverless API over self-hosted GPU?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Neural network inference is dominated by matrix multiplications at very large scale. GPUs have thousands of cores designed for parallel floating-point arithmetic — a high-end CPU has 8–64 general-purpose cores. A 7B parameter model requires approximately 14GB of GPU memory at FP16 precision just to load the weights, before any inference occurs. A 70B model requires ~140GB — meaning multiple high-end GPUs. GPU-based deployment has a fixed cost component (GPU reservation or instance rental) that is paid whether or not you are serving requests. The cost model decision is: <strong>serverless API</strong> (pay-per-token, no fixed cost — right for low/unpredictable volume, rapid prototyping, and when latency SLAs are relaxed) versus <strong>self-hosted GPU</strong> (right for high and predictable query volume where per-token API costs exceed GPU reservation cost, or where data sovereignty/latency requirements prevent external API calls).<br>
+        <strong>Simple explanation:</strong> LLMs need GPUs because they are fundamentally parallel maths at a scale that CPUs cannot handle; the cost model depends entirely on how often you actually use the model.<br>
+        <strong>Architecture takeaway:</strong> Model the expected queries-per-day and average token count before committing to a hosting strategy. For most enterprises starting out, managed APIs are cheaper than self-hosted GPU until query volume crosses a threshold — typically hundreds of thousands of queries per day for mid-size models.
+      </div>
+    </li>
+    <li>
+      <strong>What is the vanishing gradient problem, why did it prevent deep neural networks from training reliably before ~2015, and what three innovations solved it?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> Backpropagation works by propagating an error signal backward through every layer. At each layer, the signal is multiplied by the local gradient (derivative). Sigmoid activations — the dominant choice before 2015 — produce gradients consistently less than 1. Multiplying 50 values less than 1 together produces a number approaching zero. The layers closest to the input receive an error signal so small they receive no meaningful training update — they effectively stop learning. This made it impossible to reliably train networks deeper than about 10 layers. Three innovations solved it: (1) <strong>Residual (skip) connections</strong> — introduced in ResNet (2015), these route the signal directly from earlier layers to later layers, giving gradients a shortcut path that bypasses the multiplication chain; (2) <strong>ReLU activation functions</strong> — ReLU has a gradient of exactly 1 for positive inputs, eliminating the compounding shrinkage from sigmoid's sub-1 derivatives; (3) <strong>Layer Normalisation</strong> — keeps activations in a stable range at every layer, preventing both vanishing and exploding gradients.<br>
+        <strong>Simple explanation:</strong> Training signal was dying out before it reached the early layers — like a phone message degraded to silence by the time it reaches the first few people in a chain.<br>
+        <strong>Architecture takeaway:</strong> All modern LLMs depend on these three innovations. When evaluating a model or a vendor's custom architecture, verify it uses residual connections and pre-norm LayerNorm/RMSNorm — their absence is a red flag for training instability at scale.
+      </div>
+    </li>
+    <li>
+      <strong>An ML engineer proposes retraining your customer support LLM from scratch every month. A data scientist proposes fine-tuning the existing model weekly instead. What are the tradeoffs, and what questions would you ask before recommending one approach?</strong>
+      <div class="tbox" style="margin-top:6px">
+        <strong>Answer:</strong> <strong>Full retraining</strong>: produces a clean model with no accumulated fine-tuning drift; every training run starts from a stable foundation; but it is extremely expensive (compute, time, engineering) and means waiting weeks for the model to be ready. Risk of losing capabilities if the retraining dataset is smaller or less diverse than the original. <strong>Frequent fine-tuning</strong>: cheaper and faster, but compounds over time — multiple rounds can cause "catastrophic forgetting" (the model loses base capabilities as the fine-tuning data dominates) and can introduce instability, especially if fine-tuning datasets are small or unbalanced. In practice, enterprises combine both: fine-tune frequently against new data (weekly or more) but periodically retrain from a stable checkpoint (quarterly or when significant drift is detected). Questions to ask: How much is the data distribution changing week-over-week? What is the compute budget and acceptable latency for model updates? Is catastrophic forgetting a real risk given the size and diversity of the fine-tuning dataset? Is the team measuring fine-tuning quality against a held-out validation set, or just checking that loss decreased?<br>
+        <strong>Simple explanation:</strong> Retraining from scratch is safer but slow and expensive; fine-tuning is fast and cheap but can gradually degrade the model if overdone.<br>
+        <strong>Architecture takeaway:</strong> Define a model update strategy before going to production, not after. Include a validation gate (automated benchmark against a held-out test set) that blocks any model update — retraining or fine-tune — that reduces performance below a defined threshold.
+      </div>
+    </li>
+  </ol>
+</div>
+
+<div class="sh">8. Advanced Deep Dive</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin:10px 0">
+  <strong>&#128993; Optional depth —</strong> This section goes further for architects who want to understand the mechanisms in detail. Safe to skip on a first pass.
+</div>
+
+<div class="sh2">8.1 Backpropagation: The Mechanics</div>
+
+<div class="card t">
+  <div class="ch t">Backpropagation in Detail</div>
+  <p>Training involves minimizing a <strong>loss function</strong> — a measure of how wrong the model's predictions are. For a classification problem, this is typically <strong>cross-entropy loss</strong>:</p>
+  <div class="code-label">Math</div>
+  <div class="code">Loss = -Σ y_true × log(y_predicted)</div>
+  <p>Where <code>y_true</code> is a one-hot vector (1 for the correct class, 0 for others) and <code>y_predicted</code> is the softmax output.</p>
+  <p>Backpropagation computes the gradient of this loss with respect to every weight, using the <strong>chain rule</strong>. In a network with L layers, the gradient at layer k is:</p>
+  <div class="code-label">Math</div>
+  <div class="code">∂Loss/∂w_k = (∂Loss/∂a_L) × (∂a_L/∂a_{L-1}) × ... × (∂a_{k+1}/∂a_k) × (∂a_k/∂w_k)</div>
+  <p>This product of Jacobians is what either vanishes (values &lt; 1 multiply to near-zero) or explodes (values &gt; 1 multiply to infinity). Modern architectures are structured so these products stay in a reasonable range.</p>
+  <ul class="dl">
+    <li><strong>Gradient clipping:</strong> Caps the gradient magnitude at a threshold to prevent explosion during LLM training.</li>
+    <li><strong>Warm-up schedules:</strong> Starting with a very small learning rate prevents instability in early steps when random initialization creates large gradients.</li>
+  </ul>
+</div>
+
+<div class="sh2">8.2 Optimizers: Beyond Vanilla Gradient Descent</div>
+
+<div class="card t">
+  <div class="ch t">AdamW — The Modern Standard</div>
+  <p>Vanilla gradient descent takes a fixed-size step in the direction of the gradient. Modern LLM training uses <strong>AdamW</strong>:</p>
+  <ul class="dl">
+    <li><strong>Momentum:</strong> Accumulates a "velocity" in the direction of consistent gradient, reducing oscillation.</li>
+    <li><strong>Adaptive learning rates (Adam):</strong> Each weight gets its own learning rate, scaled by how large its past gradients have been.</li>
+    <li><strong>Weight decay (W in AdamW):</strong> Adds a regularization term that shrinks weights toward zero, preventing overfitting.</li>
+  </ul>
+  <div class="ibox" style="border-left-color:#2563eb">
+    <strong>For architects:</strong> AdamW is the de facto optimizer for transformer pre-training. The learning rate schedule — how you warm up, hold, and decay the rate over training — is a major factor in final model quality. Pre-trained open-weight models you use have already gone through this process; fine-tuning uses a much smaller learning rate to avoid catastrophic forgetting.
+  </div>
+</div>
+
+<div class="sh2">8.3 Modern Normalization: LayerNorm vs RMSNorm</div>
+
+<div class="g2">
+  <div class="card t">
+    <div class="ch t">LayerNorm</div>
+    <p>Normalizes each sample's activations to have mean 0 and standard deviation 1, then applies a learned scale (γ) and shift (β):</p>
+    <div class="code-label">Formula</div>
+    <div class="code">LayerNorm(x) = γ × (x - mean(x)) / std(x) + β</div>
+  </div>
+  <div class="card t">
+    <div class="ch t">RMSNorm</div>
+    <p>Removes the mean-centering step (no β shift), only normalizing by root mean square — ~10% faster in practice:</p>
+    <div class="code-label">Formula</div>
+    <div class="code">RMSNorm(x) = γ × x / RMS(x)    where RMS(x) = sqrt(mean(x²))</div>
+    <p>Used in Llama, Mistral, Falcon, and Gemma.</p>
+  </div>
+</div>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>Pre-norm vs post-norm:</strong> The original Transformer paper placed LayerNorm after attention/FFN sub-layers (post-norm). Modern models place it before (pre-norm). Pre-norm produces more stable gradients, especially in early training steps, and scales better to very deep networks.
+</div>
+
+<div class="sh2">8.4 Model Family Architectural Differences</div>
+
+<table class="t">
+  <tr><th>Architecture</th><th>Attention Type</th><th>Normalization</th><th>Activation</th><th>Used In</th></tr>
+  <tr><td>Original Transformer</td><td>Multi-head attention</td><td>Post-norm LayerNorm</td><td>ReLU</td><td>BERT, original GPT</td></tr>
+  <tr><td>GPT-style</td><td>Causal MHA</td><td>Pre-norm LayerNorm</td><td>GeLU</td><td>GPT-2/3, early ChatGPT</td></tr>
+  <tr><td>LLaMA family</td><td>GQA (grouped query)</td><td>Pre-norm RMSNorm</td><td>SwiGLU</td><td>LLaMA 2/3, Mistral, Gemma</td></tr>
+  <tr><td>DeepSeek</td><td>MLA (multi-head latent)</td><td>Pre-norm RMSNorm</td><td>SwiGLU</td><td>DeepSeek V2/V3/R1</td></tr>
+  <tr><td>Transformer++</td><td>GQA + RoPE + RMSNorm</td><td>Pre-norm RMSNorm</td><td>SwiGLU</td><td>Most 2024–2026 models</td></tr>
+</table>
+<div class="ibox" style="border-left-color:#2563eb">
+  <strong>For architects:</strong> "Transformer++" refers to the modern combination of improvements now essentially universal. For deployment decisions what matters is parameter count, context length, and benchmark performance — not which activation function was used.
+</div>
+
+<div class="sh">9. Key Takeaways</div>
+
+<ul class="dl">
+  <li><strong>Deep learning learns patterns from examples, not rules.</strong> This gives it superhuman capability at pattern recognition and generalization — but its behavior is bounded by what it saw in training data, and it can fail confidently on inputs that look different from that data.</li>
+  <li><strong>Backpropagation + gradient descent is what "training" means.</strong> Iteratively adjusting millions of weights to minimize prediction error over training examples. You cannot "tell" a model a fact — you can only train it, fine-tune it, or give it context at inference time (RAG).</li>
+  <li><strong>Residual connections, LayerNorm/RMSNorm, and better activations are what made modern deep networks trainable.</strong> Without them, the vanishing gradient problem limits how deep you can go. All serious LLMs use all three.</li>
+  <li><strong>The Transformer's self-attention replaced all previous architectures.</strong> It parallelizes across sequence positions (enabling GPU efficiency), handles long-range dependencies directly (no sequential bottleneck), and scales to hundreds of billions of parameters. In 2026, "large AI model" almost always means a Transformer variant.</li>
+  <li><strong>Transfer learning is the default enterprise strategy.</strong> Start with a pre-trained foundation model; fine-tune for your domain and task. Training from scratch is for organisations with frontier research budgets, not enterprise integration projects.</li>
+  <li><strong>Deep learning models are opaque, non-deterministic, and cannot be surgically edited.</strong> Design your architecture around these properties: logging at boundaries (not inside the model), human review for high-stakes decisions, RAG for updatable knowledge, and monitoring pipelines for drift — not post-hoc debugging.</li>
+</ul>
