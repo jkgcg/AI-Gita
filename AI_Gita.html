@@ -13373,7 +13373,7 @@ function filterRole(show){
     devexp: 'flowchart LR\\n  Dev[AI Developer] --> SDK[SDK / CLI<br/>typed - documented]:::sdk\\n  SDK --> PL[Prompt Library<br/>versioned - reviewed]:::pl\\n  SDK --> EH[Eval Harness<br/>RAGAS - golden sets]:::eh\\n  SDK --> Obs[OTel Tracing<br/>cost - latency - errors]:::obs\\n  PL --> GW[Model Gateway<br/>router - cache - guard]\\n  EH --> CI[CI / CD<br/>eval gates]\\n  Obs --> Dash[Dashboards<br/>self-serve metrics]\\n  classDef sdk fill:#dbeafe,stroke:#1d4ed8\\n  classDef pl fill:#fef3c7,stroke:#d97706\\n  classDef eh fill:#d1fae5,stroke:#059669\\n  classDef obs fill:#fee2e2,stroke:#dc2626',
     career: 'flowchart TB\\n  S[2026 AI Job Market]:::m --> IC[IC Track]:::ic\\n  S --> MG[Mgmt Track]:::mg\\n  IC --> AIE[AI Engineer<br/>RAG - agents - eval]\\n  IC --> MLE[ML Engineer<br/>training - serving - opt]\\n  IC --> RES[Research Engineer<br/>novel arch - papers]\\n  IC --> ARC[AI Solution Architect<br/>end-to-end design]\\n  MG --> EM[Engineering Manager<br/>10-30 ICs]\\n  MG --> DIR[Director / VP<br/>multi-team - strategy]\\n  AIE -. lateral .-> MLE\\n  MLE -. lateral .-> RES\\n  ARC -. lateral .-> EM\\n  classDef m fill:#ede9fe,stroke:#7c3aed,font-weight:bold\\n  classDef ic fill:#dbeafe,stroke:#1d4ed8\\n  classDef mg fill:#fef3c7,stroke:#d97706',
     emerging: 'flowchart LR\\n  R[Reasoning Models<br/>GPT-5 - Claude 4.x - o3]:::r --> A[Agentic Stack<br/>computer-use - GA]:::a\\n  MoE[Mixture of Experts<br/>Llama 4 - DeepSeek V4]:::moe --> R\\n  MCP[Protocols<br/>MCP - A2A - AG-UI]:::p --> A\\n  SO[Structured Output<br/>JSON-mode - strict schemas]:::so --> A\\n  LC[Long Context<br/>1M baseline - 10M claimed]:::lc --> R\\n  MM[Multimodal<br/>video - audio - codec frames]:::mm --> R\\n  classDef r fill:#ede9fe,stroke:#7c3aed,color:#5b21b6,font-weight:bold\\n  classDef a fill:#d1fae5,stroke:#059669\\n  classDef moe fill:#fef3c7,stroke:#d97706\\n  classDef p fill:#dbeafe,stroke:#1d4ed8\\n  classDef so fill:#fee2e2,stroke:#dc2626\\n  classDef lc fill:#cffafe,stroke:#0891b2\\n  classDef mm fill:#fce7f3,stroke:#db2777',
-    plan: 'flowchart TB\\n  W1[Week 1<br/>Foundations]:::w1 --> W2[Week 2<br/>Deep Learning + Transformers]:::w2\\n  W2 --> W3[Week 3<br/>LLM Stack<br/>GenAI - Fine-tune - RAG]:::w3\\n  W3 --> W4[Week 4<br/>Agents + Infra]:::w4\\n  W4 --> W5[Week 5<br/>System Design + Safety]:::w5\\n  W5 --> W6[Week 6<br/>Specialise + Interview Prep]:::w6\\n  W6 --> JOB[Interview Ready]:::done\\n  Onb[Onboarding<br/>map the document]:::pre -.-> W1\\n  classDef pre fill:#f3f4f6,stroke:#6b7280\\n  classDef w1 fill:#dbeafe,stroke:#1d4ed8\\n  classDef w2 fill:#cffafe,stroke:#0891b2\\n  classDef w3 fill:#ede9fe,stroke:#7c3aed\\n  classDef w4 fill:#fef3c7,stroke:#d97706\\n  classDef w5 fill:#fee2e2,stroke:#dc2626\\n  classDef w6 fill:#d1fae5,stroke:#059669\\n  classDef done fill:#7c3aed,color:#fff,stroke:#5b21b6,font-weight:bold',
+    plan: 'flowchart LR\\n  Onb[Onboarding<br/>map the document]:::pre -.-> W1[Week 1<br/>Foundations]:::w1\\n  W1 --> W2[Week 2<br/>Deep Learning + Transformers]:::w2\\n  W2 --> W3[Week 3<br/>LLM Stack<br/>GenAI - Fine-tune - RAG]:::w3\\n  W3 --> W4[Week 4<br/>Agents + Infra]:::w4\\n  W4 --> W5[Week 5<br/>System Design + Safety]:::w5\\n  W5 --> W6[Week 6<br/>Specialise + Interview Prep]:::w6\\n  W6 --> JOB[Interview Ready]:::done\\n  classDef pre fill:#f3f4f6,stroke:#6b7280\\n  classDef w1 fill:#dbeafe,stroke:#1d4ed8\\n  classDef w2 fill:#cffafe,stroke:#0891b2\\n  classDef w3 fill:#ede9fe,stroke:#7c3aed\\n  classDef w4 fill:#fef3c7,stroke:#d97706\\n  classDef w5 fill:#fee2e2,stroke:#dc2626\\n  classDef w6 fill:#d1fae5,stroke:#059669\\n  classDef done fill:#7c3aed,color:#fff,stroke:#5b21b6,font-weight:bold',
     interview: 'flowchart TB\\n  Apply[Apply / Referral] --> Phone[Recruiter Screen<br/>30 min]:::s1\\n  Phone --> Tech1[Technical Screen<br/>ML coding + concepts<br/>45-60 min]:::s2\\n  Tech1 --> Onsite[Onsite Loop<br/>4-6 rounds]:::s3\\n  Onsite --> R1[ML Coding<br/>implement algorithm]\\n  Onsite --> R2[System Design<br/>RAG - agent - feature pipeline]\\n  Onsite --> R3[Domain Depth<br/>papers - tradeoffs]\\n  Onsite --> R4[Behavioral / Leadership<br/>STAR + ownership]\\n  R1 --> Debrief[Hiring Committee]:::s4\\n  R2 --> Debrief\\n  R3 --> Debrief\\n  R4 --> Debrief\\n  Debrief --> Offer:::done\\n  classDef s1 fill:#dbeafe,stroke:#1d4ed8\\n  classDef s2 fill:#cffafe,stroke:#0891b2\\n  classDef s3 fill:#ede9fe,stroke:#7c3aed\\n  classDef s4 fill:#fef3c7,stroke:#d97706\\n  classDef done fill:#10b981,color:#fff,stroke:#059669,font-weight:bold',
     coding: 'flowchart TB\\n  Q[Coding Question] --> Cls{What type?}\\n  Cls -->|"DSA / LeetCode"| DSA[Clarify - examples<br/>brute force - optimise<br/>code - test - complexity]:::a\\n  Cls -->|"ML algorithm"| ML[State assumptions<br/>derive math - vectorise<br/>code + unit test]:::b\\n  Cls -->|"System design"| Sys[Requirements - SLOs<br/>data model - serving path<br/>scale + failure modes]:::c\\n  Cls -->|"LLM / agent"| LLM[Define eval first<br/>prompt + tool design<br/>guardrails + cost]:::d\\n  DSA --> Done[Walk through edge cases]:::done\\n  ML --> Done\\n  Sys --> Done\\n  LLM --> Done\\n  classDef a fill:#dbeafe,stroke:#1d4ed8\\n  classDef b fill:#cffafe,stroke:#0891b2\\n  classDef c fill:#ede9fe,stroke:#7c3aed\\n  classDef d fill:#fef3c7,stroke:#d97706\\n  classDef done fill:#d1fae5,stroke:#059669,font-weight:bold',
     datasci: 'flowchart TB\\n  Biz[Business Question]:::p --> Hyp[Hypothesis +<br/>Success Metric]:::p\\n  Hyp --> EDA[EDA<br/>distributions - outliers - missingness]:::a\\n  EDA --> FE[Feature Engineering<br/>encode - scale - leakage check]:::a\\n  FE --> Model[Model + CV<br/>baseline first - then complex]:::b\\n  Model --> Test[Statistical Test<br/>A/B - hypothesis - power]:::c\\n  Test --> Decide[Decision +<br/>Stakeholder Story]:::done\\n  Decide -. learnings .-> Biz\\n  classDef p fill:#fef3c7,stroke:#d97706\\n  classDef a fill:#dbeafe,stroke:#1d4ed8\\n  classDef b fill:#ede9fe,stroke:#7c3aed\\n  classDef c fill:#fee2e2,stroke:#dc2626\\n  classDef done fill:#d1fae5,stroke:#059669,font-weight:bold',
@@ -15650,9 +15650,13 @@ function filterRole(show){
   function ensureStyle(){
     if(document.getElementById('learn-v2-style')) return;
     var css = ''
-      + '.learn-shell{margin:14px 0 18px;padding:14px;border:1px solid #ddd6fe;border-radius:12px;background:linear-gradient(135deg,#fff,#f5f3ff)}'
+      + '.learn-shell{margin:12px 0 18px;padding:10px;border:1px solid #ddd6fe;border-radius:12px;background:linear-gradient(135deg,#fff,#f5f3ff)}'
       + '.learn-hd{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}'
-      + '.learn-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}'
+      + '.learn-collapse{border:1px solid #e2e8f0;border-radius:10px;background:#fff;overflow:hidden}'
+      + '.learn-collapse > summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;font-size:11px;font-weight:800;color:#4c1d95;background:#f8fafc}'
+      + '.learn-collapse > summary::-webkit-details-marker{display:none}'
+      + '.learn-collapse[open] > summary{border-bottom:1px solid #e2e8f0}'
+      + '.learn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:10px}'
       + '.learn-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px;min-width:0}'
       + '.learn-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#1e1b4b;margin-bottom:6px}'
       + '.learn-copy{font-size:11px;line-height:1.55;color:#475569}'
@@ -15679,6 +15683,7 @@ function filterRole(show){
       + '.learn-tag{display:inline-flex;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800}'
       + '.learn-tag.must{background:#fee2e2;color:#991b1b}.learn-tag.review{background:#fef3c7;color:#92400e}.learn-tag.skip{background:#e2e8f0;color:#475569}'
       + '.tb.lp-must{box-shadow:inset 0 -2px 0 #dc2626}.tb.lp-review{box-shadow:inset 0 -2px 0 #d97706}.tb.lp-skip{opacity:.55}'
+      + '@media (max-width:1100px){.learn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}'
       + '@media (max-width:720px){.learn-grid{grid-template-columns:minmax(0,1fr)}.learn-acts{grid-template-columns:minmax(0,1fr)}}';
     var s = document.createElement('style');
     s.id = 'learn-v2-style';
@@ -15695,6 +15700,8 @@ function filterRole(show){
     box.className = 'learn-shell';
     box.innerHTML = ''
       + '<div class="learn-hd"><strong>Learning Command Center</strong><span id="learn-pill" class="learn-pill warn">Not calibrated</span></div>'
+      + '<details class="learn-collapse">'
+      + '<summary><span>Open dashboard widgets</span><span class="learn-pill warn">Compact mode</span></summary>'
       + '<div class="learn-grid">'
       + '<div class="learn-card"><div class="learn-title">Active Recall Ratio (target >= 40%)</div><div id="learn-ratio-copy" class="learn-copy">No recall activity logged yet.</div><div class="learn-row"><span id="learn-ratio-pill" class="learn-pill warn">Pending</span></div></div>'
       + '<div class="learn-card"><div class="learn-title">1) Diagnostic + personalization</div><div class="learn-copy">Run baseline quiz and auto-rank tabs by knowledge gaps.</div><div class="learn-row"><button class="learn-btn primary" data-la="diag">Start diagnostic</button><button class="learn-btn" data-la="diag-reset">Reset</button></div><ul id="learn-priority" class="learn-list"></ul></div>'
@@ -15703,8 +15710,11 @@ function filterRole(show){
       + '<div class="learn-card"><div class="learn-title">4) Misconceptions + confidence</div><div class="learn-copy" id="learn-mis-copy">Clusters appear after diagnostic and retrieval actions.</div><ul id="learn-mis" class="learn-list"></ul></div>'
       + '<div class="learn-card"><div class="learn-title">5) Project-first tracks</div><div id="learn-projects" class="learn-copy"></div></div>'
       + '<div class="learn-card"><div class="learn-title">6) Weekly dashboard</div><div id="learn-week" class="learn-copy">No activity yet.</div></div>'
-      + '</div>';
-    plan.insertBefore(box, plan.firstChild);
+      + '</div>'
+      + '</details>';
+    var roleHero = document.getElementById('role-hero');
+    if(roleHero && roleHero.nextSibling) plan.insertBefore(box, roleHero.nextSibling);
+    else plan.insertBefore(box, plan.firstChild);
   }
 
   function ensureModal(){
