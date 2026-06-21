@@ -695,6 +695,9 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
   .studycard{grid-template-columns:minmax(0,1fr)}
   .sc-badges{flex-direction:row;flex-wrap:wrap;min-width:0}
   .tg{flex-shrink:0}
+  /* Role selector: compact buttons so all 9 roles wrap cleanly on small screens */
+  #role-buttons{gap:8px}
+  .rsel-btn{padding:7px 12px;font-size:11px}
   /* Allow flex/grid children to shrink below content size */
   .card,.card.ai,.card.b,.ch,.ch.ai,.ibox,.takeaways,.wp-card{min-width:0;max-width:100%}
   /* Stack key-value rows so 170px key column doesn't blow out width */
@@ -982,6 +985,7 @@ body.linear-mode .panel::before{content:attr(data-linear-title);display:block;po
 <div id="role-intro" class="ibox" style="border-left-color:#7c3aed;margin-bottom:20px">
   <strong style="color:#5b21b6" id="role-intro-label">All Roles</strong><br>
   <span id="role-intro-text">Showing the complete learning path covering all roles. Filter by your specific role to see a focused, personalised plan.</span>
+  <div id="role-intro-core" style="margin-top:6px;color:#065f46;font-size:11.5px;font-weight:700;display:none"></div>
 </div>
 <div class="ibox" style="border-left-color:#2563eb;margin-bottom:20px">
   <strong>What is this tab?</strong> This is the master plan for the whole document: role selection, dependency order, weekly pacing, and the fastest path to the right tabs for your target role.<br>
@@ -12214,6 +12218,17 @@ function selectRole(role){
   if(lbl){ lbl.textContent=data.label; lbl.style.color=activeRoleColor; }
   var desc=document.getElementById('role-intro-text');
   if(desc) desc.textContent=msgs[role]||'';
+  var coreEl=document.getElementById('role-intro-core');
+  if(coreEl){
+    var total=data.core.length+data.deep.length+data.skip.length;
+    if(role==='all'||(data.deep.length===0&&data.skip.length===0)){
+      coreEl.style.display='none';
+      coreEl.textContent='';
+    }else{
+      coreEl.textContent=data.core.length+' of '+total+' tabs are CORE \u2014 do these first if your time is limited.';
+      coreEl.style.display='';
+    }
+  }
   var intro=document.getElementById('role-intro');
   if(intro) intro.style.borderLeftColor=activeRoleColor;
   // Filter weekly study items by role; dim weeks with nothing left
