@@ -301,6 +301,10 @@
 
 <div class="sh2">8.1 Causal Inference Beyond A/B Tests</div>
 
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> A/B testing is the gold standard for causal inference, but it is not always feasible — you cannot randomly assign customers to receive a recession, randomly assign employees to a new manager, or randomly assign patients to a disease. Observational causal inference methods let you estimate causal effects from data where the treatment was not randomly assigned. Think of it like forensic accounting: you cannot re-run the transactions, but with the right methods you can reconstruct what happened and why. The three methods architects encounter most: (1) **Difference-in-differences:** compare how a treated group changed versus an untreated group over the same time period — the causal effect is the difference in their differences. Used for policy impact analysis. (2) **Regression discontinuity:** if treatment is assigned based on a threshold (e.g. users above age 18 get a different product), compare users just above and just below the threshold — they are near-identical except for treatment. (3) **Instrumental variables:** use an external variable that affects treatment assignment but has no direct effect on the outcome to estimate the causal effect indirectly. **Why this matters:** as AI systems make more decisions (credit, hiring, recommendations), regulators and internal audit will ask "did this AI cause this outcome?" A/B testing answers that question prospectively; causal inference methods answer it retrospectively from observational data.
+</div>
+
 <div class="ibox">
   Pure randomised A/B tests are not always possible. Sometimes you cannot randomise — regulatory constraints, technical limitations, or ethical concerns may prevent withholding a feature from some users. Causal inference provides quasi-experimental alternatives.
 </div>
@@ -328,6 +332,10 @@
 
 <div class="sh2">8.2 Uplift Modelling with the X-Learner</div>
 
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> Uplift modelling (also called heterogeneous treatment effect estimation) asks a subtly different question than standard ML: not "will this customer convert?" but "will this customer convert *because of* my intervention?" A customer who would convert regardless is a wasted spend; a customer who would not convert without the intervention is the true target. Think of it like a doctor who prescribes medication: you do not want to give antibiotics to patients who would recover on their own (side effects, antibiotic resistance, cost) — you want to identify patients who will only recover with treatment. The X-Learner is a meta-learner that estimates uplift by training separate models on treated and control populations, then using cross-population imputation to estimate the counterfactual outcomes. **Why this matters architecturally:** uplift modelling is the correct formulation for any intervention-based AI system — email marketing, push notifications, discount offers, churn prevention programmes. Standard classification (predict conversion) maximises the wrong objective; uplift maximises the causal impact of your intervention on the margin that actually responds.
+</div>
+
 <div class="card b">
   <div class="ch b">X-Learner: Handling Imbalanced Treatment Groups</div>
   The X-Learner is a meta-learner for uplift modelling that handles the common situation where treatment and control groups are of different sizes (or where base outcome rates differ substantially between groups).<br><br>
@@ -345,6 +353,10 @@
 </div>
 
 <div class="sh2">8.3 Evaluating Uplift Models</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> Evaluating uplift models is harder than evaluating standard classifiers because you can never observe both outcomes for the same individual (they either received the treatment or they did not — never both). Think of it like a weather forecast: you can measure accuracy over many predictions across time, but you cannot observe "what would have happened today if it had not rained?" The standard evaluation tools are: (1) **Qini curve:** ranks individuals by predicted uplift (highest to lowest), then plots cumulative actual uplift as you treat each group. A perfect model concentrates all actual uplift in the top-ranked individuals; a random model produces a diagonal line. Area under the Qini curve is the primary model quality metric. (2) **Uplift by decile:** divide the population into 10 groups by predicted uplift score, measure actual treatment effect in each group. A good model shows monotonically decreasing actual uplift from decile 1 to decile 10. (3) **AUUC (Area Under the Uplift Curve):** equivalent to AUC for classifiers — a single number summarising model discrimination. **Practical implication:** deploy uplift models with a holdout arm — a random sample that is never treated, used to continuously validate that the model's predicted uplift matches observed uplift in production.
+</div>
 
 <div class="ibox">
   Unlike classification models (which have clear accuracy metrics), uplift models are harder to evaluate because the true individual treatment effect is never observed — you can only see what happened under one condition for each user.

@@ -294,6 +294,10 @@ Response to User</div>
 
 <div class="sh2">8.1 Matrix Factorisation vs Two-Tower — Choosing Between Them</div>
 
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> Matrix factorisation and two-tower neural networks are the two dominant approaches for collaborative filtering (learning from user behaviour patterns). **Matrix factorisation** decomposes the user-item interaction matrix into lower-dimensional user vectors and item vectors whose dot product predicts interaction probability. Think of it like describing every user and every product on a shared vocabulary of hidden "taste dimensions" — users and items that score similarly on these dimensions are predicted to interact. Simple, interpretable, fast to train, but cannot incorporate real-time context (the user's current session, the time of day, the device). **Two-tower neural networks** learn separate deep representations for users and items, incorporating arbitrary features (demographics, session context, item metadata, time). Think of it like having two experts — a user expert and a product expert — each producing a rich description, then measuring how well their descriptions match. More complex, requires more data and compute, but significantly more accurate for cold-start (new users or items) and contextual recommendation. **Decision framework:** start with matrix factorisation if you have a mature item catalogue and historical interaction data; move to two-tower when you need to incorporate real-time context, handle cold-start, or achieve the last 5–10% of accuracy for a high-value use case.
+</div>
+
 <div class="g2">
   <div class="card b">
     <div class="ch b">Matrix Factorisation</div>
@@ -315,6 +319,10 @@ Response to User</div>
 
 <div class="sh2">8.2 Temporal Fusion Transformer for Multi-Series Forecasting</div>
 
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> The Temporal Fusion Transformer (TFT) is a purpose-built architecture for multi-horizon time series forecasting — predicting multiple future time steps simultaneously while incorporating known future covariates (planned promotions, holidays, scheduled events) alongside historical patterns. Think of it like an experienced demand planner: they know last year's sales (historical), they know there is a bank holiday next Monday (known future covariate), they know the current promotion schedule (known future input), and they produce a probabilistic forecast (not a single number, but a range with confidence intervals) for each of the next 12 weeks. **Why this matters architecturally:** standard forecasting models (ARIMA, Prophet) either cannot incorporate known future covariates or cannot produce probabilistic outputs. TFT does both. **When to use it:** multi-product demand forecasting with promotional calendars, staffing level planning with shift schedule inputs, energy demand forecasting with weather forecasts. When not to use it: univariate forecasting with no covariates (use Prophet or N-BEATS), real-time streaming forecasting (TFT has significant inference latency).
+</div>
+
 <div class="card b">
   <div class="ch b">Temporal Fusion Transformer (TFT)</div>
   A deep learning architecture specifically designed for multi-horizon forecasting with mixed input types. Unlike simple lag-feature models, TFT handles:<br><br>
@@ -333,6 +341,10 @@ Response to User</div>
 </div>
 
 <div class="sh2">8.3 Recommendation Metrics</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> Recommendation system metrics measure different aspects of quality, and optimising for the wrong metric produces systems that score well on benchmarks but perform poorly for users or businesses. Think of it like measuring a restaurant's quality by different dimensions: Michelin stars (quality), number of customers served (reach), customer return rate (engagement), health inspection score (safety) — each tells you something real but none tells you everything. **The four metric families for architects:** (1) **Accuracy metrics** (NDCG, MAP, Hit Rate): does the system recommend relevant items? High accuracy means the items shown are relevant; it does not mean the user clicks or purchases. (2) **Diversity metrics** (ILD, coverage): does the system avoid recommending the same items repeatedly? A system that recommends the top-5 popular items to everyone has perfect accuracy but zero diversity. (3) **Business metrics** (CTR, conversion rate, revenue per session): the metrics that actually matter for the business case. Offline accuracy metrics often do not correlate with online business metrics. (4) **Fairness metrics** (exposure equality, demographic parity): are all items and user groups served equitably? A popularity-biased system systematically under-exposes long-tail items and may amplify demographic biases in historical interaction data. **The rule:** always validate offline metric improvements with an online A/B test before claiming business value.
+</div>
 
 <div class="g2">
   <div class="card b">

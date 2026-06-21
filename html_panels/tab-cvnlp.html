@@ -307,6 +307,10 @@
 
 <div class="sh2">8.1 Contrastive Learning: The Bridge Between CV and NLP Embeddings</div>
 
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> Contrastive learning trains a model to pull representations of similar items closer together in embedding space and push dissimilar items further apart — without any explicit labels. Think of it like training a sorting machine by saying "these two things belong together" and "these two things do not belong together", rather than labelling every item individually. CLIP (Contrastive Language-Image Pre-training) uses this approach with (image, text caption) pairs scraped from the web: "this photo belongs with this description" teaches the model a shared vision-language embedding space. **Why this matters architecturally:** Contrastive-trained models (CLIP, ALIGN) are the foundation of multimodal search — searching images with text queries, searching documents with image queries, clustering unlabelled datasets by semantic similarity. In enterprise contexts: product image search by text description, invoice layout matching, satellite imagery classification with natural language queries. The architectural implication is that you can use a CLIP-style encoder to build cross-modal retrieval without labelled training data for your specific domain.
+</div>
+
 <div class="card b">
   <div class="ch b">The Core Idea</div>
   <p>Contrastive learning is the training paradigm underpinning both modern image embedding models (CLIP, SigLIP) and modern text embedding models (Sentence-BERT, E5, text-embedding-ada-002).</p>
@@ -316,6 +320,10 @@
 </div>
 
 <div class="sh2">8.2 Production CV Patterns</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> Production computer vision has three architectural patterns that repeat across enterprise use cases. **Pattern 1 — Detect then classify:** run a fast object detector (YOLO) to find regions of interest, then run a slower, more accurate classifier on each region. Think of it like a security system: a motion sensor (fast, cheap, many false positives) triggers a camera review (slow, accurate, expensive). Use this when objects of interest are sparse in the full image. **Pattern 2 — Embed then search:** encode every image into a vector and use approximate nearest-neighbour search for similarity queries. Think of it like facial recognition: you store face embeddings, and at query time you search the embedding space for the closest match. Use for product matching, duplicate detection, visual search. **Pattern 3 — Stream then buffer:** process video frame by frame but only run inference on every Nth frame or when a scene-change detector triggers. Think of it like a security guard who checks the monitor every 10 seconds rather than watching every frame. Use for video analytics to control GPU cost. **The architect's decision:** which pattern (or combination) fits your use case, and what is the latency/cost/accuracy operating point?
+</div>
 
 <div class="card t">
   <div class="ch t">Four Patterns in Enterprise CV Deployments</div>
@@ -328,6 +336,10 @@
 </div>
 
 <div class="sh2">8.3 NLP in the LLM Era: When to Use What</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect:</strong> The arrival of LLMs did not make classical NLP obsolete — it changed where each technique is most appropriate. Think of it like the arrival of power tools: hand tools are still the right choice for fine detail work where power tools are too blunt or too expensive. **Use classical NLP (spaCy, NLTK, regex) when:** you need deterministic, auditable outputs (compliance-critical extraction), you need very low latency (<5ms), you are processing high volumes at very low cost, or the task is well-defined with a closed set of patterns (date extraction, entity type classification over a known taxonomy). **Use transformer-based NLP (BERT-class) when:** you need contextual understanding (the same word means different things in different sentences), you have labelled training data for your domain, and you need accuracy above what regex/rules can achieve — without LLM-level cost and latency. **Use LLMs when:** the task requires open-ended reasoning, the input-output space is too large to enumerate, you need few-shot or zero-shot generalisation to new task types, or you are prototyping and do not yet have labelled training data. **The cost order:** classical NLP < transformer NLP < LLM. Start with the cheapest option that achieves your accuracy requirement.
+</div>
 
 <div class="g2">
   <div class="card b">

@@ -14,7 +14,7 @@
 <div class="ibox">
   The AI landscape is the map of what exists, what each thing does, which organisations build which parts, and how they fit together into a working system. As of 2026, the landscape has three distinct layers:
   <ul class="dl" style="margin-top:10px;margin-bottom:0">
-    <li><strong>Layer 1 — Foundation (the models):</strong> Large language models, multimodal models, embedding models, image generation models. These are the capability engines. Providers: Anthropic (Claude), OpenAI (GPT-4o, o3), Google (Gemini), Meta (Llama), Mistral, Cohere, and dozens of others.</li>
+    <li><strong>Layer 1 — Foundation (the models):</strong> Large language models, multimodal models, embedding<a href="#" onclick="document.querySelector('[data-action=switch-tab][data-tab=glossary]') && document.querySelector('[data-action=switch-tab][data-tab=glossary]').click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px">[→ Glossary]</a> models, image generation models. These are the capability engines. Providers: Anthropic (Claude), OpenAI (GPT-4o, o3), Google (Gemini), Meta (Llama), Mistral, Cohere, and dozens of others.</li>
     <li><strong>Layer 2 — Infrastructure (the plumbing):</strong> Cloud ML platforms (AWS Bedrock, Azure OpenAI, GCP Vertex), vector databases (Pinecone, Weaviate, pgvector), observability tools (LangFuse, Helicone), MLOps platforms (MLflow, W&amp;B), serving frameworks (vLLM, SGLang).</li>
     <li><strong>Layer 3 — Applications (the products):</strong> Enterprise copilots (Microsoft Copilot, Salesforce Einstein), developer tools (GitHub Copilot, Cursor), custom enterprise applications built by your organisation.</li>
   </ul>
@@ -26,7 +26,7 @@
 <div class="sh">Why Should I Care</div>
 
 <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
-  <strong>&#128161; What is a token?</strong> A token is the basic unit of text that LLMs process &mdash; and the unit that APIs charge for. Roughly 3&ndash;4 characters or 0.75 words in English. &ldquo;Hello world&rdquo; = 2 tokens. 1,000 tokens &asymp; 750 words &asymp; 1.5 pages. APIs charge separately for <strong>input tokens</strong> (your prompt) and <strong>output tokens</strong> (the model&rsquo;s response). When you see pricing like &ldquo;$2 per million tokens&rdquo;, that is the cost per million of these text chunks.
+  <strong>&#128161; What is a token?<a href="#" onclick="document.querySelector('[data-action=switch-tab][data-tab=glossary]') && document.querySelector('[data-action=switch-tab][data-tab=glossary]').click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px">[→ Glossary]</a></strong> A token is the basic unit of text that LLMs process &mdash; and the unit that APIs charge for. Roughly 3&ndash;4 characters or 0.75 words in English. &ldquo;Hello world&rdquo; = 2 tokens. 1,000 tokens &asymp; 750 words &asymp; 1.5 pages. APIs charge separately for <strong>input tokens</strong> (your prompt) and <strong>output tokens</strong> (the model&rsquo;s response). When you see pricing like &ldquo;$2 per million tokens&rdquo;, that is the cost per million of these text chunks.
 </div>
 
 <div class="g2">
@@ -74,50 +74,19 @@
 <div class="sh">Step-by-Step Walkthrough — Core Concepts</div>
 
 <div class="sh2">4.1 The 2026 AI Capability Map</div>
-<p style="margin-bottom:10px">Not all AI problems are LLM problems. Match problem type to the right technology:</p>
+<p style="margin-bottom:10px">Not all AI problems are LLM problems. The table below maps each model family to its inputs, outputs, and when an architect should reach for it:</p>
 
-<div class="alayer al1">
-  <div class="ln">Text</div>
-  <ul class="dl" style="margin-bottom:0">
-    <li><strong>Summarisation, Q&amp;A, classification, extraction, translation, writing:</strong> LLMs (GPT-4o, Claude, Gemini, Llama)</li>
-    <li><strong>Semantic similarity, search, clustering, deduplication:</strong> Embedding models (text-embedding-3-large, BGE, E5)</li>
-  </ul>
-</div>
-
-<div class="alayer al2">
-  <div class="ln">Structured Data</div>
-  <ul class="dl" style="margin-bottom:0">
-    <li><strong>Tabular prediction (churn, fraud, demand):</strong> Traditional ML (XGBoost, Random Forest, LightGBM) — often outperforms LLMs on tabular tasks</li>
-    <li><strong>Time series forecasting:</strong> Specialised models (TFT, N-BEATS) or LLMs (for narrative context + quantitative)</li>
-    <li><strong>Recommendation:</strong> Two-tower models, matrix factorisation, deep learning RecSys</li>
-  </ul>
-</div>
-
-<div class="alayer al3">
-  <div class="ln">Image &amp; Video</div>
-  <ul class="dl" style="margin-bottom:0">
-    <li><strong>Image generation:</strong> Diffusion models (Stable Diffusion, DALL-E, Flux)</li>
-    <li><strong>Image classification, object detection:</strong> Vision models (ViT, ResNet, YOLOv8)</li>
-    <li><strong>Document/image understanding (OCR + comprehension):</strong> Vision-language models (GPT-4V, Claude Vision, Gemini Vision)</li>
-  </ul>
-</div>
-
-<div class="alayer al4">
-  <div class="ln">Audio</div>
-  <ul class="dl" style="margin-bottom:0">
-    <li><strong>Speech-to-text:</strong> Whisper (OpenAI), Deepgram, AssemblyAI</li>
-    <li><strong>Text-to-speech:</strong> ElevenLabs, OpenAI TTS, AWS Polly</li>
-    <li><strong>Music/audio generation:</strong> Suno, AudioCraft (niche, emerging)</li>
-  </ul>
-</div>
-
-<div class="alayer al5">
-  <div class="ln">Code</div>
-  <ul class="dl" style="margin-bottom:0">
-    <li><strong>Code generation, completion, review:</strong> LLMs (Claude Sonnet, GPT-4o, DeepSeek-Coder, CodeLlama)</li>
-    <li><strong>Code execution, testing:</strong> Requires a separate execution sandbox</li>
-  </ul>
-</div>
+<table class="t">
+  <tr><th>Model family</th><th>What it takes as input</th><th>What it produces as output</th><th>Canonical example</th><th>When an architect cares</th></tr>
+  <tr><td><strong>LLM (text generation)</strong></td><td>Text prompt (instructions, context, conversation)</td><td>Text (answers, summaries, code, structured data)</td><td>GPT-4o, Claude, Gemini</td><td>Any task requiring language understanding, generation, or reasoning — the vast majority of enterprise AI use cases</td></tr>
+  <tr><td><strong>Embedding model</strong></td><td>Text (or image)</td><td>A list of numbers (vector) capturing meaning</td><td>text-embedding-3-large, BGE-M3</td><td>Powering semantic search and RAG pipelines — every RAG system needs one</td></tr>
+  <tr><td><strong>Image classifier</strong></td><td>An image</td><td>A category label + confidence score</td><td>ResNet, ViT, EfficientNet</td><td>Quality inspection, document type routing, content moderation</td></tr>
+  <tr><td><strong>Object detector</strong></td><td>An image or video frame</td><td>Bounding boxes + class labels for each detected object</td><td>YOLOv8, Detectron2</td><td>Warehouse automation, retail shelf monitoring, safety compliance</td></tr>
+  <tr><td><strong>Tabular ML (gradient boosting)</strong></td><td>Rows of structured data (numbers, categories)</td><td>A prediction (class or number) per row</td><td>XGBoost, LightGBM, CatBoost</td><td>Fraud detection, churn prediction, credit scoring — the most common enterprise ML use case</td></tr>
+  <tr><td><strong>Speech-to-text</strong></td><td>Audio waveform</td><td>Transcript text</td><td>Whisper, Azure Speech</td><td>Call centre analytics, voice interface, meeting transcription</td></tr>
+  <tr><td><strong>Diffusion / image generation</strong></td><td>Text prompt (and optionally a reference image)</td><td>A generated image</td><td>Flux, Stable Diffusion 3, DALL-E 3</td><td>Marketing content generation, product visualisation, design tooling</td></tr>
+  <tr><td><strong>Multimodal LLM</strong></td><td>Text + images (and increasingly audio/video)</td><td>Text (or structured data)</td><td>GPT-4o, Claude 3.5, Gemini 1.5</td><td>Document understanding (invoice + text), visual QA, chart analysis</td></tr>
+</table>
 
 <div class="ibox" style="border-left-color:#2563eb;margin-top:12px">
   <strong>Architect's decision rule:</strong> always ask "is this an LLM problem?" before defaulting to one. For structured/tabular problems with clear labels and clean data, classical ML frequently outperforms LLMs at lower cost. LLMs excel at unstructured text, multi-step reasoning, and problems where the solution is hard to specify algorithmically.
@@ -127,7 +96,7 @@
 <p style="margin-bottom:10px">Understanding AI roles is essential for architects building AI teams and assessing partner capabilities.</p>
 
 <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
-  <strong>&#128161; What is RAG?</strong> RAG (Retrieval-Augmented Generation) means: instead of relying on the model&rsquo;s built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from <em>your data</em>, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
+  <strong>&#128161; What is RAG?<a href="#" onclick="document.querySelector('[data-action=switch-tab][data-tab=glossary]') && document.querySelector('[data-action=switch-tab][data-tab=glossary]').click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px">[→ Glossary]</a></strong> RAG (Retrieval-Augmented Generation) means: instead of relying on the model&rsquo;s built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from <em>your data</em>, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
 </div>
 
 <table class="t">
@@ -153,11 +122,11 @@
     <p style="margin-bottom:6px">Accessed via API; weights are not publicly available.</p>
     <div class="kv">
       <div class="kvr"><span class="kvk">Quality</span><span class="kvv">Highest available; regularly updated</span></div>
-      <div class="kvr"><span class="kvk">Context window</span><span class="kvv">128K–1M tokens</span></div>
+      <div class="kvr"><span class="kvk">Context window<a href="#" onclick="document.querySelector('[data-action=switch-tab][data-tab=glossary]') && document.querySelector('[data-action=switch-tab][data-tab=glossary]').click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px">[→ Glossary]</a></span><span class="kvv">128K–1M tokens</span></div>
       <div class="kvr"><span class="kvk">Cost</span><span class="kvv">Pay-per-token; 2026 range £0.0003–0.015/K tokens</span></div>
       <div class="kvr"><span class="kvk">Data privacy</span><span class="kvv">Prompts leave your network; DPA required</span></div>
       <div class="kvr"><span class="kvk">Operational overhead</span><span class="kvv">Zero — provider manages infrastructure</span></div>
-      <div class="kvr"><span class="kvk">Customisation</span><span class="kvv">Limited to prompting, system prompts, fine-tuning via API</span></div>
+      <div class="kvr"><span class="kvk">Customisation</span><span class="kvv">Limited to prompting, system prompts, fine-tuning<a href="#" onclick="document.querySelector('[data-action=switch-tab][data-tab=glossary]') && document.querySelector('[data-action=switch-tab][data-tab=glossary]').click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px">[→ Glossary]</a> via API</span></div>
       <div class="kvr"><span class="kvk">Availability</span><span class="kvv">Provider SLA; typically 99.9%+</span></div>
       <div class="kvr"><span class="kvk">Vendor risk</span><span class="kvv">Subject to pricing changes, deprecation cycles</span></div>
     </div>
