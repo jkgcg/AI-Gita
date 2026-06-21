@@ -1,219 +1,217 @@
-# Practice & Navigation Tabs — Improvement Notes
-### Chief Learning Experience Designer Edition
+# How to Use AI Gita — Guide for Solution Architects
 
-> These tabs serve different purposes from the learning modules. Rather than forcing a 9-section learning format onto navigation, practice, and reference content, this document captures the specific improvements needed for each tab to fulfil its intended purpose more effectively.
-
----
-
-## Tab: 📚 Start Here
-
-**Purpose:** Onboarding — orient the learner, surface their role path, and get them into the right content as fast as possible.
-
-**Current strengths:** Role-based personalisation is excellent. The dependency map (study in this order) is well-structured. The weekly study plan content per topic is genuinely useful.
-
-**Improvement priorities:**
-
-**1. Elevate the architect-specific path to the top.**
-The tab currently lists 9 role paths. For the primary audience of this platform (Solution Architects, Enterprise Architects, Integration Architects), the path should appear immediately — not buried after ML Engineer, AI Engineer, Data Scientist, MLOps. Consider reordering: Architect paths first, then technical roles.
-
-**2. The Learning Command Center is front-loaded but confusing.**
-Active Recall Ratio, spaced reviews, forgetting risk — these concepts require explanation before they're useful. Consider: brief the learner on how to use the platform in 3 bullets before presenting the dashboard.
-
-**3. The "Quick Reference: Non-Negotiable Tabs by Role" is high-value — surface it above the fold.**
-This section (which tabs are must-reads for your role) answers the first question every new learner has. It should be the second thing they see, not the fifth.
-
-**4. Clarify what "transformed" tabs are vs original content.**
-As the 9-section progressive learning modules are integrated back into the HTML, the Start Here page should communicate: "The tabs marked [Learning] have been redesigned as progressive learning modules — start with those for your role path."
+> **Who this is for:** Solution Architects, Enterprise Architects, Integration Architects, and Technical Leads with no prior AI/ML background who are using AI Gita to build working AI knowledge for enterprise architecture decisions.
 
 ---
 
-## Tab: 🎯 Quick Guide
+## 1. What Is It (Plain English)
 
-**Purpose:** Decision support for experienced learners who need a specific answer fast — not a learning path, but a routing guide.
+AI Gita is a 35-tab learning platform covering the full AI and LLM landscape — from mathematical foundations to production governance. It is not a course you read front to back. It is a **reference platform with five types of tabs**, each serving a different purpose.
 
-**Current strengths:** "Where do I go when I get stuck?" section is excellent — maps specific problems to the tab that solves them. The 8 mental models are genuinely valuable orientation content. Role-based pathways are well-structured.
+**The five tab types:**
 
-**Improvement priorities:**
-
-**1. The "8 mental models that make the rest click" should be the first content block.**
-These eight mental models (LLM = Next-token slot machine, Context = working memory, RAG > long-context > fine-tune usually, etc.) are the fastest orientation available. Any learner who absorbs these 8 models understands the landscape well enough to start asking the right questions. Move to position 1.
-
-**2. "Where do I go when I get stuck?" — add two missing links:**
-- "How do I choose a cloud platform?" → Cloud Platforms tab (now transformed)
-- "How do I get my team to adopt AI?" → People & Adoption tab (now transformed)
-
-**3. The complete map diagram needs an architect-specific callout.**
-The 34-tab map is comprehensive. Add a visual callout or filter: "Architects — these 8 tabs are your critical path" (AI Landscape, System Design, Agents & Prompting, RAG & Vector, Infrastructure, Governance, Safety & Ethics, People & Adoption).
-
-**4. Week-by-week study plan — add architect variant.**
-The study plan paces through ML fundamentals before getting to LLM content. For architects with no ML background, a reordered path starting with AI Landscape → LLMs & Foundation → System Design → Agents → RAG is more immediately applicable. Consider adding a "Solution Architect" pace option alongside the existing Fast/Standard/Deep pacing.
-
----
-
-## Tab: 🌎 AI Landscape
-
-**A full 9-section transformation has been written:** `AI_Gita_Transformed_AILandscape.md`
-
-The original tab's strengths (Open-weight vs Closed enterprise framework, Build vs Prompt vs Fine-tune vs Train, AI Capability Map) are preserved and significantly expanded. The interview-focused sections (What Interviewers Test by Company Type, Interview Signal Map by Role) are retained in the Architecture Perspective section with a broader framing.
-
----
-
-## Tab: 🛥 Role Paths
-
-**Purpose:** Curated learning paths and revision tools for specific roles.
-
-**Current strengths:** Anchored Learning Paths, 1-Page Cheat Sheets by Role, Top 20 Must-Know Answers are all well-designed for their purpose. Top Formulas to Remember is appropriate for technical roles (ML Engineer, Data Scientist) but irrelevant for architects.
-
-**Improvement priorities:**
-
-**1. Add an explicit architect cheat sheet.**
-The current cheat sheets appear to focus on ML/AI engineering roles. Add: "Solution/Enterprise Architect — 1-page cheat sheet" covering the key decisions an architect must be able to make (model selection framework, build vs buy criteria, RAG vs fine-tune, governance tiers, cost estimation).
-
-**2. Revision Studio — clarify the intended workflow.**
-The revision format (active recall, spaced repetition) is a learning science best practice, but the UX for how to use it should be clearer. A one-paragraph "how to use this" at the top of the Revision Studio section would reduce friction.
-
-**3. Top 20 Must-Know Answers — ensure architect-relevant questions are represented.**
-Review the 20 questions: if they skew toward ML engineering (which is likely given the platform's original scope), add 5–7 architect-specific questions: How do you decide when to self-host vs use an API? What is the EU AI Act and what does it require? How do you design a production LLM system with SLAs? etc.
-
----
-
-## Tab: 📰 What's New
-
-**Purpose:** Freshness — surface what has changed since the rest of the platform was written.
-
-**Current strengths:** The concept (a "freshness index by tab" and "current snapshot buckets") is excellent. A platform this comprehensive needs a maintenance signal.
-
-**Improvement priorities:**
-
-**1. The "Last verified" date must be prominent.**
-This is the most important piece of information in this tab. It should be at the top, formatted clearly, and updated whenever any tab is refreshed. Hidden in a learning module it loses its value.
-
-**2. The freshness index should link directly to tabs.**
-Rather than listing tabs with a freshness status, link each entry to the tab — so a reader can go directly from "RAG & Vector (updated June 2026)" to the tab.
-
-**3. Add a "What changed in this refresh" section.**
-When tabs are updated (such as the 9-section transformations in this project), note specifically what changed — not just "refreshed" but "Added: 2026 model pricing comparison, updated quantisation table, added disaggregated prefill/decode section."
-
-**4. Emerging Trends tab should be flagged as the highest-refresh-priority tab.**
-AI capabilities change fastest. The Emerging Trends tab (now transformed) should have a explicit note: "This tab is reviewed every 3 months; if the last review was > 3 months ago, treat frontier model comparisons as provisional."
-
----
-
-## Tab: 🎯 Interview Strategy
-
-**Purpose:** Prepare for AI-focused technical and system design interviews.
-
-**Current strengths:** Interview loop structure, what interviewers actually score, STAR templates with AI context are all well-designed. Portfolio presentation section is genuinely useful.
-
-**Improvement priorities:**
-
-**1. Distinguish interview prep from architect/lead decision-making.**
-Much of the interview content is appropriate for ML Engineer / AI Engineer interviews. For Solution Architects and Technical Leads, the interview format is different: system design discussions, technology selection rationale, risk and governance conversations. Add a "Architect / Technical Lead interview" section addressing: how to handle "design an AI system for X" questions, how to present trade-off decisions, how to answer "what would you do if the model hallucinated?"
-
-**2. The STAR templates need AI-specific behavioural scenarios.**
-Current STAR templates appear generic. Add architect-specific scenarios: "Tell me about a time you had to choose between multiple AI approaches" (fine-tune vs RAG vs prompting), "Describe a time you had to convince stakeholders to invest in AI governance," "Tell me about a production AI system failure and how you handled it."
-
-**3. Common Mistakes to Avoid — add AI-specific mistakes.**
-Generic interview mistakes are already covered. Add AI-specific mistakes: jumping to "we need a neural network" when classical ML is sufficient, ignoring data residency in system design, treating hallucination as a solvable problem rather than a managed risk, using cost-per-API-call without accounting for volume.
-
----
-
-## Tab: 📈 AI Career Path
-
-**Purpose:** Help learners navigate career development in AI.
-
-**Current strengths:** IC levels with what each means in AI, Breaking Into AI from Other Backgrounds, and 2025 AI Job Market Reality are all grounded and useful.
-
-**Improvement priorities:**
-
-**1. The "IC Levels" section needs explicit architect-track content.**
-Currently IC levels appear to describe the ML Engineer / AI Engineer track (L3 → L4 → L5 → Staff). For architects, the progression looks different: SA → Senior SA → Principal SA → Distinguished/Fellow, or equivalent. Add parallel architect IC level descriptions.
-
-**2. "Breaking Into AI from Other Backgrounds" — add an explicit "integration/solution architect path."**
-Many readers of this platform are experienced enterprise architects moving into AI. This path (leverages: API design, enterprise architecture patterns, stakeholder management; needs to develop: AI model fluency, evaluation methodology, governance frameworks) deserves explicit treatment rather than being subsumed under "Software Engineer → AI Engineer."
-
-**3. "How to Evaluate an AI Team Before Joining" is excellent — make it more prominent.**
-This section (what questions to ask, what signals to look for in an AI team's maturity) is uniquely valuable and hard to find elsewhere. It's buried at section 7. Move earlier or cross-reference from Start Here.
-
-**4. Add: "What makes an AI architect portfolio different from a software architect portfolio?"**
-Building AI systems has different proof points: evaluations you've designed and run, models you've selected and justified, governance frameworks you've implemented, adoption programmes you've led. A section bridging from "software architect CV" to "AI architect CV" would be high value for the target audience.
-
----
-
-## Tab: Live Coding
-
-**Purpose:** Practice implementing core AI algorithms from scratch — for interview preparation and for building mental models by implementing.
-
-**Current strengths:** The selection of 6 implementations (Multi-Head Attention, Backpropagation, K-Means, BPE Tokenizer, VAE, Transformer Block) is excellent. These are the canonical implementations interviewers ask for. The "Interview Coding Framework 5 Steps" is practical and actionable.
-
-**Improvement priorities:**
-
-**1. Add difficulty and time estimates per implementation.**
-A learner should know: Multi-Head Attention is harder than K-Means; Transformer Block takes 45 minutes under interview conditions, BPE takes 20 minutes. This helps with preparation pacing.
-
-**2. The "Live Coding Interview What Each Implementation Tests" section is high-value — expand it.**
-For each implementation, answer: what concept does writing this prove you understand, what are the common mistakes interviewers look for, and what follow-up questions to expect. This turns implementations from "things to memorise" into "things to understand."
-
-**3. Add a "quick-test-yourself" section per implementation.**
-Before the full implementation, add 2–3 questions to check if the learner understands the algorithm conceptually before coding it: "Before implementing Multi-Head Attention, can you explain: what Q, K, V represent? Why divide by √d_k? What happens if you remove the residual connection?" Understanding first, then implementation.
-
----
-
-## Tabs: Q&A Vol 1 (1–60), Vol 2 (61–103), Vol 3 (104–160)
-
-**Purpose:** 160 interview questions with model answers, structured for active recall practice.
-
-**Current strengths:** The calibration rubrics (Weak/Solid/Senior answer quality descriptors) are excellent learning tools. The three-volume structure (Foundations → Applied → Production/Advanced) maps well to interview difficulty progression.
-
-**Improvement priorities (apply to all three volumes):**
-
-**1. Each volume needs a "Architect shortlist" — the 10–15 questions most relevant to architect roles.**
-160 questions is too many to review without prioritisation. Many questions are deep ML engineering (implement backprop, PyTorch training loop, gradient clipping) which are not relevant to architect interviews. Architect-specific questions (system design, governance, trade-off analysis, cost estimation) should be flagged so architects can prioritise.
-
-**2. The "How to Use This Volume" section should explicitly state: don't read the answers first.**
-Active recall (attempt the answer, then check) is dramatically more effective for retention than passive reading. This is not obvious to all learners. Make it explicit and bold.
-
-**3. Add cross-references to the learning module tabs.**
-For each question, link to the tab that covers the underlying concept. "Q45: How does RAG differ from fine-tuning?" → RAG & Vector tab + Fine-tuning tab. This turns the Q&A from standalone drill into a learning navigation tool.
-
-**4. Vol 3 calibration (Senior answers sound like rollout plans with ownership, controls, rollback) is the strongest of the three — this framing should be applied back to Vols 1 and 2.**
-The maturation of the calibration rubric across volumes (Weak → Solid → Senior) is the most distinctive feature of this Q&A approach. Ensure this progression is reflected consistently, not just in Vol 3.
-
----
-
-## Tab: 📚 Glossary
-
-**Purpose:** 74-term reference for the vocabulary of 2026 AI.
-
-**Current strengths:** The A–Z coverage is comprehensive. The selection of terms (HNSW, AKP, MLA, RLVR, ColBERT — not just the basics) reflects genuine 2026 depth.
-
-**Improvement priorities:**
-
-**1. Add: context for each term (what tab covers it in depth).**
-"HNSW — see RAG & Vector tab" turns the glossary from a standalone reference into a navigation tool. Every term should link to its primary treatment in the platform.
-
-**2. Add: "Why it matters" — one sentence per term from an architect's perspective.**
-"Hallucination: a model confidently stating incorrect facts — requires architectural guardrail design, not just better prompting." This turns a vocabulary list into a decision-relevant reference.
-
-**3. Flag terms that are architecture decisions vs implementation details.**
-Some terms (LoRA, KV cache, BM25) are primarily implementation concerns for engineers. Others (MCP, RLHF, EU AI Act, Governance Tiers) are architecture and governance concerns that architects must understand. A simple icon or flag (🏗 Architect concern vs ⚙ Engineering detail) would help the primary audience prioritise.
-
-**4. Ensure all terms introduced in the transformed learning modules are present.**
-The 9-section transformations introduced some terms and frameworks specific to those modules (FRAME, AKP planes, PRR checklist, T0–T3 tiers). Verify these are in the glossary.
-
----
-
-## Summary: Improvement Priority Matrix
-
-| Tab | Primary improvement | Effort |
+| Type | Tabs | What they are for |
 |---|---|---|
-| Start Here | Elevate architect path; surface Non-Negotiable Tabs earlier | Low |
-| Quick Guide | 8 mental models to top; add missing stuck-on-X links | Low |
-| AI Landscape | Full 9-section transformation — DONE | Complete |
-| Role Paths | Add architect cheat sheet; architect-relevant Q coverage | Medium |
-| What's New | Prominent last-verified date; tab-linking freshness index | Low |
-| Interview Strategy | Architect/lead interview section; AI-specific STAR templates | Medium |
-| AI Career Path | Architect IC track; integration architect path; portfolio section | Medium |
-| Live Coding | Difficulty/time estimates; conceptual check before coding | Low |
-| Q&A Vol 1/2/3 | Architect shortlist flags; cross-references to tabs | Medium |
-| Glossary | "Why it matters" line; architect vs engineering flags; tab links | Medium |
+| **Learning modules** | AI Landscape, LLMs, Deep Learning, RAG, Agents, Fine-Tuning, Safety, Governance, and 16 others | Progressive 9-section learning: each teaches one domain from intuition to architecture decision |
+| **Navigation** | Start Here, Quick Guide, Role Paths | Where to start, which tabs to read for your role, and how to sequence your learning |
+| **Practice** | Q&A Vol 1–3, Interview Strategy, Live Coding | Active recall practice for 160 AI interview questions |
+| **Reference** | Glossary, AI Snapshot | Look up a term or check current model pricing without re-reading a full module |
+| **Career** | AI Career Path | Understanding the AI career landscape for architects moving into AI roles |
+
+> **Explain Like I'm an Architect:** Think of AI Gita like a well-structured enterprise architecture framework (TOGAF, Zachman). You do not read the entire framework front to back. You read the section relevant to your current decision. When you are designing an integration, you go to the integration patterns section. When you need a governance model, you go there. AI Gita works the same way — use the Role Paths and Quick Guide to find your section, then go deep.
+
+---
+
+## 2. For Solution Architects — Start Here
+
+**The 8 tabs that give architects the most decision-making leverage:**
+
+| Priority | Tab | What it gives you |
+|:---:|---|---|
+| 1 | **AI Landscape** | Model selection framework, build vs buy criteria, the 2026 stack |
+| 2 | **LLMs & Foundation** | How LLMs work — enough to make architecture decisions and not be misled |
+| 3 | **System Design** | LLM system architecture patterns, latency/cost tradeoffs, request flow design |
+| 4 | **Agents & Prompting** | How agentic systems work, MCP protocol, function calling, production failure modes |
+| 5 | **RAG & Vector Databases** | Retrieval-augmented generation — the pattern behind most enterprise AI deployments |
+| 6 | **AI Infrastructure** | GPU costs, inference serving, quantisation — why infrastructure is different for AI |
+| 7 | **Safety & Ethics** | Hallucination, prompt injection, RLHF alignment — what can go wrong and how to govern it |
+| 8 | **AI Governance** | EU AI Act, NIST RMF, risk tiers — your compliance and governance framework |
+
+**Recommended reading order for a Solution Architect with no AI background:**
+
+```
+Week 1:  AI Landscape → LLMs & Foundation → Generative AI
+Week 2:  RAG & Vector → Agents & Prompting → Agentic Platform
+Week 3:  System Design → AI Infrastructure → MLOps / LLMOps
+Week 4:  Safety & Ethics → AI Governance → People & Adoption
+```
+
+> **Explain Like I'm an Architect:** This is your critical path. Just as you would not design a microservices architecture without first understanding the domain model and the integration patterns, you should not design an AI system without first understanding how LLMs work (LLMs tab), how to ground them in your data (RAG tab), and how to keep them governable (Governance tab). The four-week sequence above gives you that foundation in the right order.
+
+---
+
+## 3. The Navigation Tabs
+
+### Start Here
+The onboarding tab. Select your role (Solution Architect, Enterprise Architect, AI Engineer, etc.) and it generates a personalised study plan with a weekly sequence and progress tracking. **Use this tab first**, before anything else.
+
+**What it gives architects specifically:**
+- A filtered view showing only the tabs relevant to architect roles
+- A week-by-week plan calibrated for someone with no AI background
+- A "Non-Negotiable Tabs by Role" reference — the minimum viable reading list for your role
+
+### Quick Guide
+One-page orientation hub for when you are lost or need a fast answer. Contains:
+- **8 mental models** that make the rest of the platform click — read these first
+- **Use-case quick routes** — "Build an AI Chatbot", "Design an Agent Platform", "Prepare for AI Interviews" — each a 4-tab ordered sequence
+- **"Where am I lost?"** troubleshooter — maps specific problems ("I don't understand why RAG exists", "I can't explain attention") to the exact tab that solves them
+
+> **The 8 mental models summarised for architects:**
+> 1. **LLM = next-token slot machine.** It predicts the most statistically likely next word. It does not understand. It does not verify. It produces the most *plausible* text — which is often correct but not guaranteed to be.
+> 2. **Context window = whiteboard.** Everything the model can see at once. When it fills, earlier content is forgotten. 128K–1M tokens ≈ 90K–750K words. This is your working memory budget.
+> 3. **RAG > long-context > fine-tune — usually.** For enterprise knowledge integration, retrieval is cheaper, safer, and more governable than either long prompts or model retraining.
+> 4. **Agents = LLM + loop + tools.** An agent is just an LLM that can call tools and run multiple times until done. Everything else is infrastructure to make that loop safe and governable.
+> 5. **Embeddings = meaning as coordinates.** Text converted to numbers such that similar meanings land close together in space. The foundation of semantic search and RAG.
+> 6. **Tokens = billing unit.** 1 token ≈ ¾ of an English word. APIs charge per token (input and output separately). Token count drives both cost and context window consumption.
+> 7. **Fine-tuning ≠ teaching the model new facts.** It adjusts *behaviour and style*, not knowledge. For new facts and current data, use RAG. For consistent format, tone, or task structure, use fine-tuning.
+> 8. **Hallucination is structural, not a bug.** The model generates the most plausible next token — it has no mechanism to verify truth. Architect accordingly: retrieval grounding, output validation, human-in-the-loop for high-stakes outputs.
+
+### Role Paths
+Curated sequences for specific outcomes — "ship RAG in a weekend", "prepare for a frontier-model interview", "become MLOps-fluent". Each is an ordered list of tabs with progress tracking. **Use when you have a specific deliverable in mind** rather than building broad knowledge.
+
+---
+
+## 4. The Practice Tabs
+
+### Q&A Volumes 1–3 (160 Questions)
+
+160 AI interview questions organised in three volumes by difficulty:
+- **Vol 1 (Q1–Q60):** Foundations and core concepts — LLMs, ML basics, RAG, Agents
+- **Vol 2 (Q61–Q103):** Applied and systems — production architecture, trade-off decisions
+- **Vol 3 (Q104–Q160):** Advanced and production — enterprise deployment, governance, edge cases
+
+**How to use them correctly (active recall, not passive reading):**
+
+> **Do not read the answers first.** Read the question. Attempt your own answer in your head or on paper. Then reveal the answer and compare. The gap between what you said and what the answer says is exactly where your learning is. Passive reading feels productive but does not build durable recall. Active recall does.
+
+**For architects:** Each question is tagged by role (ARCHITECT, ML ENG, AI ENG, etc.). Filter to ARCHITECT first. The architect-relevant questions focus on: system design decisions, trade-off rationale, governance and compliance, cost estimation, and technology selection. Deep ML engineering questions (implement backpropagation, write a PyTorch training loop) are tagged ML ENG and can be skipped unless you want full coverage.
+
+**Answer quality calibration (used across all three volumes):**
+
+| Level | What it looks like |
+|---|---|
+| **Weak** | Names the concept correctly but cannot explain it, gives a one-liner, cannot discuss trade-offs |
+| **Solid** | Explains the mechanism clearly, can discuss when to use it and when not to |
+| **Senior/Architect** | Frames as a system design decision with trade-offs, costs, failure modes, and governance implications — not just "what it is" but "how I would architect for it" |
+
+### Interview Strategy
+
+Covers what standard prep guides skip: how FAANG and enterprise AI interviews are actually scored, how to handle system design questions for AI systems, STAR templates with AI-specific behavioural scenarios.
+
+**Architect-specific sections to prioritise:**
+- "Design an AI system for X" — how to structure your answer as a decision tree (data? RAG? agents? governance tier?)
+- Trade-off conversations — how to present model selection rationale without sounding like a vendor pitch
+- Handling "what would you do if the model hallucinated?" — the governance-first answer that senior interviewers are looking for
+
+### Live Coding
+
+Six canonical AI algorithm implementations interviewers ask for: Multi-Head Attention, Backpropagation, K-Means, BPE Tokenizer, VAE, and Transformer Block.
+
+> **Note for architects:** Live coding interviews in this depth are standard for ML Engineer and AI Engineer roles. For Solution Architect and Technical Lead interviews, the expectation is conceptual understanding of these algorithms — not implementation from memory. Use this tab to build intuition, not to memorise syntax. The "what does this prove you understand" section for each implementation is the part most relevant to architects.
+
+---
+
+## 5. The Reference Tabs
+
+### Glossary
+
+74 terms defined for Solution Architects and Enterprise Architects — each with a one-sentence plain-English definition, a "why it matters architecturally" note, and a cross-reference to the tab that covers it in depth.
+
+**How to use it:** When you encounter a term in a learning module that is not immediately clear, look it up here first before going to an external source. The glossary is calibrated for this audience — you will get the architect-relevant framing, not the ML engineer definition.
+
+**The 10 terms architects are most likely to need first:**
+
+| Term | One-liner |
+|---|---|
+| Token | Basic unit LLMs process and APIs charge for — roughly ¾ of a word |
+| Context window | The model's working memory — maximum text it can hold at once |
+| Embedding | Text converted to a list of numbers capturing its meaning |
+| RAG | Retrieving relevant documents from your own systems before asking the LLM |
+| Fine-tuning | Adapting a pre-trained model's behaviour (not its knowledge) on your data |
+| Hallucination | The model generating plausible but incorrect content with apparent confidence |
+| Inference | Running the model to get an answer (vs training, which is building the model) |
+| Agent | An LLM that can use tools and loop until a task is complete |
+| MCP | Model Context Protocol — the standard for connecting agents to enterprise tools |
+| KV cache | The model's saved computation for prior tokens — primary driver of long-context serving cost |
+
+### AI Snapshot
+
+Time-sensitive facts: current frontier model names, pricing, and benchmark comparisons. Updated as models are released. **Use this tab when you need current pricing for a cost model or a decision document** — do not use pricing figures from learning modules, which may be months old.
+
+---
+
+## 6. Architecture Perspective — How to Get Maximum Value
+
+**The single most important mindset shift for architects using this platform:**
+
+Every concept in AI Gita has two layers — the *mechanism* (how it works technically) and the *decision* (what it means for your architecture). The learning modules are structured to get you to the decision layer as quickly as possible. When reading any module, always ask:
+
+> "Given this, what would I do differently when designing a system?"
+
+If you cannot answer that question after reading a section, re-read the "Architecture Perspective" subsection (present in every module) — that is where the decision-layer content lives.
+
+**A practical heuristic for Solution Architects:**
+
+```
+Reading a learning module:
+  - Section 1 (What Is It):       Understand the concept in plain English
+  - Section 2 (For Architects):   Find your decision levers
+  - Section 4 (Core Concepts):    Build enough depth to reason about trade-offs
+  - Section 5 (Enterprise Example): Anchor it in a recognisable scenario
+  - Section 6 (Architecture Perspective): Distil into design principles
+  - Section 7 (Self-Check):       Test whether you can articulate it
+  - Section 8 (Advanced):         Optional — go here only if you need depth
+```
+
+You do not need to read Section 8 to be architecturally competent on a topic. Section 8 exists for those who need to reason about the mechanism in detail — useful when evaluating vendor claims or reviewing an ML engineer's technical proposal.
+
+---
+
+## 7. Self-Check — Can You Do These?
+
+After completing the architect critical path (8 tabs above), you should be able to answer each of these without looking them up:
+
+**LLM & Architecture:**
+- Explain what a token is and why it affects both cost and system design.
+- Describe the context window constraint and its implication for agent loop design.
+- Explain why LLMs hallucinate and what architectural pattern addresses it.
+
+**RAG & Knowledge:**
+- Explain what an embedding is using an analogy a non-technical stakeholder would understand.
+- Describe the RAG pipeline from user query to grounded LLM response in five steps.
+- State when you would choose RAG over fine-tuning, and vice versa.
+
+**Agents & Platform:**
+- Describe the ReAct loop (Reason → Act → Observe → Repeat) and what breaks it in production.
+- Explain what MCP is and why it changes the economics of enterprise tool development.
+- Name the six planes of an Agentic Knowledge Platform and what each governs.
+
+**Governance & Safety:**
+- Name three prompt injection mitigation strategies.
+- Explain what the EU AI Act's risk tier system means for a system you are designing.
+- Describe what RLHF alignment is and why reward hacking is the architect's concern.
+
+**Simple explanation:** You are ready to lead an AI architecture design session, evaluate vendor AI offerings, and hold an ML engineering team accountable for design decisions when you can answer all of the above clearly and without notes.
+
+**Architecture takeaway:** These are not exam questions. They are the questions your CTO, your risk committee, and your client's architecture review board will ask you in 2026. The goal of AI Gita is to make your answers authoritative, not approximate.
+
+---
+
+## 8. Key Takeaways
+
+- **AI Gita is a reference platform, not a linear course.** Use Role Paths to find your sequence, then go deep on the tabs that matter for your current decision.
+- **The 8 mental models in Quick Guide are the fastest orientation available.** Read them before anything else.
+- **The Intuition → Analogy → Example → Architecture → Technical sequence is intentional.** Every learning module is structured this way — you can stop at any layer once you have what you need.
+- **Q&A active recall is the fastest route to durable knowledge.** Read the question, attempt the answer, then check. The gap is where learning happens.
+- **The Glossary and AI Snapshot are your day-to-day reference tools.** Use them when you encounter unfamiliar terms or need current pricing — do not re-read full modules for a quick lookup.
+- **Section 8 Advanced content is optional for architects.** You need conceptual depth and decision-layer fluency, not implementer-level detail, for most architecture work.
