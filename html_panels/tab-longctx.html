@@ -1,5 +1,9 @@
 <div class="preq"><span class="preq-lbl">Prereq:</span> <a data-action="switch-tab" data-tab="dl">Deep Learning</a>, <a data-action="switch-tab" data-tab="transformers">Transformers</a></div>
 
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is a token?</strong> A token is the basic unit of text that LLMs process &mdash; and the unit that APIs charge for. Roughly 3&ndash;4 characters or 0.75 words in English. &ldquo;Hello world&rdquo; = 2 tokens. 1,000 tokens &asymp; 750 words &asymp; 1.5 pages. APIs charge separately for <strong>input tokens</strong> (your prompt) and <strong>output tokens</strong> (the model&rsquo;s response). When you see pricing like &ldquo;$2 per million tokens&rdquo;, that is the cost per million of these text chunks.
+</div>
+
 <div class="ibox">Every LLM has a context window — the maximum text it can read and reason about in one interaction. Long Context techniques (smarter positional encoding, efficient attention algorithms, and new State Space Model architectures) are what pushed that window from 1K tokens in 2019 to 1M+ tokens today. As an architect, you need to know when to put a whole document in context versus when to build a RAG pipeline — and what the real cost difference is. Getting it wrong can mean $50,000/day in API spend vs. $500.</div>
 
 <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
@@ -103,6 +107,18 @@
 
 <div class="alayer al5">
   <div class="ln">4.5 Multi-head Latent Attention (MLA)</div>
+
+  <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect &mdash; What is the KV Cache?</strong> When an LLM generates a response word by word, it needs to understand all the previous words it has already processed &mdash; so it does not recompute their meaning from scratch for every new word it writes. The <strong>KV cache</strong> is the saved record of those computations: a memory store that caches what the model calculated for every prior token, so generation is fast.<br><br>
+  <strong>Everyday analogy:</strong> Imagine a translator working through a long legal document, translating one sentence at a time. Without a notepad, they would re-read the entire document from the beginning before writing each new sentence. Their notepad of previously translated sentences <em>is</em> the KV cache. The model keeps this notepad in GPU memory throughout the entire response.<br><br>
+  <strong>Why architects care about the KV cache:</strong>
+  <ul class="dl">
+    <li>The KV cache <strong>grows linearly with context length</strong>. At 1M tokens it can consume tens of gigabytes of GPU memory &mdash; the primary reason long-context models are expensive to serve.</li>
+    <li><strong>Prompt caching</strong> (offered by Anthropic, OpenAI, Google) lets you cache the KV state of a fixed system prompt and reuse it across requests &mdash; reducing latency and cost by up to 90% for repeated-context workloads. A direct cost lever.</li>
+    <li><strong>KV cache eviction</strong> (what happens when memory fills) is the core engineering problem in long-context inference &mdash; models truncate, compress, or use specialist architectures (MLA) to reduce the footprint.</li>
+  </ul>
+</div>
+
   <p>DeepSeek's <strong>MLA</strong> compresses the KV cache (the memory needed to avoid recomputing past tokens during generation) into a lower-rank representation. This reduces the memory footprint of serving long-context models by 5–10x.</p>
   <div class="ibox" style="border-left-color:#2563eb">
     <strong>For architects:</strong> MLA is relevant when evaluating open-weight models for self-hosting. A model with MLA support can serve longer contexts at a given hardware budget — this directly affects your per-request cost model.

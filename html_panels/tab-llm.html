@@ -39,6 +39,11 @@
 </div>
 
 <div class="sh2">What this means for architects</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is the context window?</strong> The context window is the maximum amount of text the model can hold in working memory at once &mdash; your prompt, conversation history, retrieved documents, and the model&rsquo;s response all count toward this limit. Think of it as a whiteboard: everything the model needs to reason with must be written on this whiteboard. When it fills up, earlier content falls off and the model can no longer see it. Current models support 128K&ndash;1M tokens (roughly 90,000&ndash;750,000 words), but long agent workflows with rich tool outputs fill this faster than you expect.
+</div>
+
 <div class="ibox">
   You almost never interact with a raw foundation model. You work with instruction-tuned, safety-aligned derivatives. But understanding the foundation — what the model actually is, how it processes text, what its fundamental limits are — is what allows you to:
   <ul class="dl">
@@ -52,6 +57,10 @@
 
 <!-- S2: Why Should I Care -->
 <div class="sh">Why Should I Care</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is a token?</strong> A token is the basic unit of text that LLMs process &mdash; and the unit that APIs charge for. Roughly 3&ndash;4 characters or 0.75 words in English. &ldquo;Hello world&rdquo; = 2 tokens. 1,000 tokens &asymp; 750 words &asymp; 1.5 pages. APIs charge separately for <strong>input tokens</strong> (your prompt) and <strong>output tokens</strong> (the model&rsquo;s response). When you see pricing like &ldquo;$2 per million tokens&rdquo;, that is the cost per million of these text chunks.
+</div>
 
 <div class="g2">
   <div class="card b">
@@ -548,6 +557,12 @@ Step 4: Consider operational constraints
 <div class="ibox" style="border-left-color:#d97706;background:#fffbeb"><strong>&#128993; Optional depth —</strong> Section 8.1 covers attention mathematics which requires comfort with matrix notation. If you prefer to skip the math, jump directly to <strong>8.2 (Scaling Laws)</strong> and <strong>8.3 (Tokenisation Edge Cases)</strong> which are practical and do not require mathematical background. Safe to skip on a first pass.</div>
 
 <div class="sh2">8.1 Attention Math: A Concrete 3-Token Walkthrough</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect &mdash; Q/K/V Attention:</strong> Think of Q/K/V like a corporate directory search. Every word (token) in a sentence has three things: a <strong>search query</strong> (Q &mdash; what this word is looking for right now to understand itself in context), a <strong>business card headline</strong> (K &mdash; the short summary of what this word offers to others), and a <strong>full CV</strong> (V &mdash; the complete information this word can contribute). When the word &ldquo;bank&rdquo; wants to know whether it means &ldquo;river bank&rdquo; or &ldquo;financial bank&rdquo;, it broadcasts its search query and checks every other word&rsquo;s business card headline. Whoever scores highest gets their full CV pulled in. That weighted blend of CVs becomes the word&rsquo;s updated meaning, carrying context forward into the next layer. Run this for every word simultaneously, across 80-plus layers, and you get a model that deeply understands context.
+  <br><br>
+  <strong>Why this matters architecturally:</strong> You do not need to memorise the formula. What you need to know is that attention is the mechanism that lets the model connect &ldquo;it&rdquo; to &ldquo;the animal&rdquo; three sentences earlier, or connect &ldquo;bank&rdquo; to &ldquo;river&rdquo; from context. The size of the context window &mdash; how much text the model holds in working memory &mdash; is a primary cost and capability variable in your architecture decisions. The math below is this mechanism expressed as matrix multiplication.
+</div>
 
 <div class="ibox">Given input tokens ["The", "cat", "sat"], the attention mechanism computes:</div>
 

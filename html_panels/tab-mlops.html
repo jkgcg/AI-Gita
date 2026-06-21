@@ -22,6 +22,11 @@
 
 <div class="wbox"><strong>&#9888; Common Misconception:</strong> "MLOps is just DevOps with a GPU." Not quite. DevOps assumes that if your tests pass, your code behaves correctly — forever, until you change the code. ML systems can fail without any code change at all. The inputs change, the world changes, and a model that was accurate last month becomes inaccurate this month. MLOps adds an entirely new monitoring concern (drift detection) that has no equivalent in standard DevOps.</div>
 
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is a token?</strong> A token is the basic unit of text that LLMs process &mdash; and the unit that APIs charge for. Roughly 3&ndash;4 characters or 0.75 words in English. &ldquo;Hello world&rdquo; = 2 tokens. 1,000 tokens &asymp; 750 words &asymp; 1.5 pages. APIs charge separately for <strong>input tokens</strong> (your prompt) and <strong>output tokens</strong> (the model&rsquo;s response). When you see pricing like &ldquo;$2 per million tokens&rdquo;, that is the cost per million of these text chunks.
+</div>
+
 <div class="ibox">
   <strong>What MLOps covers in practice:</strong>
   <ul class="dl">
@@ -140,6 +145,11 @@ Retraining Trigger
 
 <div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
   <strong>&#127919; Explain Like I&#39;m an Architect:</strong> Classic MLOps was built for models where you train once, deploy, and retrain occasionally. LLMs flip this. The model (GPT-4o, Claude) is a pre-trained product you license — you almost never retrain it. What changes daily is the <em>prompt</em>: the instruction you send the model. A prompt is a few hundred words of text, but changing it can be as consequential as releasing new software. A prompt that said "always recommend our premium product first" and gets changed to "recommend based on customer need" is a major behavioural change — and if done without testing and versioning, it's a production incident waiting to happen. LLMOps recognises prompts as first-class production artifacts that need the same engineering discipline as code.
+</div>
+
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is RAG?</strong> RAG (Retrieval-Augmented Generation) means: instead of relying on the model&rsquo;s built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from <em>your data</em>, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
 </div>
 
 <div class="alayer al4">

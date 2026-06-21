@@ -94,6 +94,13 @@
   <div class="ln">Unit of Randomisation</div>
   What entity is randomly assigned — the user, the session, the order, the store? The unit must match the level at which the intervention is applied. If your AI personalises at the user level, randomise at the user level. If it affects an entire store's operations, randomise at the store level (a "cluster randomised trial").
 </div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect &mdash; Why sample size matters (no statistics required):</strong> Imagine you want to know whether a new office layout improves productivity. You try it with two people for one day and one reports feeling more productive. Is the new layout better? Almost certainly you cannot tell &mdash; two people for one day is too noisy. Try it with 500 people for a month and you get a reliable answer.<br><br>
+  <strong>Statistical power</strong> is: <em>how likely is my test to detect a real improvement if one exists?</em> Low power means: even if the AI genuinely improves the conversion rate, your test may not see it &mdash; and you may incorrectly conclude the AI made no difference, cancelling a change that would have delivered real value. <strong>80% power</strong> means: if the AI truly improves the metric, your test will reliably catch it 80 times out of 100.<br><br>
+  <strong>Practical rule for architects:</strong> before approving an A/B test design, ask: &ldquo;What is the minimum detectable effect and how long does the test need to run to reach 80% power?&rdquo; If the data scientist cannot answer this, the test is not designed &mdash; it is a guess. AI system improvements are typically smaller in magnitude than traditional product changes, so AI A/B tests require larger samples and longer run times than you are used to.
+</div>
+
 <div class="alayer al2">
   <div class="ln">Sample Size and Power</div>
   Before running the test, calculate how many users you need in each group to detect a meaningful effect. This requires estimating the baseline conversion rate, the minimum effect size you care about, and the desired statistical power (typically 80–90%). Running a test with too few users and declaring victory based on a positive result is a form of false confidence — small samples produce noisy results that can be positive by chance.

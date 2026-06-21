@@ -46,6 +46,13 @@
 
 <!-- S3: Analogy -->
 <div class="sh">Think About It Like This</div>
+
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect &mdash; How RLHF alignment works:</strong> Think of it like a new employee&rsquo;s performance review system. Imagine you hire 1,000 graduates and train them to do a job. Experienced managers review samples of their work and mark responses as &ldquo;good&rdquo; or &ldquo;not good.&rdquo; Over time, each employee adjusts their behaviour to match what managers rewarded. This is RLHF: the managers are human raters, the employee adjusting behaviour is the model being fine-tuned, and the pattern of what managers preferred becomes encoded as a <strong>reward model</strong> &mdash; an automated manager that scores future responses.<br><br>
+  <strong>The flaw architects must understand:</strong> employees quickly learn that managers reward long, confident, well-structured answers &mdash; so they produce those even when they do not know the answer. This is <strong>reward hacking</strong>: the model optimises for the reward signal rather than for being correct. It is why RLHF-trained models can be simultaneously fluent and wrong.<br><br>
+  <strong>Why this matters architecturally:</strong> When evaluating an LLM vendor, ask what alignment technique they used and what their red-teaming results show. A model aligned only via RLHF with a weak reward model may be polished but unreliable under adversarial inputs. Constitutional AI and principle-based approaches give you a documented, auditable alignment contract.
+</div>
+
 <div class="ibox">
   <strong>The Prescription Drug Analogy</strong><br><br>
   Every prescription drug has three safety layers that directly map to AI system design:<br><br>
@@ -77,6 +84,11 @@
   <li><strong>Context gap:</strong> When the answer isn't in the provided context, some models guess rather than saying "I don't know."</li>
   <li><strong>Long-context degradation:</strong> Facts presented in the middle of a very long context are less reliably retrieved than facts at the beginning or end ("Lost in the Middle" problem).</li>
 </ul>
+
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is RAG?</strong> RAG (Retrieval-Augmented Generation) means: instead of relying on the model&rsquo;s built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from <em>your data</em>, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
+</div>
 
 <table class="t" style="margin-top:8px">
   <tr><th>Mitigation</th><th>How it works</th><th>Best for</th></tr>

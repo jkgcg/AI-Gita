@@ -1,4 +1,10 @@
 <!-- prereq bar placeholder — inject via platform -->
+<div class="ibox" style="border-left-color:#0891b2;background:#ecfeff;margin-bottom:12px">
+  <strong>&#127919; Explain Like I&rsquo;m an Architect &mdash; What is a vector (embedding)?</strong> Imagine describing every document in your knowledge base by its position on a map. Not a 2D map &mdash; a 1,536-dimensional map where documents that <em>mean similar things</em> end up close to each other, and documents that mean different things end up far apart. &ldquo;How do I get a refund?&rdquo; and &ldquo;What is the returns policy?&rdquo; land near each other on this map. &ldquo;Tell me about our office football league&rdquo; lands far away. The 1,536 numbers are the coordinates &mdash; you never read them directly. The database uses them to calculate distances and find the nearest neighbours to your query. This is why semantic search finds relevant documents even when the query uses completely different words from the document &mdash; it searches by <em>meaning</em>, not by keyword.
+  <br><br>
+  <strong>Why this matters architecturally:</strong> Every RAG pipeline depends on this mechanism. The quality of your embedding model determines whether semantically similar content is correctly clustered &mdash; which directly determines whether the right documents are retrieved and whether the LLM&rsquo;s answer is grounded in your actual data.
+</div>
+
 <div class="ibox">
   <strong>RAG (Retrieval-Augmented Generation)</strong> solves the LLM knowledge cutoff problem. Instead of expecting the model to "know" your information, you retrieve the relevant pieces at query time and hand them directly to the model as context. The model reads the retrieved information and answers from it — not from its training weights.<br><br>
   <strong>Vector search</strong> is the retrieval mechanism that makes this work at scale. Rather than matching keywords, it converts text into numerical vectors (embeddings) that capture semantic meaning — so "What is your returns policy?" and "How do I send something back?" find the same documents, even though they share no words.
@@ -27,7 +33,15 @@
   RAG is the <strong>single most widely deployed AI pattern in enterprise in 2026</strong>. If you're integrating AI into a system that needs to answer questions about your organisation's information — products, policies, contracts, knowledge base, support history — RAG is almost certainly the right starting point.
 </div>
 
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is the context window?</strong> The context window is the maximum amount of text the model can hold in working memory at once &mdash; your prompt, conversation history, retrieved documents, and the model&rsquo;s response all count toward this limit. Think of it as a whiteboard: everything the model needs to reason with must be written on this whiteboard. When it fills up, earlier content falls off and the model can no longer see it. Current models support 128K&ndash;1M tokens (roughly 90,000&ndash;750,000 words), but long agent workflows with rich tool outputs fill this faster than you expect.
+</div>
+
 <div class="wbox"><strong>&#9888; Common Misconception:</strong> "RAG teaches the AI new things, like fine-tuning does." — RAG does not change the model at all. The model's weights are frozen. RAG changes what information the model <em>reads at query time</em> — like giving an exam-taker a reference sheet, not a better brain. The moment the context window closes, the model "forgets" everything retrieved. Fine-tuning bakes knowledge into weights permanently; RAG delivers knowledge temporarily at query time. They solve different problems.</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is a token?</strong> A token is the basic unit of text that LLMs process &mdash; and the unit that APIs charge for. Roughly 3&ndash;4 characters or 0.75 words in English. &ldquo;Hello world&rdquo; = 2 tokens. 1,000 tokens &asymp; 750 words &asymp; 1.5 pages. APIs charge separately for <strong>input tokens</strong> (your prompt) and <strong>output tokens</strong> (the model&rsquo;s response). When you see pricing like &ldquo;$2 per million tokens&rdquo;, that is the cost per million of these text chunks.
+</div>
 
 <div class="wbox"><strong>&#9888; Common Misconception:</strong> "If I have a big enough context window, I don't need RAG." — For small, stable document sets this is sometimes true. But for large corpora (thousands of documents), it is cost-prohibitive to stuff everything in context for every query. RAG retrieves only the 3–5 most relevant chunks — dropping token cost by 99%+ compared to sending all documents. Context window replaces RAG only when documents are few, stable, and the query genuinely needs all of them.</div>
 

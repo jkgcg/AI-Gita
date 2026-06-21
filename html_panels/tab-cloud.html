@@ -6,6 +6,16 @@
 <!-- S1: What Is It (Plain English) -->
 <div class="sh">What Is It (Plain English)</div>
 
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; Before you read this section &mdash; six plain-English concepts you need:</strong><br><br>
+  <strong>LLM (Large Language Model):</strong> Software that reads text and generates text in response. Think of it as a very sophisticated autocomplete engine trained on a vast library of human-written text. ChatGPT, Claude, and Gemini are LLMs. You interact with them via an API.<br><br>
+  <strong>GPU (Graphics Processing Unit):</strong> Originally designed for video-game graphics, GPUs are ideal for running LLM mathematics because they perform millions of calculations simultaneously. Running an LLM at scale requires a GPU cluster. Buying and managing these is expensive, specialist work.<br><br>
+  <strong>Inference:</strong> In AI, <em>inference</em> means running the model to get an answer &mdash; as opposed to <em>training</em>, which is building the model. When a user sends a message to your chatbot, your system is doing inference. Cloud platforms sell inference as a managed service so you do not need to buy GPUs.<br><br>
+  <strong>Embedding:</strong> A way of converting text into a list of numbers that captures its meaning &mdash; so that texts with similar meanings produce similar number lists. Used to power semantic search and RAG systems.<br><br>
+  <strong>Vector store / Vector database:</strong> A database designed to store embeddings and answer: &ldquo;which stored items are most similar in meaning to this query?&rdquo; Standard SQL databases cannot do this efficiently. Purpose-built vector databases (pgvector, Pinecone, Weaviate) can.<br><br>
+  <strong>Chunking:</strong> Breaking a long document into smaller pieces before embedding it, because embedding models have a maximum input length and smaller chunks produce more precise similarity matches.
+</div>
+
 <div class="ibox" style="border-left-color:#16a34a;background:#f0fdf4;margin-top:10px;margin-bottom:16px">
   <strong>&#128994; Stop here if you just need the concept.</strong> Read the intro — done at a conceptual level.<br>
   <strong>&#128993; Keep going for architect-level detail.</strong>
@@ -39,6 +49,11 @@
   <div class="card ai">
     <div class="ch ai">For Enterprise Architects</div>
     <p>Cloud AI platforms introduce new vendor categories into enterprise procurement:</p>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is a token?</strong> A token is the basic unit of text that LLMs process &mdash; and the unit that APIs charge for. Roughly 3&ndash;4 characters or 0.75 words in English. &ldquo;Hello world&rdquo; = 2 tokens. 1,000 tokens &asymp; 750 words &asymp; 1.5 pages. APIs charge separately for <strong>input tokens</strong> (your prompt) and <strong>output tokens</strong> (the model&rsquo;s response). When you see pricing like &ldquo;$2 per million tokens&rdquo;, that is the cost per million of these text chunks.
+</div>
+
     <ul class="dl">
       <li><strong>LLM API endpoints</strong> with per-token pricing (new cost structure, different from traditional compute)</li>
       <li><strong>Managed model serving</strong> with availability SLAs (different from self-managed model serving)</li>
@@ -132,6 +147,11 @@ Data never leaves your VPC?
 <div class="g2">
   <div class="card b">
     <div class="ch b">Key Architectural Features</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is RAG?</strong> RAG (Retrieval-Augmented Generation) means: instead of relying on the model&rsquo;s built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from <em>your data</em>, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
+</div>
+
     <ul class="dl" style="margin-bottom:0">
       <li><strong>Inference profiles:</strong> pre-configured model deployments with guaranteed throughput — important when you need predictable latency and don't want shared capacity fluctuations</li>
       <li><strong>Knowledge Bases for Bedrock:</strong> managed RAG infrastructure — upload documents to S3, Bedrock handles chunking, embedding, indexing, and a retrieval API layer. Reduces RAG build time; limits flexibility vs custom implementation.</li>
@@ -182,6 +202,11 @@ Data never leaves your VPC?
 <div class="g2">
   <div class="card b">
     <div class="ch b">Key Architectural Features</div>
+
+<div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
+  <strong>&#128161; What is the context window?</strong> The context window is the maximum amount of text the model can hold in working memory at once &mdash; your prompt, conversation history, retrieved documents, and the model&rsquo;s response all count toward this limit. Think of it as a whiteboard: everything the model needs to reason with must be written on this whiteboard. When it fills up, earlier content falls off and the model can no longer see it. Current models support 128K&ndash;1M tokens (roughly 90,000&ndash;750,000 words), but long agent workflows with rich tool outputs fill this faster than you expect.
+</div>
+
     <ul class="dl" style="margin-bottom:0">
       <li><strong>Gemini access:</strong> Gemini 1.5 Pro (1M context window), Gemini 1.5 Flash (fast, cheap), Gemini 2.0 Pro. Gemini 1.5 Pro's 1M token context window enables full-codebase or full-document-library analysis without chunking.</li>
       <li><strong>Model Garden:</strong> curated collection of open-weight and third-party models (Llama, Mistral, Falcon, Gemma) available as managed endpoints.</li>
