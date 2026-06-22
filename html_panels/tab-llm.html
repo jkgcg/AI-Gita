@@ -41,7 +41,7 @@
 <div class="sh2">What this means for architects</div>
 
 <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
-  <strong>&#128161; What is the context window?</strong> The context window is the maximum amount of text the model can hold in working memory at once &mdash; your prompt, conversation history, retrieved documents, and the model&rsquo;s response all count toward this limit. Think of it as a whiteboard: everything the model needs to reason with must be written on this whiteboard. When it fills up, earlier content falls off and the model can no longer see it. Current models support 128K&ndash;1M tokens (roughly 90,000&ndash;750,000 words), but long agent workflows with rich tool outputs fill this faster than you expect.
+  <strong>&#128161; What is the context window?</strong> The context window<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> is the maximum amount of text the model can hold in working memory at once &mdash; your prompt, conversation history, retrieved documents, and the model&rsquo;s response all count toward this limit. Think of it as a whiteboard: everything the model needs to reason with must be written on this whiteboard. When it fills up, earlier content falls off and the model can no longer see it. Current models support 128K&ndash;1M tokens<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> (roughly 90,000&ndash;750,000 words), but long agent workflows with rich tool outputs fill this faster than you expect.
 </div>
 
 <div class="ibox">
@@ -125,7 +125,7 @@
 </div>
 
 <div class="ibox">
-  <strong>The instruction-tuned model = a specialised interface.</strong> The foundation model (the raw compression library) is hard to use directly. Instruction tuning applies a layer of fine-tuning that teaches the model to respond to natural language instructions — "answer my question, don't just predict text." The safety alignment layer adds further training to prevent harmful outputs. What you use in production is this layered product, not the raw foundation.
+  <strong>The instruction-tuned model = a specialised interface.</strong> The foundation model (the raw compression library) is hard to use directly. Instruction tuning applies a layer of fine-tuning<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> that teaches the model to respond to natural language instructions — "answer my question, don't just predict text." The safety alignment layer adds further training to prevent harmful outputs. What you use in production is this layered product, not the raw foundation.
 </div>
 
 <!-- S4: Step-by-Step -->
@@ -323,7 +323,7 @@
   <div class="card t">
     <div class="ch t">Tier 4 — Specialised Models</div>
     <ul class="dl">
-      <li><strong>Embedding models</strong> (text-embedding-3-large, BGE, E5) — vector search, semantic similarity</li>
+      <li><strong>Embedding<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> models</strong> (text-embedding-3-large, BGE, E5) — vector search, semantic similarity</li>
       <li><strong>Vision-language models</strong> (GPT-4V, Claude with vision, Gemini Vision) — image/document understanding</li>
       <li><strong>Code-specialised</strong> (CodeLlama, DeepSeek-Coder) — code generation and review</li>
       <li><strong>Reasoning-specialised</strong> (o1, o3, DeepSeek-R1) — extended thinking for mathematical/logical tasks</li>
@@ -392,7 +392,7 @@ Step 4: Consider operational constraints
   </div>
   <div class="card a">
     <div class="ch a">4. Hallucination Is Inherent, Not a Bug</div>
-    LLMs generate plausible continuations — they don't verify facts. Hallucination is a property of the architecture, not a failure of a specific model. It can be mitigated (RAG, structured prompting, verification steps) but not eliminated. Systems must be designed assuming some fraction of outputs will contain errors.
+    LLMs generate plausible continuations — they don't verify facts. Hallucination<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> is a property of the architecture, not a failure of a specific model. It can be mitigated (RAG, structured prompting, verification steps) but not eliminated. Systems must be designed assuming some fraction of outputs will contain errors.
   </div>
 </div>
 
@@ -505,7 +505,7 @@ Step 4: Consider operational constraints
   <ol class="sl">
     <li>
       <strong>A stakeholder asks why the customer service chatbot "doesn't know about the supplier announcement that happened last week." What is the root cause, what does it reveal about how LLMs fundamentally work, and what architectural mechanism resolves it?</strong>
-      <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">Root cause is the model's knowledge cutoff. LLMs are trained on data with a specific end date; events after that date are unknown. This reveals a fundamental characteristic of LLMs: they are a frozen snapshot of knowledge at training time, not a live connected system. The model isn't "forgetting" — it never knew about events after its cutoff in the first place. The architectural mechanism is RAG: connect the model to a knowledge base kept current, and retrieve relevant information to include in the context on each query. Alternatively, use function calling / tool use to query a live database or API at inference time. The model doesn't need retraining; the system needs a live knowledge source the model can access.</div>
+      <div class="ibox" style="border-left-color:#2563eb;margin-top:8px">Root cause is the model's knowledge cutoff. LLMs are trained on data with a specific end date; events after that date are unknown. This reveals a fundamental characteristic of LLMs: they are a frozen snapshot of knowledge at training time, not a live connected system. The model isn't "forgetting" — it never knew about events after its cutoff in the first place. The architectural mechanism is RAG: connect the model to a knowledge base kept current, and retrieve relevant information to include in the context on each query. Alternatively, use function calling / tool use to query a live database or API at inference<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> time. The model doesn't need retraining; the system needs a live knowledge source the model can access.</div>
       <div class="tbox" style="margin-top:6px">
         <strong>Simple explanation:</strong> The model's knowledge is frozen at training time — like a very knowledgeable colleague who's been on sabbatical since last year and hasn't read the news.<br>
         <strong>Answer:</strong> Knowledge cutoff — the model was trained on data up to a fixed date and has no awareness of events after that point. RAG or tool use (live API calls) connects the model to current information without retraining.<br>

@@ -10,7 +10,7 @@
 </div>
 
 <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
-  <strong>&#128161; What is the context window?</strong> The context window is the maximum amount of text the model can hold in working memory at once &mdash; your prompt, conversation history, retrieved documents, and the model&rsquo;s response all count toward this limit. Think of it as a whiteboard: everything the model needs to reason with must be written on this whiteboard. When it fills up, earlier content falls off and the model can no longer see it. Current models support 128K&ndash;1M tokens (roughly 90,000&ndash;750,000 words), but long agent workflows with rich tool outputs fill this faster than you expect.
+  <strong>&#128161; What is the context window?</strong> The context window<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> is the maximum amount of text the model can hold in working memory at once &mdash; your prompt, conversation history, retrieved documents, and the model&rsquo;s response all count toward this limit. Think of it as a whiteboard: everything the model needs to reason with must be written on this whiteboard. When it fills up, earlier content falls off and the model can no longer see it. Current models support 128K&ndash;1M tokens<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> (roughly 90,000&ndash;750,000 words), but long agent workflows with rich tool outputs fill this faster than you expect.
 </div>
 
 <div class="ibox">
@@ -118,7 +118,7 @@
 <div class="sh2">4.2 Model Routing: Tiered Cost Architecture</div>
 
 <div class="ibox" style="border-left-color:#d97706;background:#fffbeb;margin-bottom:12px">
-  <strong>&#128161; What is RAG?</strong> RAG (Retrieval-Augmented Generation) means: instead of relying on the model&rsquo;s built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from <em>your data</em>, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
+  <strong>&#128161; What is RAG?</strong> RAG<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a> (Retrieval-Augmented Generation) means: instead of relying on the model&rsquo;s built-in training knowledge, you retrieve relevant documents from your own systems at query time and feed them to the model alongside the question. The model answers from <em>your data</em>, not from what it memorised during training. Think of it as giving the model a cheat-sheet of relevant pages from your internal wiki before asking it a question.
 </div>
 
 <div class="alayer al1">
@@ -308,7 +308,7 @@ Return response</div>
       <tr><th>Signal</th><th>Choose</th></tr>
       <tr><td>Knowledge changes frequently (products, policies, prices)</td><td>RAG</td></tr>
       <tr><td>Documents fit in 128K context and volume is low</td><td>Long context</td></tr>
-      <tr><td>Domain language is highly specialised and consistent</td><td>Fine-tune</td></tr>
+      <tr><td>Domain language is highly specialised and consistent</td><td>Fine-tune<a href="#" onclick="var t=document.querySelector('[data-action=switch-tab][data-tab=glossary],[data-tab=tab-glossary]'); if(t)t.click(); return false;" style="font-size:10px;color:#7c3aed;margin-left:4px;white-space:nowrap">[&#8594;&nbsp;Glossary]</a></td></tr>
       <tr><td>All three signals present</td><td>RAG + fine-tune</td></tr>
     </table>
   </div>
